@@ -1,0 +1,1133 @@
+<title>왜그래 골목</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=IBM+Plex+Sans+KR:wght@400;600;700&family=Nanum+Gothic+Coding:wght@400;700&display=swap">
+<style>
+/* Layout: 화면 전체가 비 젖은 뒷골목 3D. 위: 간판 알약(골목 이름·지금 있는 사람) + 방금 일어난 일 띠.
+   아래: 행동 막대(고민 카드·도장·손 흔들기). 가게 문 앞에 서면 '들어가기'가 뜨고, 가게 안은 아래에서 올라오는 어두운 판.
+   진단서만 종이. 네온 골목 하나로 고정된 어두운 화면. */
+:root {
+  --night: #0b0c11;
+  --panel: #14161f;
+  --panel-2: #1c1f2b;
+  --line: #2a2e3d;
+  --fg: #eceef3;
+  --muted: #9097a8;
+  --neon-y: #ffd84d;   /* 접수처 */
+  --neon-c: #4fd2ff;   /* 통역소 */
+  --neon-p: #ff5c9e;   /* 입장바꿔방 */
+  --neon-v: #b77bff;   /* 타로 */
+  --neon-g: #5ee08f;   /* 발급소 */
+  --paper: #f3efe6;
+  --ink: #1d1b19;
+  --stamp: #d23b2a;
+  --f-sign: "Black Han Sans", "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
+  --f-ui: "IBM Plex Sans KR", "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
+  --f-code: "Nanum Gothic Coding", ui-monospace, monospace;
+  color-scheme: dark;
+}
+[hidden] { display: none !important; }
+html, body { height: 100%; background: var(--night); color: var(--fg); overflow: hidden; }
+body { font-family: var(--f-ui); font-size: 15px; line-height: 1.6; -webkit-tap-highlight-color: transparent; overscroll-behavior: none; }
+button, select, input, textarea { font: inherit; color: inherit; }
+button { cursor: pointer; background: none; border: 0; }
+:focus-visible { outline: 2px solid var(--neon-y); outline-offset: 2px; border-radius: 8px; }
+
+#stage { position: fixed; inset: 0; touch-action: none; }
+#stage canvas { display: block; width: 100%; height: 100%; }
+
+.glass {
+  background: rgba(16, 18, 26, .74); border: 1px solid rgba(255,255,255,.09);
+  -webkit-backdrop-filter: blur(14px); backdrop-filter: blur(14px);
+  border-radius: 999px; box-shadow: 0 10px 30px -12px rgba(0,0,0,.7);
+}
+.top {
+  position: fixed; z-index: 5; display: flex; justify-content: space-between; gap: 10px; align-items: flex-start;
+  top: calc(12px + env(safe-area-inset-top, 0px));
+  left: max(12px, env(safe-area-inset-left, 0px)); right: max(12px, env(safe-area-inset-right, 0px));
+  pointer-events: none;
+}
+.top > * { pointer-events: auto; }
+.signpill { display: flex; align-items: center; gap: 12px; padding: 8px 16px 8px 18px; min-width: 0; }
+.signpill h1 { margin: 0; font-family: var(--f-sign); font-weight: 400; font-size: 20px; color: var(--neon-p); white-space: nowrap; text-shadow: 0 0 12px rgba(255,92,158,.6); }
+.signpill .sep { width: 1px; height: 16px; background: rgba(255,255,255,.14); }
+.who { display: flex; align-items: center; gap: 7px; font-size: 13px; white-space: nowrap; font-variant-numeric: tabular-nums; }
+.who i { width: 7px; height: 7px; border-radius: 50%; background: var(--neon-g); box-shadow: 0 0 8px var(--neon-g); }
+.rightpill { display: flex; padding: 4px; }
+.iconbtn { width: 40px; height: 40px; border-radius: 50%; display: grid; place-items: center; }
+.iconbtn:hover { background: rgba(255,255,255,.07); }
+.iconbtn svg { width: 20px; height: 20px; stroke: var(--fg); fill: none; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
+
+.feed {
+  position: fixed; z-index: 5; left: 50%; transform: translateX(-50%); top: calc(66px + env(safe-area-inset-top, 0px));
+  padding: 7px 14px; font-size: 13px; white-space: nowrap; max-width: calc(100% - 32px); overflow: hidden; text-overflow: ellipsis; box-sizing: border-box;
+  transition: opacity .4s; pointer-events: none;
+}
+.feed b { color: var(--neon-y); font-weight: 600; }
+
+.tags { position: fixed; inset: 0; pointer-events: none; z-index: 3; overflow: hidden; }
+.tag { position: absolute; left: 0; top: 0; white-space: nowrap; display: flex; align-items: center; gap: 6px;
+  padding: 3px 10px 3px 3px; border-radius: 999px; background: rgba(243,239,230,.94); color: var(--ink); font-size: 12.5px; box-shadow: 0 4px 12px rgba(0,0,0,.4); }
+.tag b { width: 20px; height: 20px; border-radius: 50%; display: grid; place-items: center; font-size: 11px; font-weight: 600; background: var(--ink); color: var(--paper); }
+.tag.peer { background: rgba(16,18,26,.82); color: var(--fg); border: 1px solid rgba(255,255,255,.1); padding: 3px 10px; }
+.tag.peer:empty { display: none; }
+
+.prompt {
+  position: fixed; z-index: 6; left: 50%; transform: translateX(-50%); bottom: calc(112px + env(safe-area-inset-bottom, 0px));
+  padding: 12px 22px; display: flex; gap: 10px; align-items: center; white-space: nowrap; animation: rise .25s ease;
+  border-color: color-mix(in srgb, var(--acc, #fff) 55%, transparent);
+}
+.prompt b { color: var(--acc, var(--fg)); font-weight: 700; }
+.prompt small { color: var(--muted); font-size: 12px; }
+@keyframes rise { from { transform: translate(-50%, 8px); opacity: 0; } }
+
+.actions {
+  position: fixed; z-index: 5; left: 50%; transform: translateX(-50%); bottom: calc(16px + env(safe-area-inset-bottom, 0px));
+  display: grid; grid-template-columns: repeat(3, 1fr); width: min(400px, calc(100% - 24px)); box-sizing: border-box; padding: 6px; border-radius: 26px;
+}
+.act { display: grid; justify-items: center; gap: 3px; padding: 9px 4px 8px; border-radius: 20px; font-size: 13px; }
+.act:hover { background: rgba(255,255,255,.05); }
+.act svg { width: 24px; height: 24px; stroke: currentColor; fill: none; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; }
+.act .n { font-family: var(--f-code); font-size: 12px; color: var(--neon-y); }
+
+.joy { position: fixed; z-index: 4; width: 110px; height: 110px; margin: -55px 0 0 -55px; border-radius: 50%; border: 1.5px solid rgba(255,255,255,.25); background: rgba(10,12,18,.25); pointer-events: none; }
+.joy i { position: absolute; left: 50%; top: 50%; width: 44px; height: 44px; margin: -22px 0 0 -22px; border-radius: 50%; background: rgba(255,255,255,.35); }
+.hint { position: fixed; z-index: 4; left: 50%; transform: translateX(-50%); bottom: calc(112px + env(safe-area-inset-bottom, 0px));
+  font-size: 12.5px; color: var(--muted); white-space: nowrap; text-shadow: 0 1px 3px #000; pointer-events: none; transition: opacity .6s; }
+
+/* 가게 안 */
+.sheet-back { position: fixed; inset: 0; z-index: 9; background: rgba(0,0,0,.5); }
+.sheet {
+  --acc: var(--neon-y);
+  position: fixed; z-index: 10; left: 50%; transform: translateX(-50%); bottom: 0;
+  width: min(620px, 100%); max-height: calc(100% - 64px - env(safe-area-inset-top, 0px)); overflow-y: auto; box-sizing: border-box;
+  background: var(--panel); border-top: 2px solid var(--acc); border-radius: 18px 18px 0 0;
+  box-shadow: 0 -20px 60px rgba(0,0,0,.7), 0 -2px 24px -6px var(--acc);
+  padding: 18px max(20px, env(safe-area-inset-right, 0px)) calc(22px + env(safe-area-inset-bottom, 0px)) max(20px, env(safe-area-inset-left, 0px));
+  display: grid; gap: 16px; animation: up .28s ease;
+}
+@keyframes up { from { transform: translate(-50%, 40px); opacity: 0; } }
+.shead { display: grid; grid-template-columns: 56px minmax(0, 1fr) 36px; gap: 12px; align-items: center; }
+.keeper { width: 56px; height: 56px; border-radius: 16px; background: var(--panel-2); display: grid; place-items: center; border: 1px solid var(--line); }
+.keeper svg { width: 44px; height: 44px; }
+.shead h2 { margin: 0; font-family: var(--f-sign); font-weight: 400; font-size: 22px; color: var(--acc); line-height: 1.2; text-shadow: 0 0 14px color-mix(in srgb, var(--acc) 45%, transparent); }
+.shead p { margin: 2px 0 0; color: var(--muted); font-size: 13.5px; }
+.close { width: 36px; height: 36px; border-radius: 50%; display: grid; place-items: center; }
+.close:hover { background: rgba(255,255,255,.07); }
+.close svg { width: 18px; height: 18px; stroke: var(--fg); fill: none; stroke-width: 1.8; stroke-linecap: round; }
+
+.field { display: grid; gap: 6px; }
+.field label { font-size: 13px; color: var(--muted); }
+.row2 { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+select, input[type="text"], textarea {
+  width: 100%; box-sizing: border-box; background: var(--panel-2); border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; font-size: 15px; resize: none;
+}
+select:focus, input:focus, textarea:focus { outline: none; border-color: var(--acc); }
+.count { font-family: var(--f-code); font-size: 12px; color: var(--muted); text-align: right; }
+.primary { background: var(--acc); color: #0b0c11; border-radius: 12px; padding: 13px 16px; font-weight: 700; }
+.primary:disabled { opacity: .45; cursor: default; }
+.ghost { border: 1px solid var(--line); border-radius: 12px; padding: 11px 14px; }
+.ghost:hover { border-color: var(--acc); }
+.btns { display: flex; gap: 8px; flex-wrap: wrap; }
+.fine { font-size: 12.5px; color: var(--muted); margin: 0; }
+.cardsum { background: var(--panel-2); border: 1px solid var(--line); border-radius: 12px; padding: 12px 14px; font-size: 14px; display: grid; gap: 4px; }
+.cardsum .m { font-family: var(--f-code); font-size: 12px; color: var(--acc); }
+.cardsum p { margin: 0; overflow-wrap: anywhere; }
+
+.thinking { display: flex; align-items: center; gap: 10px; color: var(--muted); font-size: 14px; }
+.dots { display: inline-flex; gap: 4px; }
+.dots i { width: 6px; height: 6px; border-radius: 50%; background: var(--acc); animation: blink 1.2s infinite; }
+.dots i:nth-child(2) { animation-delay: .2s; } .dots i:nth-child(3) { animation-delay: .4s; }
+@keyframes blink { 0%, 80%, 100% { opacity: .2; } 40% { opacity: 1; } }
+.err { color: #ffb4a8; font-size: 14px; }
+
+.headline { font-family: var(--f-sign); font-size: clamp(22px, 5.4vw, 28px); line-height: 1.35; margin: 0; color: var(--fg); text-wrap: balance; }
+.headline em { font-style: normal; color: var(--acc); }
+.prose { margin: 0; font-size: 15.5px; overflow-wrap: anywhere; }
+.box { border: 1px solid var(--line); border-radius: 12px; padding: 12px 14px; display: grid; gap: 6px; }
+.box h4 { margin: 0; font-size: 12px; letter-spacing: .06em; color: var(--acc); font-weight: 600; }
+.box ul { margin: 0; padding-left: 18px; display: grid; gap: 4px; }
+.quote { font-size: 16px; padding: 12px 14px; border-left: 3px solid var(--acc); background: var(--panel-2); border-radius: 0 10px 10px 0; overflow-wrap: anywhere; }
+.copy { font-size: 12.5px; color: var(--acc); padding: 4px 0; justify-self: start; }
+
+/* 거울 대화 */
+.chat { display: grid; gap: 10px; }
+.bub { max-width: 86%; padding: 10px 13px; border-radius: 14px; font-size: 15px; overflow-wrap: anywhere; white-space: pre-wrap; }
+.bub.them { justify-self: start; background: var(--panel-2); border: 1px solid color-mix(in srgb, var(--acc) 40%, var(--line)); border-bottom-left-radius: 4px; }
+.bub.me { justify-self: end; background: var(--acc); color: #0b0c11; border-bottom-right-radius: 4px; }
+.composer { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 8px; }
+.composer .primary { padding: 10px 16px; }
+
+/* 타로 */
+.fan { display: flex; flex-wrap: wrap; justify-content: center; gap: 6px; }
+.tback {
+  width: 44px; height: 70px; border-radius: 6px; border: 1px solid color-mix(in srgb, var(--acc) 60%, transparent);
+  background: repeating-linear-gradient(45deg, #241a35 0 6px, #2d2042 6px 12px); transition: transform .2s;
+}
+.tback:hover { transform: translateY(-6px); }
+.tback[aria-pressed="true"] { transform: translateY(-10px); box-shadow: 0 0 0 2px var(--acc), 0 0 18px var(--acc); }
+.tback:disabled { opacity: .3; }
+.spread { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
+.tcard { background: #f1e9d8; color: var(--ink); border-radius: 10px; padding: 10px 8px 12px; display: grid; justify-items: center; gap: 4px; text-align: center; aspect-ratio: 3 / 5; align-content: center; animation: flip .5s ease both; }
+@keyframes flip { from { transform: rotateY(90deg); } }
+.tcard .pos { font-size: 11px; color: #7a6d5a; }
+.tcard .num { font-family: var(--f-code); font-size: 12px; color: #7d4bb8; }
+.tcard svg { width: 44px; height: 44px; }
+.tcard .nm { font-family: var(--f-sign); font-size: 17px; line-height: 1.2; }
+.readings { display: grid; gap: 10px; }
+.reading b { color: var(--acc); font-weight: 600; }
+
+/* 도장 */
+.stamps { display: grid; gap: 10px; }
+.stamp-row { display: grid; grid-template-columns: 40px minmax(0, 1fr) auto; gap: 12px; align-items: center; background: var(--panel-2); border-radius: 12px; padding: 10px 12px; }
+.stamp-row .dot { width: 40px; height: 40px; border-radius: 50%; border: 2px dashed var(--line); display: grid; place-items: center; font-family: var(--f-sign); font-size: 13px; color: var(--muted); }
+.stamp-row.done .dot { border: 2px solid var(--c); color: var(--c); transform: rotate(-12deg); box-shadow: 0 0 10px -2px var(--c); }
+.stamp-row span { font-size: 14px; } .stamp-row small { display: block; color: var(--muted); font-size: 12px; }
+
+.safety { background: #2a1416; border: 1px solid #6a2b2e; border-radius: 12px; padding: 14px 16px; display: grid; gap: 8px; }
+.safety h3 { margin: 0; font-size: 16px; }
+.safety p { margin: 0; font-size: 14px; }
+.safety ul { margin: 0; padding-left: 18px; font-size: 14px; display: grid; gap: 4px; }
+.safety b { font-family: var(--f-code); font-size: 15px; color: #ffd0c8; user-select: all; }
+
+.certimg { width: min(340px, 100%); justify-self: center; border-radius: 6px; box-shadow: 0 16px 40px -16px rgba(0,0,0,.8); }
+
+.toast { position: fixed; left: 50%; top: calc(70px + env(safe-area-inset-top, 0px)); transform: translate(-50%, -10px); z-index: 20;
+  background: var(--paper); color: var(--ink); padding: 9px 16px; border-radius: 999px; font-size: 14px; opacity: 0; pointer-events: none; transition: .3s;
+  white-space: nowrap; max-width: calc(100% - 32px); overflow: hidden; text-overflow: ellipsis; box-sizing: border-box; }
+.toast.on { opacity: 1; transform: translate(-50%, 0); }
+
+.loading { position: fixed; inset: 0; z-index: 30; display: grid; place-items: center; background: var(--night); text-align: center; transition: opacity .8s; }
+.loading h2 { font-family: var(--f-sign); font-weight: 400; font-size: 52px; color: var(--neon-p); margin: 0 0 6px; text-shadow: 0 0 24px rgba(255,92,158,.7); }
+.loading p { color: var(--muted); margin: 0; padding: 0 24px; }
+
+@media (max-width: 520px) {
+  .signpill { padding: 7px 12px 7px 14px; gap: 9px; } .signpill h1 { font-size: 18px; }
+  .iconbtn { width: 36px; height: 36px; }
+  .row2 { grid-template-columns: minmax(0, 1fr); }
+}
+@media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; } }
+</style>
+
+<div id="stage" aria-label="왜그래 골목 3D 공간. 끌어서 둘러보고 바닥을 눌러 걸어가세요."></div>
+<div class="tags" id="tags"></div>
+
+<div class="top">
+  <div class="signpill glass"><h1>왜그래 골목</h1><span class="sep"></span><span class="who"><i></i><span id="whoText">골목 불 켜는 중</span></span></div>
+  <div class="rightpill glass">
+    <button class="iconbtn" id="aboutBtn" aria-label="골목 안내">
+      <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 11v6M12 7.5v.5"/></svg>
+    </button>
+  </div>
+</div>
+<div class="feed glass" id="feed" style="opacity:0"></div>
+
+<button class="prompt glass" id="prompt" hidden></button>
+<div class="hint" id="hint">고민 접수처부터 들러 보세요 · 끌어서 둘러보고 바닥을 눌러 걸어요</div>
+<div class="joy" id="joy" hidden><i id="joyKnob"></i></div>
+
+<nav class="actions glass" aria-label="행동">
+  <button class="act" id="actCard"><svg viewBox="0 0 24 24"><rect x="4" y="3" width="16" height="18" rx="2"/><path d="M8 8h8M8 12h8M8 16h5"/></svg>고민 카드</button>
+  <button class="act" id="actStamp"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><path d="M8.5 12.5l2.3 2.3 4.7-5"/></svg><span>도장 <span class="n" id="stampN">0/3</span></span></button>
+  <button class="act" id="actWave"><svg viewBox="0 0 24 24"><path d="M8 13V6.5a1.5 1.5 0 0 1 3 0V12"/><path d="M11 11V5a1.5 1.5 0 0 1 3 0v6"/><path d="M14 11V6.5a1.5 1.5 0 0 1 3 0V14a6 6 0 0 1-6 6h-.5a6 6 0 0 1-5-2.7L3.8 14.6a1.5 1.5 0 0 1 2.4-1.8L8 15"/></svg>손 흔들기</button>
+</nav>
+
+<div class="sheet-back" id="sheetBack" hidden></div>
+<section class="sheet" id="sheet" hidden role="dialog" aria-modal="true" aria-labelledby="sheetTitle"></section>
+<div class="toast" id="toast" role="status"></div>
+<div class="loading" id="loading"><div><h2>왜그래 골목</h2><p id="loadMsg">간판에 불 넣는 중이에요</p></div></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+(() => {
+  "use strict";
+  const $ = (id) => document.getElementById(id);
+  const pad = (n) => String(n).padStart(2, "0");
+  const reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
+  function h(tag, attrs, ...kids) {
+    const e = document.createElement(tag);
+    if (attrs) for (const k in attrs) { if (k === "class") e.className = attrs[k]; else if (k === "text") e.textContent = attrs[k]; else if (k.startsWith("on")) e.addEventListener(k.slice(2), attrs[k]); else e.setAttribute(k, attrs[k]); }
+    for (const k of kids) if (k != null) e.append(k);
+    return e;
+  }
+  const local = {
+    get(k, d) { try { const v = localStorage.getItem(k); return v == null ? d : JSON.parse(v); } catch { return d; } },
+    set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch {} }
+  };
+  let tt;
+  function toast(msg) { const t = $("toast"); t.textContent = msg; t.classList.add("on"); clearTimeout(tt); tt = setTimeout(() => t.classList.remove("on"), 2600); }
+
+  /* ───────── 데이터 ───────── */
+  const MBTIS = ["ISTJ", "ISFJ", "INFJ", "INTJ", "ISTP", "ISFP", "INFP", "INTP", "ESTP", "ESFP", "ENFP", "ENTP", "ESTJ", "ESFJ", "ENFJ", "ENTJ"];
+  const RELS = ["썸 타는 중", "연애 중", "결혼했어요", "헤어진 사이"];
+  const ARCANA = ["바보", "마법사", "여사제", "여황제", "황제", "교황", "연인", "전차", "힘", "은둔자", "운명의 수레바퀴", "정의", "매달린 사람", "죽음", "절제", "악마", "탑", "별", "달", "태양", "심판", "세계"];
+  const ROMAN = ["0", "I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX", "X", "XI", "XII", "XIII", "XIV", "XV", "XVI", "XVII", "XVIII", "XIX", "XX", "XXI"];
+  const SHOPS = {
+    desk:   { name: "고민 접수처", color: "#ffd84d", greet: "어서 오세요. 고민을 카드에 적어 주시면 골목 어느 가게에서든 보여 드릴 수 있어요." },
+    mbti:   { name: "MBTI 통역소", color: "#4fd2ff", greet: "그 사람 행동, 그 사람 언어로 번역해 드립니다.", stamp: "통역" },
+    mirror: { name: "입장바꿔방", color: "#ff5c9e", greet: "거울 앞에 앉으세요. 그 사람이 나타날 거예요.", stamp: "거울" },
+    tarot:  { name: "확신 타로", color: "#b77bff", greet: "앉아 봐. 할매가 50년 봤어. 카드 세 장만 골라.", stamp: "타로" },
+    cert:   { name: "진단서 발급소", color: "#5ee08f", greet: "골목에서 들은 이야기를 모아 관계 진단서를 떼 드려요." }
+  };
+  let card = local.get("whyalley.card", null);          // 고민 카드 (이 기기에만)
+  let results = local.get("whyalley.results", {});      // 가게별 결과 (이 기기에만)
+  const saveAll = () => { local.set("whyalley.card", card); local.set("whyalley.results", results); syncStamps(); };
+
+  /* ───────── 점술가에게 묻기 (sample) ───────── */
+  let sample = null;
+  const RULES = `[공통 규칙]
+- 너는 '왜그래 골목'이라는 재미로 보는 연애 상담 골목의 가게 주인이다. 한국어로 답한다.
+- 손님이 들려준 건 한쪽 이야기일 뿐이다. 상대를 나쁜 사람으로 단정하거나 나르시시스트·소시오패스 같은 진단명을 붙이지 않는다.
+- MBTI는 재미 삼아 쓰는 렌즈다. "그 유형은 원래 그래"라고 단정하지 말고 "그 유형이라면 이렇게 볼 수도 있다" 정도로 말한다.
+- 헤어질지 말지 같은 큰 결정을 대신 내려 주지 않는다. 직접 대화로 이어지도록 돕는다.
+- 겁주거나 불안을 키우지 않고, 부적이나 추가 결제를 권하지 않는다.
+- 안전: 고민에 신체적 폭력, 폭언이나 협박, 통제(휴대폰 검사 강요, 친구 못 만나게 함, 돈 통제), 스토킹, 성적 강요, 자해나 자살 암시가 보이면 캐릭터 말투를 멈추고 차분하고 진지하게 안전을 먼저 말한다. 이 경우 관계를 잘 맞춰 보라는 조언은 하지 않는다.`;
+  const cardText = (c) => `[고민 카드]
+- 나의 MBTI: ${c.me || "모름"}
+- 상대 MBTI: ${c.them || "모름"}
+- 관계: ${c.rel}
+- 함께한 기간: ${c.dur || "적지 않음"}
+- 고민: ${c.text}`;
+  function errCopy(e) {
+    const c = e && e.code;
+    if (c === "cancelled") return "";
+    if (c === "unavailable") return "이 화면에서는 가게 주인이 말을 할 수 없어요. Claude에서 열어야 답을 받을 수 있어요.";
+    if (c === "not_granted") return "Claude 사용을 허락하지 않아서 답을 받을 수 없어요. 새로고침하면 다시 물어봐요.";
+    if (c === "rate_limited" || c === "queue_overflow") return "손님이 몰렸어요. 잠시 뒤 다시 눌러 주세요.";
+    if (c === "refused") return "이 고민에는 답하기 어렵대요. 표현을 조금 바꿔서 다시 적어 보세요.";
+    if (c === "invalid_json" || c === "empty_completion" || c === "upstream_error") return "가게 주인이 말을 더듬었어요. 다시 물어봐 주세요.";
+    if (c === "session_expired") return "로그인이 만료됐어요. 새로고침해 주세요.";
+    return "지금은 답을 받을 수 없어요. 잠시 뒤 다시 시도해 주세요.";
+  }
+  const S = (v, n) => (typeof v === "string" ? v : "").slice(0, n);
+
+  /* ───────── 3D ───────── */
+  if (!window.THREE) { $("loadMsg").textContent = "3D 화면을 불러오지 못했어요. 새로고침해 주세요."; return; }
+  let renderer;
+  try { renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: "high-performance" }); }
+  catch { $("loadMsg").textContent = "이 기기에서는 3D 화면을 열 수 없어요."; return; }
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 1.75));
+  renderer.outputEncoding = THREE.sRGBEncoding;
+  renderer.toneMapping = THREE.ACESFilmicToneMapping;
+  renderer.toneMappingExposure = 1.1;
+  $("stage").appendChild(renderer.domElement);
+  const scene = new THREE.Scene();
+  scene.background = new THREE.Color(0x07080c);
+  scene.fog = new THREE.Fog(0x07080c, 12, 32);
+  const camera = new THREE.PerspectiveCamera(54, 1, 0.1, 80);
+
+  const AW = 4, ZMIN = -14, ZMAX = 14;          // 골목 반폭, 길이
+  const solids = [], spots = [];
+  const mat = (color, o = {}) => new THREE.MeshStandardMaterial(Object.assign({ color, roughness: .8, metalness: 0 }, o));
+  const basic = (o) => new THREE.MeshBasicMaterial(Object.assign({ toneMapped: false }, o));
+  function box(w, hh, d, m, x, y, z, parent = scene) { const b = new THREE.Mesh(new THREE.BoxGeometry(w, hh, d), m); b.position.set(x, y, z); parent.add(b); return b; }
+  function tex(w, hh, draw, rep) {
+    const c = document.createElement("canvas"); c.width = w; c.height = hh; draw(c.getContext("2d"), w, hh);
+    const t = new THREE.CanvasTexture(c); t.encoding = THREE.sRGBEncoding; t.anisotropy = 4;
+    if (rep) { t.wrapS = t.wrapT = THREE.RepeatWrapping; t.repeat.set(rep[0], rep[1]); }
+    t.userData = { c, draw }; return t;
+  }
+  const redrawables = [];
+  const rnd = (() => { let s = 77001; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); })();
+
+  /* 젖은 아스팔트 */
+  const groundTex = tex(512, 512, (x, w, hh) => {
+    x.fillStyle = "#17181d"; x.fillRect(0, 0, w, hh);
+    for (let i = 0; i < 5000; i++) { const v = 20 + rnd() * 30; x.fillStyle = `rgba(${v},${v},${v + 6},${rnd() * .5})`; x.fillRect(rnd() * w, rnd() * hh, 2, 2); }
+    for (let i = 0; i < 7; i++) { const g = x.createRadialGradient(0, 0, 0, 0, 0, 1); x.save(); x.translate(rnd() * w, rnd() * hh); x.scale(30 + rnd() * 60, 14 + rnd() * 30); g.addColorStop(0, "rgba(8,10,18,.85)"); g.addColorStop(1, "rgba(8,10,18,0)"); x.fillStyle = g; x.beginPath(); x.arc(0, 0, 1, 0, Math.PI * 2); x.fill(); x.restore(); }
+    x.strokeStyle = "rgba(0,0,0,.5)"; x.lineWidth = 1.5;
+    for (let i = 0; i < 9; i++) { x.beginPath(); let px = rnd() * w, py = rnd() * hh; x.moveTo(px, py); for (let k = 0; k < 5; k++) { px += (rnd() - .5) * 60; py += (rnd() - .5) * 60; x.lineTo(px, py); } x.stroke(); }
+  }, [2, 7]);
+  const ground = new THREE.Mesh(new THREE.PlaneGeometry(AW * 2, ZMAX - ZMIN + 4), mat(0xffffff, { map: groundTex, roughness: .32, metalness: .35 }));
+  ground.rotation.x = -Math.PI / 2; ground.position.z = 0; scene.add(ground);
+  box(.5, .04, ZMAX - ZMIN, mat(0x0c0d10, { roughness: .4, metalness: .6 }), 0, .01, 0);   // 가운데 배수로
+  box(.08, .15, ZMAX - ZMIN, mat(0x2a2b30), -AW + .1, .07, 0); box(.08, .15, ZMAX - ZMIN, mat(0x2a2b30), AW - .1, .07, 0);
+
+  /* 간판 */
+  function drawSign(x, w, hh, text, color, opt) {
+    x.clearRect(0, 0, w, hh);
+    x.fillStyle = opt.lit ? "#0d0e14" : "#1a1a1e"; x.fillRect(0, 0, w, hh);
+    x.strokeStyle = opt.lit ? color : "#44454c"; x.lineWidth = 8; x.shadowColor = color; x.shadowBlur = opt.lit ? 24 : 0; x.strokeRect(14, 14, w - 28, hh - 28);
+    x.shadowBlur = opt.lit ? 34 : 0; x.fillStyle = opt.lit ? "#ffffff" : "#6a6b72";
+    x.font = `${Math.floor(hh * (opt.sub ? .42 : .52))}px "Black Han Sans", sans-serif`; x.textAlign = "center"; x.textBaseline = "middle";
+    x.fillText(text, w / 2, hh * (opt.sub ? .42 : .53));
+    if (opt.lit) { x.shadowBlur = 16; x.fillStyle = color; x.fillText(text, w / 2, hh * (opt.sub ? .42 : .53)); }
+    if (opt.sub) { x.shadowBlur = 0; x.fillStyle = opt.lit ? color : "#55565c"; x.font = `${Math.floor(hh * .17)}px "IBM Plex Sans KR", sans-serif`; x.fillText(opt.sub, w / 2, hh * .79); }
+  }
+  function sign(text, color, w, hh, opt = {}) {
+    opt = Object.assign({ lit: true }, opt);
+    const t = tex(1024, Math.round(1024 * hh / w), (x, cw, ch) => drawSign(x, cw, ch, text, color, opt));
+    redrawables.push(t);
+    return new THREE.Mesh(new THREE.PlaneGeometry(w, hh), basic({ map: t }));
+  }
+
+  /* 건물 윗층 창문 */
+  function facadeTex(base) {
+    return tex(256, 256, (x, w, hh) => {
+      x.fillStyle = base; x.fillRect(0, 0, w, hh);
+      for (let i = 0; i < 400; i++) { x.fillStyle = `rgba(0,0,0,${rnd() * .08})`; x.fillRect(rnd() * w, rnd() * hh, 4, 4); }
+      for (let r = 0; r < 2; r++) for (let c = 0; c < 3; c++) {
+        const lit = rnd() < .45, wx = 22 + c * 78, wy = 30 + r * 110;
+        x.fillStyle = "#0c0d12"; x.fillRect(wx - 4, wy - 4, 60, 76);
+        x.fillStyle = lit ? (rnd() < .5 ? "#f6d79a" : "#9fc2e8") : "#191b22"; x.fillRect(wx, wy, 52, 68);
+        if (lit) { x.fillStyle = "rgba(0,0,0,.25)"; x.fillRect(wx + 25, wy, 2, 68); }
+      }
+    });
+  }
+  const shutterTex = tex(256, 256, (x, w, hh) => {
+    x.fillStyle = "#5d6068"; x.fillRect(0, 0, w, hh);
+    for (let y = 0; y < hh; y += 10) { x.fillStyle = "rgba(0,0,0,.3)"; x.fillRect(0, y, w, 2); x.fillStyle = "rgba(255,255,255,.08)"; x.fillRect(0, y + 3, w, 2); }
+    x.fillStyle = "rgba(255,255,255,.85)"; x.font = '44px "Black Han Sans", sans-serif'; x.textAlign = "center"; x.rotate(-.08); x.fillText("준비 중", w / 2, hh / 2 + 20);
+  });
+  redrawables.push(shutterTex);
+
+  const signLights = [];
+  function shop(side, z, w, key, label, color, open, sub) {
+    const g = new THREE.Group(); g.position.set(side * AW, 0, z); g.rotation.y = side < 0 ? Math.PI / 2 : -Math.PI / 2; scene.add(g);
+    const H = 6 + rnd() * 3;
+    const wallC = ["#3a3330", "#2f3438", "#3b3a33", "#33303a", "#2d3330"][Math.floor(rnd() * 5)];
+    const wall = box(w, H, .3, mat(0xffffff, { map: facadeTex(wallC), roughness: .95 }), 0, H / 2, -.15, g);
+    box(w, 2.9, .32, mat(0x16171c, { roughness: .7 }), 0, 1.45, -.14, g);
+    if (open) {
+      const glass = new THREE.Mesh(new THREE.PlaneGeometry(w * .72, 2.2), new THREE.MeshStandardMaterial({ color: 0x111111, emissive: new THREE.Color(color), emissiveIntensity: .32, roughness: .2, metalness: .1 }));
+      glass.position.set(0, 1.2, .03); g.add(glass);
+      box(.08, 2.3, .1, mat(0x0c0c0e, { metalness: .6, roughness: .3 }), -w * .36, 1.2, .04, g); box(.08, 2.3, .1, mat(0x0c0c0e, { metalness: .6, roughness: .3 }), w * .36, 1.2, .04, g);
+      box(.05, 2.2, .06, mat(0x0c0c0e), w * .1, 1.2, .05, g);
+      const l = new THREE.PointLight(new THREE.Color(color), 1.5, 7.5, 1.8); l.position.set(0, 2.4, 1.3); g.add(l); signLights.push(l);
+    } else {
+      const sh = new THREE.Mesh(new THREE.PlaneGeometry(w * .8, 2.4), mat(0xffffff, { map: shutterTex, roughness: .5, metalness: .4 })); sh.position.set(0, 1.25, .04); g.add(sh);
+    }
+    const s = sign(label, color, w * .86, .86, { lit: open, sub }); s.position.set(0, 3.25, .1); g.add(s);
+    box(w * .9, .1, .7, mat(0x1d1e24), 0, 2.72, .35, g);                    // 차양
+    // 돌출 간판
+    if (open && rnd() < .8) {
+      const chars = label.replace(/\s|MBTI/g, "").slice(0, 4).split("");
+      const vt = tex(160, 160 * chars.length + 40, (x, cw, ch) => {
+        x.fillStyle = "#0d0e14"; x.fillRect(0, 0, cw, ch); x.strokeStyle = color; x.lineWidth = 8; x.shadowColor = color; x.shadowBlur = 20; x.strokeRect(10, 10, cw - 20, ch - 20);
+        x.fillStyle = "#fff"; x.shadowBlur = 26; x.textAlign = "center"; x.textBaseline = "middle"; x.font = '104px "Black Han Sans", sans-serif';
+        chars.forEach((c, i) => x.fillText(c, cw / 2, 20 + 160 * (i + .5) + 6));
+      });
+      redrawables.push(vt);
+      const v = new THREE.Mesh(new THREE.PlaneGeometry(.5, .5 * (chars.length + .25)), basic({ map: vt }));
+      const vg = new THREE.Group(); vg.position.set(w * .42, 4.6, .9); vg.rotation.y = Math.PI / 2; g.add(vg);
+      const back = v.clone(); back.rotation.y = Math.PI; vg.add(v); vg.add(back);
+      box(.06, .06, .9, mat(0x222222), w * .42, 5.45, .45, g);
+    }
+    const doorX = side * (AW - 1.1);
+    spots.push({ key, x: doorX, z, r: 1.7, open, label, color });
+    return g;
+  }
+  // 왼쪽(-) / 오른쪽(+)
+  shop(-1, 9.5, 4.4, "desk", "고민 접수처", "#ffd84d", true, "여기서 시작");
+  shop(-1, 3.2, 5, "mbti", "MBTI 통역소", "#4fd2ff", true, "그 사람 언어로 번역해 드림");
+  shop(-1, -3.6, 5, "tarot", "확신 타로", "#b77bff", true, "할매가 50년 봤어");
+  shop(-1, -10, 4.6, "soon1", "카톡 해석소", "#7ad7c4", false, "곧 문 열어요");
+  shop(1, 6.2, 5, "mirror", "입장바꿔방", "#ff5c9e", true, "그 사람이 거울에 나타나요");
+  shop(1, -.6, 4.6, "soon2", "싸움 판정소", "#ff9a4d", false, "곧 문 열어요");
+  shop(1, -7.6, 5, "cert", "진단서 발급소", "#5ee08f", true, "관계 진단서 즉시 발급");
+  shop(1, 11.4, 3.6, "none", "24시 편의점", "#e8f0ff", true, "");
+  spots.pop();   // 편의점은 장식
+
+  /* 막다른 벽의 네온 */
+  const brick = tex(512, 256, (x, w, hh) => {
+    x.fillStyle = "#2a1c18"; x.fillRect(0, 0, w, hh);
+    for (let r = 0; r < 16; r++) for (let c = -1; c < 17; c++) { x.fillStyle = `hsl(${12 + rnd() * 8}, ${30 + rnd() * 15}%, ${18 + rnd() * 8}%)`; x.fillRect(c * 32 + (r % 2) * 16 + 1, r * 16 + 1, 30, 14); }
+  }, [3, 2]);
+  box(AW * 2 + 2, 9, .3, mat(0xffffff, { map: brick, roughness: 1 }), 0, 4.5, ZMIN - .2);
+  const endSign = sign("걔는 왜 그럴까?", "#ff5c9e", 6, 1.3, { lit: true }); endSign.position.set(0, 3.6, ZMIN - .03); scene.add(endSign);
+  const endLight = new THREE.PointLight(0xff5c9e, 2, 10, 1.6); endLight.position.set(0, 3.4, ZMIN + 1.5); scene.add(endLight);
+
+  /* 골목 입구 아치 */
+  box(.25, 5, .25, mat(0x1a1b20, { metalness: .5 }), -AW + .2, 2.5, 12.8); box(.25, 5, .25, mat(0x1a1b20, { metalness: .5 }), AW - .2, 2.5, 12.8);
+  const gate = sign("왜그래 골목", "#ffd84d", 5.6, .9, { lit: true, sub: "걔가 왜 그러는지, 가게마다 물어보세요" }); gate.position.set(0, 4.7, 12.7); gate.rotation.y = Math.PI; scene.add(gate);
+  const gate2 = gate.clone(); gate2.rotation.y = 0; gate2.position.z = 12.9; scene.add(gate2);
+
+  /* 머리 위 전구 줄 */
+  const bulbM = basic({ color: 0xffe3a0 });
+  const bulbGeo = new THREE.SphereGeometry(.06, 8, 6);
+  for (let z = -12; z <= 11; z += 2.6) {
+    const a = new THREE.Vector3(-AW + .1, 4.9, z), b = new THREE.Vector3(AW - .1, 4.9, z + 1.2);
+    const pts = [];
+    for (let i = 0; i <= 12; i++) { const t = i / 12; const p = a.clone().lerp(b, t); p.y -= Math.sin(t * Math.PI) * .55; pts.push(p); if (i % 2 === 1) { const bl = new THREE.Mesh(bulbGeo, bulbM); bl.position.copy(p).add(new THREE.Vector3(0, -.08, 0)); scene.add(bl); } }
+    scene.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints(pts), new THREE.LineBasicMaterial({ color: 0x111111 })));
+  }
+  // 전선
+  for (let i = 0; i < 5; i++) {
+    const a = new THREE.Vector3(-AW, 6.5 + i * .3, -13 + i * 6), b = new THREE.Vector3(AW, 6.8 + i * .2, -10 + i * 5.5), pts = [];
+    for (let k = 0; k <= 10; k++) { const t = k / 10; const p = a.clone().lerp(b, t); p.y -= Math.sin(t * Math.PI) * .8; pts.push(p); }
+    scene.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints(pts), new THREE.LineBasicMaterial({ color: 0x050505 })));
+  }
+
+  /* 가로등 */
+  function lamp(x, z) {
+    const pole = new THREE.Mesh(new THREE.CylinderGeometry(.05, .07, 4.2, 8), mat(0x22252b, { metalness: .6, roughness: .4 })); pole.position.set(x, 2.1, z); scene.add(pole);
+    box(.7, .08, .2, mat(0x22252b), x + (x < 0 ? .3 : -.3), 4.2, z);
+    const head = new THREE.Mesh(new THREE.SphereGeometry(.14, 12, 8), basic({ color: 0xfff1d0 })); head.position.set(x + (x < 0 ? .6 : -.6), 4.1, z); scene.add(head);
+    const l = new THREE.PointLight(0xffe2b0, 1.3, 9, 1.8); l.position.set(x + (x < 0 ? .6 : -.6), 3.9, z); scene.add(l);
+    solids.push({ x0: x - .15, x1: x + .15, z0: z - .15, z1: z + .15 });
+  }
+  lamp(AW - .45, 1.8); lamp(-AW + .45, -7.2);
+
+  /* 소품: 실외기, 플라스틱 의자, 상자, 화분, 고양이 */
+  function unit(side, y, z) {
+    const g = new THREE.Group(); g.position.set(side * (AW - .3), y, z); scene.add(g);
+    box(.5, .6, .8, mat(0xb9bcc2, { roughness: .6 }), 0, 0, 0, g);
+    const fan = new THREE.Mesh(new THREE.CircleGeometry(.22, 16), mat(0x2a2c30)); fan.position.set(-side * .26, 0, 0); fan.rotation.y = -side * Math.PI / 2; g.add(fan);
+  }
+  unit(-1, 4.4, 6.3); unit(1, 3.9, 2.8); unit(-1, 5.2, -6.8); unit(1, 4.8, -4.2);
+  function stool(x, z, c) {
+    const m = mat(c, { roughness: .5 });
+    box(.36, .05, .36, m, x, .45, z); [[-1, -1], [1, -1], [-1, 1], [1, 1]].forEach(([a, b]) => box(.04, .45, .04, m, x + a * .15, .22, z + b * .15));
+    solids.push({ x0: x - .2, x1: x + .2, z0: z - .2, z1: z + .2 });
+  }
+  stool(-2.9, 1.2, 0xd23b2a); stool(-2.7, .4, 0x2a7bd2); stool(2.8, -3, 0xd23b2a);
+  function crate(x, z, y = 0) { box(.6, .4, .45, mat(0x2a6a4a, { roughness: .7 }), x, y + .2, z); if (!y) solids.push({ x0: x - .32, x1: x + .32, z0: z - .25, z1: z + .25 }); }
+  crate(2.95, 9.4); crate(2.95, 9.4, .4); crate(-3.05, -8.2);
+  function pot(x, z) { const p = new THREE.Mesh(new THREE.CylinderGeometry(.22, .17, .4, 12), mat(0x8a4a2a)); p.position.set(x, .2, z); scene.add(p); const leaf = new THREE.Mesh(new THREE.SphereGeometry(.32, 10, 8), mat(0x2f5a32)); leaf.position.set(x, .62, z); leaf.scale.y = 1.2; scene.add(leaf); solids.push({ x0: x - .25, x1: x + .25, z0: z - .25, z1: z + .25 }); }
+  pot(-3.1, 6.2); pot(3.1, 3.6); pot(-3.1, -12.6); pot(3.1, -12.6);
+  const cat = new THREE.Group(); cat.position.set(-3.05, .62, -8.2); cat.rotation.y = .8; scene.add(cat);
+  const catM = mat(0xe8a25a, { roughness: 1 });
+  const catBody = new THREE.Mesh(new THREE.SphereGeometry(.2, 14, 10), catM); catBody.scale.set(1.3, .65, 1); catBody.position.y = .12; cat.add(catBody);
+  const catHead = new THREE.Mesh(new THREE.SphereGeometry(.12, 14, 10), catM); catHead.position.set(.24, .16, 0); cat.add(catHead);
+  [-.06, .06].forEach((dz) => { const e = new THREE.Mesh(new THREE.ConeGeometry(.04, .08, 6), catM); e.position.set(.27, .28, dz); cat.add(e); });
+  const tail = new THREE.Mesh(new THREE.CylinderGeometry(.025, .02, .35, 6), catM); tail.position.set(-.28, .2, 0); tail.rotation.z = .9; cat.add(tail);
+  spots.push({ key: "cat", x: -2.3, z: -8.2, r: 1.2, open: true, label: "골목 고양이", color: "#ffd84d" });
+
+  /* 빗방울 */
+  const rn = 500, rp = new Float32Array(rn * 6);
+  for (let i = 0; i < rn; i++) { const x = (Math.random() - .5) * AW * 2, y = Math.random() * 8, z = ZMIN + Math.random() * (ZMAX - ZMIN); rp.set([x, y, z, x - .02, y - .35, z], i * 6); }
+  const rainGeo = new THREE.BufferGeometry(); rainGeo.setAttribute("position", new THREE.BufferAttribute(rp, 3));
+  const rain = new THREE.LineSegments(rainGeo, new THREE.LineBasicMaterial({ color: 0x8aa0c8, transparent: true, opacity: .35 }));
+  scene.add(rain);
+
+  scene.add(new THREE.HemisphereLight(0x4a5478, 0x0d0d10, .55));
+  scene.add(new THREE.AmbientLight(0x30364a, .3));
+
+  /* ───────── 손님 캐릭터 ───────── */
+  const HATS = [0xff5c9e, 0x4fd2ff, 0xffd84d, 0x5ee08f, 0xb77bff, 0xff9a4d, 0xf3efe6, 0x2f3438];
+  const COATS = [0x2b2f3a, 0x5a3a2e, 0x2e4a3c, 0x4a2e44, 0x3a3a40, 0x6a5a3a];
+  const skinM = mat(0xf0cfae, { roughness: .7 });
+  const shadowTex = tex(64, 64, (c) => { const g = c.createRadialGradient(32, 32, 2, 32, 32, 30); g.addColorStop(0, "rgba(0,0,0,.6)"); g.addColorStop(1, "rgba(0,0,0,0)"); c.fillStyle = g; c.fillRect(0, 0, 64, 64); });
+  function makeAvatar(ci) {
+    const hat = HATS[ci % HATS.length], coat = COATS[Math.floor(ci / HATS.length) % COATS.length];
+    const g = new THREE.Group(), body = new THREE.Group(); g.add(body);
+    const coatM = mat(coat, { roughness: .9 }), hatM = mat(hat, { roughness: 1 });
+    const torso = new THREE.Mesh(new THREE.CylinderGeometry(.24, .36, .62, 18), coatM); torso.position.y = .62; body.add(torso);
+    const legs = [-1, 1].map((sx) => { const p = new THREE.Group(); p.position.set(sx * .11, .34, 0); body.add(p);
+      const l = new THREE.Mesh(new THREE.CylinderGeometry(.065, .06, .3, 10), mat(0x1e1f24)); l.position.y = -.15; p.add(l);
+      const f = new THREE.Mesh(new THREE.SphereGeometry(.075, 10, 8), mat(0xeeeeee)); f.scale.set(1, .6, 1.4); f.position.set(0, -.3, .03); p.add(f); return p; });
+    const arms = [-1, 1].map((sx) => { const p = new THREE.Group(); p.position.set(sx * .29, .86, 0); body.add(p);
+      const a = new THREE.Mesh(new THREE.CylinderGeometry(.065, .075, .4, 10), coatM); a.position.y = -.19; p.add(a);
+      const hd = new THREE.Mesh(new THREE.SphereGeometry(.065, 10, 8), skinM); hd.position.y = -.41; p.add(hd); return p; });
+    arms[0].rotation.z = -.12; arms[1].rotation.z = .12;
+    const head = new THREE.Group(); head.position.y = 1.2; body.add(head);
+    head.add(new THREE.Mesh(new THREE.SphereGeometry(.3, 24, 18), skinM));
+    [-1, 1].forEach((sx) => { const e = new THREE.Mesh(new THREE.SphereGeometry(.032, 10, 8), mat(0x1a1512)); e.position.set(sx * .1, -.01, .27); head.add(e);
+      const ck = new THREE.Mesh(new THREE.CircleGeometry(.045, 12), new THREE.MeshBasicMaterial({ color: 0xe89a8a, transparent: true, opacity: .55 })); ck.position.set(sx * .16, -.08, .262); ck.rotation.y = sx * .45; head.add(ck); });
+    // 후드
+    // 후드: 머리 위와 뒤를 덮고 얼굴 쪽만 열림
+    const hood = new THREE.Mesh(new THREE.SphereGeometry(.345, 24, 16, 0, Math.PI * 2, 0, Math.PI * .72), new THREE.MeshStandardMaterial({ color: hat, roughness: 1, side: THREE.DoubleSide }));
+    hood.rotation.x = -.95; head.add(hood);
+    const brim = new THREE.Mesh(new THREE.TorusGeometry(.25, .055, 8, 24), hatM); brim.position.set(0, -.12, .2); brim.rotation.x = .62; head.add(brim);
+    const strings = [-1, 1].map((sx) => { const st = new THREE.Mesh(new THREE.CylinderGeometry(.012, .012, .22, 6), mat(0xf3efe6)); st.position.set(sx * .08, .88, .27); body.add(st); return st; });
+    const sh = new THREE.Mesh(new THREE.PlaneGeometry(1, 1), new THREE.MeshBasicMaterial({ map: shadowTex, transparent: true, depthWrite: false })); sh.rotation.x = -Math.PI / 2; sh.position.y = .015; g.add(sh);
+    scene.add(g);
+    return { g, body, legs, arms, head, phase: Math.random() * 6 };
+  }
+  function animateAvatar(a, st, t, dt) {
+    a.phase += dt * (st.moving ? 10 : 2);
+    const sw = st.moving ? Math.sin(a.phase) * .65 : 0;
+    a.legs[0].rotation.x = sw; a.legs[1].rotation.x = -sw;
+    a.body.position.y = st.moving ? Math.abs(Math.sin(a.phase)) * .05 : Math.sin(t * 2 + a.phase) * .008;
+    const waving = st.waveUntil > Date.now();
+    const k = Math.min(1, dt * 12);
+    a.arms[0].rotation.x += ((st.moving ? -sw * .7 : 0) - a.arms[0].rotation.x) * k;
+    a.arms[1].rotation.x += ((waving ? 0 : st.moving ? sw * .7 : 0) - a.arms[1].rotation.x) * k;
+    a.arms[1].rotation.z += ((waving ? 2.6 + Math.sin(t * 12) * .35 : .12) - a.arms[1].rotation.z) * k;
+    a.head.rotation.z = Math.sin(t * 1.3 + a.phase) * .03;
+  }
+
+  /* ───────── 나 ───────── */
+  const myColor = local.get("whyalley.color", Math.floor(Math.random() * 48)); local.set("whyalley.color", myColor);
+  const me = { x: .4, z: 9.8, r: Math.PI, moving: false, waveUntil: 0 };
+  const meA = makeAvatar(myColor);
+  let yaw = 0, pitch = .32, camDist = 4.8;
+  function blocked(x, z) {
+    const R = .3;
+    if (x < -AW + .75 || x > AW - .75 || z < ZMIN + .6 || z > 12.4) return true;
+    for (const s of solids) if (x > s.x0 - R && x < s.x1 + R && z > s.z0 - R && z < s.z1 + R) return true;
+    return false;
+  }
+
+  /* ───────── 조작 ───────── */
+  const keys = {};
+  addEventListener("keydown", (e) => { if (e.target.closest && e.target.closest("input,textarea,select")) return; keys[e.key.toLowerCase()] = true; });
+  addEventListener("keyup", (e) => { keys[e.key.toLowerCase()] = false; });
+  addEventListener("blur", () => { for (const k in keys) keys[k] = false; });
+  const joy = { active: false, id: null, ox: 0, oy: 0, x: 0, y: 0 };
+  let drag = null, target = null, route = [];   // route: 골목 가운데로 돌아가는 경유지
+  const ray = new THREE.Raycaster(), ndc = new THREE.Vector2(), el = renderer.domElement;
+  el.addEventListener("pointerdown", (e) => {
+    hideHint();
+    if (e.pointerType === "touch" && e.clientX < innerWidth * .42 && e.clientY > innerHeight * .4 && !joy.active) {
+      Object.assign(joy, { active: true, id: e.pointerId, ox: e.clientX, oy: e.clientY, x: 0, y: 0 });
+      const j = $("joy"); j.style.left = e.clientX + "px"; j.style.top = e.clientY + "px"; j.hidden = false; $("joyKnob").style.transform = "";
+    } else if (!drag) drag = { id: e.pointerId, x: e.clientX, y: e.clientY, sx: e.clientX, sy: e.clientY, t: performance.now() };
+    try { el.setPointerCapture(e.pointerId); } catch {}
+  });
+  el.addEventListener("pointermove", (e) => {
+    if (joy.active && e.pointerId === joy.id) {
+      let dx = e.clientX - joy.ox, dy = e.clientY - joy.oy; const L = Math.hypot(dx, dy), M = 46;
+      if (L > M) { dx *= M / L; dy *= M / L; }
+      joy.x = dx / M; joy.y = dy / M; $("joyKnob").style.transform = `translate(${dx}px, ${dy}px)`;
+    } else if (drag && e.pointerId === drag.id) {
+      yaw -= (e.clientX - drag.x) * .006; pitch = Math.min(.95, Math.max(.1, pitch + (e.clientY - drag.y) * .004));
+      drag.x = e.clientX; drag.y = e.clientY;
+    }
+  });
+  function endPointer(e) {
+    if (joy.active && e.pointerId === joy.id) { joy.active = false; joy.x = joy.y = 0; $("joy").hidden = true; }
+    else if (drag && e.pointerId === drag.id) {
+      const moved = Math.hypot(e.clientX - drag.sx, e.clientY - drag.sy), quick = performance.now() - drag.t < 350; drag = null;
+      if (moved < 8 && quick && e.type === "pointerup") tapAt(e.clientX, e.clientY);
+    }
+  }
+  el.addEventListener("pointerup", endPointer); el.addEventListener("pointercancel", endPointer);
+  el.addEventListener("wheel", (e) => { camDist = Math.min(8, Math.max(2.6, camDist + e.deltaY * .003)); }, { passive: true });
+  function tapAt(cx, cy) {
+    const r = el.getBoundingClientRect();
+    ndc.set(((cx - r.left) / r.width) * 2 - 1, -((cy - r.top) / r.height) * 2 + 1); ray.setFromCamera(ndc, camera);
+    const hit = ray.intersectObject(ground)[0];
+    if (hit) route = [], target = { x: Math.max(-AW + .8, Math.min(AW - .8, hit.point.x)), z: Math.max(ZMIN + .7, Math.min(12.3, hit.point.z)) };
+  }
+  let hintShown = true;
+  function hideHint() { if (hintShown) { hintShown = false; $("hint").style.opacity = 0; } }
+
+  /* ───────── 가게 앞 안내 ───────── */
+  let near = null, sheetOpen = false, catWiggle = 0;
+  function nearest() { let best = null, bd = 1e9; for (const s of spots) { const d = Math.hypot(s.x - me.x, s.z - me.z); if (d < s.r && d < bd) { bd = d; best = s; } } return best; }
+  function updatePrompt() {
+    const n = sheetOpen ? null : nearest(); if (n === near) return; near = n;
+    const p = $("prompt"); if (!n) { p.hidden = true; return; }
+    p.style.setProperty("--acc", n.color); p.replaceChildren();
+    const verb = n.key === "cat" ? "쓰다듬기" : !n.open ? "준비 중" : n.key === "desk" ? (card ? "고민 카드 고치기" : "고민 카드 쓰기") : "들어가기";
+    p.append(h("b", { text: verb }), h("small", { text: n.label })); p.hidden = false;
+  }
+  $("prompt").addEventListener("click", () => {
+    const n = near; if (!n) return;
+    if (n.key === "cat") { catWiggle = 2; toast("고양이가 '냐'라고 했어요. 무슨 뜻인지는 통역소에 물어보세요"); return; }
+    if (!n.open) { toast(`${n.label}은 곧 문을 열어요`); return; }
+    openShop(n.key);
+  });
+
+  /* ───────── 가게 안 ───────── */
+  let ctl = null;
+  const closeIcon = () => { const s = document.createElementNS("http://www.w3.org/2000/svg", "svg"); s.setAttribute("viewBox", "0 0 24 24"); s.innerHTML = '<path d="M6 6l12 12M18 6L6 18"/>'; return s; };
+  const KEEPERS = {
+    desk: '<circle cx="24" cy="26" r="13" fill="#f0cfae"/><path d="M10 20h28v-4a14 6 0 0 0-28 0z" fill="#ffd84d"/><rect x="9" y="19" width="30" height="3" rx="1.5" fill="#c9a72e"/><circle cx="19" cy="27" r="1.6" fill="#1d1b19"/><circle cx="29" cy="27" r="1.6" fill="#1d1b19"/><path d="M20 33q4 3 8 0" stroke="#1d1b19" stroke-width="1.6" fill="none" stroke-linecap="round"/>',
+    mbti: '<circle cx="24" cy="25" r="13" fill="#f0cfae"/><path d="M11 22q2-12 13-12t13 12q-4-6-13-6t-13 6z" fill="#2b2f3a"/><circle cx="19" cy="26" r="4.2" fill="none" stroke="#4fd2ff" stroke-width="1.8"/><circle cx="29" cy="26" r="4.2" fill="none" stroke="#4fd2ff" stroke-width="1.8"/><path d="M23.2 26h1.6" stroke="#4fd2ff" stroke-width="1.8"/><circle cx="19" cy="26" r="1.4" fill="#1d1b19"/><circle cx="29" cy="26" r="1.4" fill="#1d1b19"/><path d="M21 33h6" stroke="#1d1b19" stroke-width="1.6" stroke-linecap="round"/>',
+    mirror: '<ellipse cx="24" cy="24" rx="14" ry="18" fill="#1c1f2b" stroke="#ff5c9e" stroke-width="2.4"/><circle cx="24" cy="20" r="6" fill="#ff5c9e" opacity=".35"/><path d="M14 36q10-12 20 0" fill="#ff5c9e" opacity=".35"/>',
+    tarot: '<circle cx="24" cy="27" r="12" fill="#f0cfae"/><path d="M10 26q0-16 14-16t14 16q-3-9-14-9t-14 9z" fill="#b77bff"/><circle cx="24" cy="9" r="4" fill="#d8d0e6"/><path d="M18 27q1.5-1.5 3 0M27 27q1.5-1.5 3 0" stroke="#1d1b19" stroke-width="1.6" fill="none" stroke-linecap="round"/><path d="M19 33q5 4 10 0" stroke="#1d1b19" stroke-width="1.6" fill="none" stroke-linecap="round"/><circle cx="17" cy="31" r="2" fill="#e89a8a" opacity=".6"/><circle cx="31" cy="31" r="2" fill="#e89a8a" opacity=".6"/>',
+    cert: '<rect x="11" y="8" width="26" height="32" rx="3" fill="#f3efe6"/><path d="M16 16h16M16 21h16M16 26h10" stroke="#9a948a" stroke-width="1.6" stroke-linecap="round"/><circle cx="30" cy="33" r="6" fill="none" stroke="#d23b2a" stroke-width="2"/><path d="M27.5 33l1.8 1.8 3.2-3.4" stroke="#d23b2a" stroke-width="1.8" fill="none" stroke-linecap="round"/>'
+  };
+  function openSheet(key, build) {
+    const s = $("sheet"), sh = SHOPS[key];
+    s.style.setProperty("--acc", sh.color); s.replaceChildren();
+    const keeper = h("div", { class: "keeper" }); keeper.innerHTML = `<svg viewBox="0 0 48 48">${KEEPERS[key]}</svg>`;
+    const closeB = h("button", { class: "close", "aria-label": "가게에서 나가기", onclick: closeSheet }); closeB.append(closeIcon());
+    s.append(h("div", { class: "shead" }, keeper, h("div", null, h("h2", { id: "sheetTitle", text: sh.name }), h("p", { text: sh.greet })), closeB));
+    const body = h("div", { style: "display:grid;gap:14px" }); s.append(body);
+    s.hidden = false; $("sheetBack").hidden = false; sheetOpen = true; s.scrollTop = 0; near = undefined; $("prompt").hidden = true;
+    build(body);
+  }
+  function closeSheet() { if (ctl) { ctl.abort(); ctl = null; } $("sheet").hidden = true; $("sheetBack").hidden = true; sheetOpen = false; near = undefined; }
+  $("sheetBack").addEventListener("click", closeSheet);
+  addEventListener("keydown", (e) => { if (e.key === "Escape" && sheetOpen) closeSheet(); });
+  const thinking = (msg) => h("div", { class: "thinking" }, h("span", { class: "dots" }, h("i"), h("i"), h("i")), h("span", { text: msg }));
+  function safetyBox() {
+    return h("div", { class: "safety" },
+      h("h3", { text: "지금은 점보다 사람이 먼저예요" }),
+      h("p", { text: "적어 주신 내용에 걱정되는 신호가 보여요. 혼자 견디지 않아도 돼요. 아래로 전화하면 비밀이 지켜지는 상담을 받을 수 있어요." }),
+      h("ul", null,
+        h("li", null, h("b", { text: "1366" }), " 여성긴급전화, 24시간 데이트폭력·가정폭력 상담"),
+        h("li", null, h("b", { text: "112" }), " 지금 위험하다면 경찰"),
+        h("li", null, h("b", { text: "109" }), " 자살예방 상담전화, 24시간")));
+  }
+  function cardSummary() {
+    return h("div", { class: "cardsum" }, h("span", { class: "m", text: `나 ${card.me || "?"} · 그 사람 ${card.them || "?"} · ${card.rel}${card.dur ? " · " + card.dur : ""}` }), h("p", { text: card.text }));
+  }
+  function needCard(body) {
+    body.append(h("p", { class: "prose", text: "고민 카드가 있어야 상담할 수 있어요. 골목 입구 고민 접수처에서 먼저 써 오시거나, 여기서 바로 써도 돼요." }),
+      h("button", { class: "primary", text: "고민 카드 쓰기", onclick: () => openShop("desk") }));
+  }
+  function openShop(key) {
+    if (key === "desk") return openSheet("desk", buildDesk);
+    if (!card) return openSheet(key, needCard);
+    if (key === "mbti") return openSheet("mbti", buildMbti);
+    if (key === "mirror") return openSheet("mirror", buildMirror);
+    if (key === "tarot") return openSheet("tarot", buildTarot);
+    if (key === "cert") return openSheet("cert", buildCert);
+  }
+
+  /* 고민 접수처 */
+  function buildDesk(body) {
+    const opt = (sel, v) => { const o = h("option", { value: v, text: v || "모름" }); if (sel === v) o.selected = true; return o; };
+    const me_ = h("select", { id: "fMe" }, opt(card?.me || "", ""), ...MBTIS.map((m) => opt(card?.me, m)));
+    const th_ = h("select", { id: "fThem" }, opt(card?.them || "", ""), ...MBTIS.map((m) => opt(card?.them, m)));
+    const rel = h("select", { id: "fRel" }, ...RELS.map((r) => { const o = h("option", { value: r, text: r }); if ((card?.rel || "연애 중") === r) o.selected = true; return o; }));
+    const dur = h("input", { type: "text", id: "fDur", maxlength: "12", placeholder: "예: 1년 2개월" }); dur.value = card?.dur || "";
+    const txt = h("textarea", { id: "fText", rows: "4", maxlength: "300", placeholder: "예: 답장이 3시간씩 늦는데 물어보면 바빴대요. 나만 애쓰는 기분이에요." }); txt.value = card?.text || "";
+    const cnt = h("div", { class: "count", text: `${txt.value.length}/300` });
+    const save = h("button", { class: "primary", text: card ? "고민 카드 고치기" : "고민 카드 접수하기" });
+    const check = () => { cnt.textContent = `${txt.value.length}/300`; save.disabled = txt.value.trim().length < 8; };
+    txt.addEventListener("input", check); check();
+    save.addEventListener("click", () => {
+      const next = { me: me_.value, them: th_.value, rel: rel.value, dur: dur.value.trim(), text: txt.value.trim() };
+      const changed = !card || JSON.stringify(next) !== JSON.stringify({ me: card.me, them: card.them, rel: card.rel, dur: card.dur, text: card.text });
+      card = next; if (changed) results = {}; saveAll(); closeSheet();
+      toast(changed ? "고민 카드를 접수했어요. 이제 가게에 들어가 보세요" : "고민 카드는 그대로예요");
+    });
+    body.append(
+      h("div", { class: "row2" }, h("div", { class: "field" }, h("label", { for: "fMe", text: "나의 MBTI" }), me_), h("div", { class: "field" }, h("label", { for: "fThem", text: "그 사람 MBTI" }), th_)),
+      h("div", { class: "row2" }, h("div", { class: "field" }, h("label", { for: "fRel", text: "어떤 사이" }), rel), h("div", { class: "field" }, h("label", { for: "fDur", text: "함께한 기간" }), dur)),
+      h("div", { class: "field" }, h("label", { for: "fText", text: "그 사람, 뭐가 답답해요?" }), txt, cnt),
+      save,
+      h("p", { class: "fine", text: "고민 카드는 이 기기에만 보관돼요. 가게에서 답을 받을 때 내용이 Claude로 보내지고, 다른 손님에게는 MBTI 조합만 보여요. 카드를 고치면 받은 도장이 초기화돼요." }));
+  }
+
+  /* MBTI 통역소 */
+  function renderMbti(out, r) {
+    out.replaceChildren();
+    if (r.safety) out.append(safetyBox());
+    out.append(h("p", { class: "headline", text: r.headline }), h("p", { class: "prose", text: r.translation }));
+    if (r.my_side) out.append(h("div", { class: "box" }, h("h4", { text: "내가 유독 답답한 이유" }), h("p", { class: "prose", text: r.my_side })));
+    if (r.tips && r.tips.length) out.append(h("div", { class: "box" }, h("h4", { text: "바로 해볼 것" }), h("ul", null, ...r.tips.map((t) => h("li", { text: t })))));
+    if (r.ask_like_this) {
+      const q = h("div", { class: "quote", text: r.ask_like_this });
+      out.append(h("div", { class: "box" }, h("h4", { text: "이렇게 물어보세요" }), q, h("button", { class: "copy", text: "복사하기", onclick: () => copyText(r.ask_like_this) })));
+    }
+    out.append(h("p", { class: "fine", text: "MBTI는 재미로 보는 렌즈예요. 같은 유형이어도 사람마다 달라요." }));
+  }
+  function buildMbti(body) {
+    body.append(cardSummary());
+    const out = h("div", { style: "display:grid;gap:12px" }); body.append(out);
+    const go = h("button", { class: "primary", text: results.mbti ? "다시 번역받기" : "번역 맡기기" });
+    body.append(go);
+    if (results.mbti) renderMbti(out, results.mbti);
+    go.addEventListener("click", async () => {
+      if (!sample) { out.replaceChildren(h("p", { class: "err", text: errCopy({ code: "unavailable" }) })); return; }
+      go.disabled = true; out.replaceChildren(thinking("통역사가 그 사람 언어를 해독하는 중이에요"));
+      ctl = new AbortController();
+      try {
+        const r = await sample.json(`${RULES}
+
+[가게] MBTI 통역소. 주인은 차분하고 위트 있는 통역사다. 상대의 행동을 상대 유형의 '언어'로 번역해서 손님이 "아, 그래서 그랬구나" 하게 만든다. MBTI를 모르면 행동에서 읽히는 성향으로 번역한다. 손님 쪽 유형이 왜 이 상황을 유독 답답해하는지도 짚는다.
+
+${cardText(card)}
+
+JSON 하나로만 답하라:
+{"safety": true 또는 false, "headline": "캡처하고 싶어지는 번역 한 줄, 30자 이내", "translation": "그 사람 입장에서 이 행동이 어떤 의미일 수 있는지 3~4문장, 존댓말", "my_side": "손님이 이 상황에서 특히 답답한 이유 1~2문장", "tips": ["바로 해볼 수 있는 행동 3개, 각 40자 이내"], "ask_like_this": "그 사람에게 그대로 보낼 수 있는 부드러운 한 마디, 50자 이내"}
+safety가 true면 headline과 translation에 안전을 먼저 말하는 진지한 내용을 쓰고 tips는 도움을 구하는 방법으로 채운다.`, { signal: ctl.signal, modelTier: "default" });
+        const clean = { safety: !!r.safety, headline: S(r.headline, 60), translation: S(r.translation, 600), my_side: S(r.my_side, 300), tips: Array.isArray(r.tips) ? r.tips.slice(0, 3).map((t) => S(t, 80)) : [], ask_like_this: S(r.ask_like_this, 120) };
+        if (!clean.headline || !clean.translation) throw { code: "invalid_json" };
+        results.mbti = clean; saveAll(); renderMbti(out, clean); go.textContent = "다시 번역받기";
+        if (!clean.safety) emitEv({ k: "mbti", a: card.me, b: card.them });
+      } catch (e) { const m = errCopy(e); out.replaceChildren(m ? h("p", { class: "err", text: m }) : ""); if (results.mbti) renderMbti(out, results.mbti); }
+      finally { go.disabled = false; ctl = null; }
+    });
+  }
+
+  /* 입장바꿔방 */
+  function buildMirror(body) {
+    body.append(cardSummary(), h("p", { class: "fine", text: "거울 속 그 사람은 AI가 상상한 모습이에요. 진짜 마음은 직접 물어봐야 알아요. 하고 싶은 말을 미리 연습해 봐도 좋아요." }));
+    const chat = h("div", { class: "chat" }); body.append(chat);
+    const input = h("textarea", { rows: "2", maxlength: "200", placeholder: "그 사람에게 하고 싶은 말", "aria-label": "그 사람에게 할 말" });
+    const send = h("button", { class: "primary", text: "말하기" });
+    const comp = h("div", { class: "composer" }, input, send);
+    const status = h("div"); body.append(status, comp);
+    const prev = results.mirror && Array.isArray(results.mirror.turns) ? results.mirror.turns : [];
+    const turns = prev.slice();
+    const first = `${RULES}
+
+[가게] 입장바꿔방. 거울 속에 손님의 그 사람이 나타난다. 너는 고민 카드 속 '그 사람'을 연기한다.
+- 그 사람의 MBTI와 상황을 바탕으로, 그 사람이 가졌을 법한 속마음을 1인칭으로 솔직하게 말한다. 연인 사이처럼 편한 반말.
+- 방어하거나 손님을 탓하지 않는다. 그렇다고 무조건 사과하지도 않는다. 그 사람 나름의 이유와 서운함을 보여 준다.
+- 한 번에 2~4문장. 이모지, 괄호 지문, 따옴표 없이 대사만 쓴다.
+- 손님이 하고 싶은 말을 연습하면 그 사람이 실제로 할 법하게 반응한다.
+- 안전 규칙에 해당하면 연기를 멈추고 첫 줄을 [안전]으로 시작해서 진지하게 말한다.
+
+${cardText(card)}
+
+이제 거울에 나타나서, 손님의 고민에 대해 그 사람으로서 첫마디를 해라.`;
+    const bubble = (role, text) => {
+      const safe = role === "assistant" && text.startsWith("[안전]");
+      if (safe) chat.append(safetyBox());
+      chat.append(h("div", { class: "bub " + (role === "user" ? "me" : "them"), text: safe ? text.replace(/^\[안전\]\s*/, "") : text }));
+    };
+    turns.forEach((t, i) => { if (i > 0 || t.role === "assistant") bubble(t.role, t.content); });
+    const userCount = () => turns.filter((t) => t.role === "user").length;
+    const MAX = 8;
+    async function call() {
+      if (!sample) { status.replaceChildren(h("p", { class: "err", text: errCopy({ code: "unavailable" }) })); return; }
+      send.disabled = true; status.replaceChildren(thinking("거울이 일렁이고 있어요"));
+      ctl = new AbortController();
+      const live = h("div", { class: "bub them" });
+      try {
+        const msgs = [{ role: "user", content: first }, ...turns];
+        if (msgs[msgs.length - 1].role !== "user") throw { code: "invalid_request" };
+        const { text } = await sample(msgs, { signal: ctl.signal, modelTier: "quick", cache: false, onText: ({ text }) => { if (!live.isConnected) { status.replaceChildren(); chat.append(live); } live.textContent = text.replace(/^\[안전\]\s*/, ""); } });
+        live.remove(); const clean = S(text.trim(), 600);
+        turns.push({ role: "assistant", content: clean }); bubble("assistant", clean);
+        results.mirror = { turns: turns.slice(-17) }; saveAll(); status.replaceChildren();
+        if (turns.length === 1) emitEv({ k: "mirror" });
+      } catch (e) { live.remove(); if (turns.length && turns[turns.length - 1].role === "user") turns.pop(); const m = errCopy(e); status.replaceChildren(m ? h("p", { class: "err", text: m }) : ""); }
+      finally { send.disabled = userCount() >= MAX; ctl = null; if (userCount() >= MAX) status.replaceChildren(h("p", { class: "fine", text: "거울이 흐려졌어요. 나머지 이야기는 그 사람에게 직접 해 보세요." })); }
+    }
+    send.addEventListener("click", () => {
+      const v = input.value.trim(); if (!v || send.disabled) return;
+      if (!turns.length) return call();
+      turns.push({ role: "user", content: v }); bubble("user", v); input.value = ""; call();
+    });
+    input.addEventListener("keydown", (e) => { if (e.key === "Enter" && !e.shiftKey && !e.isComposing) { e.preventDefault(); send.click(); } });
+    if (!turns.length) { comp.hidden = true; const start = h("button", { class: "primary", text: "거울 앞에 앉기", onclick: () => { start.remove(); comp.hidden = false; call(); } }); body.insertBefore(start, status); }
+    else if (userCount() >= MAX) { send.disabled = true; status.replaceChildren(h("p", { class: "fine", text: "거울이 흐려졌어요. 카드를 고치면 다시 이야기할 수 있어요." })); }
+    const reset = h("button", { class: "ghost", text: "처음부터 다시", onclick: () => { results.mirror = null; saveAll(); openShop("mirror"); } });
+    if (turns.length) body.append(h("div", { class: "btns" }, reset));
+  }
+
+  /* 확신 타로 */
+  const SYMBOL = (i) => {
+    if (i === 19) return '<circle cx="24" cy="24" r="8" fill="#e0a82e"/><g stroke="#e0a82e" stroke-width="2.4" stroke-linecap="round">' + Array.from({ length: 8 }, (_, k) => { const a = k * Math.PI / 4; return `<path d="M${24 + Math.cos(a) * 12} ${24 + Math.sin(a) * 12}L${24 + Math.cos(a) * 17} ${24 + Math.sin(a) * 17}"/>`; }).join("") + "</g>";
+    if (i === 18) return '<path d="M30 10a14 14 0 1 0 0 28a11 11 0 0 1 0-28z" fill="#7d4bb8"/>';
+    if (i === 17) return '<path d="M24 8l4 11 11 1-9 7 3 11-9-6-9 6 3-11-9-7 11-1z" fill="#3a8ad6"/>';
+    if (i === 6) return '<path d="M24 38s-13-8-13-17a7 7 0 0 1 13-4 7 7 0 0 1 13 4c0 9-13 17-13 17z" fill="#d23b2a"/>';
+    if (i === 16) return '<path d="M17 40V16l7-8 7 8v24z" fill="#5a5a66"/><path d="M28 6l-6 10h5l-4 9" stroke="#e0a82e" stroke-width="2" fill="none"/>';
+    if (i === 13) return '<path d="M12 38q12-30 24 0" stroke="#1d1b19" stroke-width="2.4" fill="none"/><path d="M24 14l6 6" stroke="#1d1b19" stroke-width="2.4"/>';
+    if (i === 10) return '<circle cx="24" cy="24" r="13" fill="none" stroke="#7d4bb8" stroke-width="2.4"/>' + Array.from({ length: 8 }, (_, k) => { const a = k * Math.PI / 4; return `<path d="M24 24L${24 + Math.cos(a) * 13} ${24 + Math.sin(a) * 13}" stroke="#7d4bb8" stroke-width="1.6"/>`; }).join("");
+    const n = 3 + (i % 5); return `<polygon points="${Array.from({ length: n }, (_, k) => { const a = -Math.PI / 2 + k * 2 * Math.PI / n; return `${24 + Math.cos(a) * 13},${24 + Math.sin(a) * 13}`; }).join(" ")}" fill="none" stroke="#7d4bb8" stroke-width="2.4"/><circle cx="24" cy="24" r="3" fill="#7d4bb8"/>`;
+  };
+  function tcard(i, pos) {
+    const c = h("div", { class: "tcard" }, h("span", { class: "pos", text: pos }), h("span", { class: "num", text: ROMAN[i] }));
+    const s = document.createElementNS("http://www.w3.org/2000/svg", "svg"); s.setAttribute("viewBox", "0 0 48 48"); s.innerHTML = SYMBOL(i); c.append(s, h("span", { class: "nm", text: ARCANA[i] }));
+    return c;
+  }
+  function renderTarot(out, r) {
+    out.replaceChildren(h("div", { class: "spread" }, ...r.picks.map((i, k) => tcard(i, ["과거", "현재", "미래"][k]))));
+    if (r.safety) out.append(safetyBox());
+    out.append(h("p", { class: "headline", text: r.verdict }));
+    out.append(h("div", { class: "readings" }, ...r.cards.map((c) => h("p", { class: "prose reading" }, h("b", { text: `${c.position} · ${c.name}  ` }), c.reading))));
+    if (r.advice) out.append(h("div", { class: "box" }, h("h4", { text: "할매가 시키는 것" }), h("p", { class: "prose", text: r.advice })));
+    out.append(h("p", { class: "fine", text: r.wink || "재미로 보는 거야. 진짜 답은 그 사람한테 물어봐." }));
+  }
+  function buildTarot(body) {
+    body.append(cardSummary());
+    const out = h("div", { style: "display:grid;gap:12px" }); body.append(out);
+    if (results.tarot) { renderTarot(out, results.tarot); body.append(h("button", { class: "ghost", text: "카드 다시 뽑기", onclick: () => { results.tarot = null; saveAll(); openShop("tarot"); } })); return; }
+    const deck = ARCANA.map((_, i) => i).sort(() => Math.random() - .5);
+    const picked = [];
+    const info = h("p", { class: "prose", text: "마음속으로 그 사람을 떠올리면서 끌리는 카드 3장을 골라. 순서대로 과거, 현재, 미래야." });
+    const go = h("button", { class: "primary", text: "할매, 봐 주세요", disabled: "" });
+    const fan = h("div", { class: "fan" }, ...deck.map((ci, k) => {
+      const b = h("button", { class: "tback", "aria-label": `${k + 1}번째 카드`, "aria-pressed": "false" });
+      b.addEventListener("click", () => {
+        const at = picked.indexOf(ci);
+        if (at >= 0) { picked.splice(at, 1); b.setAttribute("aria-pressed", "false"); }
+        else if (picked.length < 3) { picked.push(ci); b.setAttribute("aria-pressed", "true"); }
+        go.disabled = picked.length !== 3; info.textContent = picked.length === 3 ? "좋아, 세 장. 이제 할매한테 보여 줘." : `${picked.length}/3장 골랐어.`;
+      });
+      return b;
+    }));
+    body.append(info, fan, go);
+    go.addEventListener("click", async () => {
+      if (!sample) { out.replaceChildren(h("p", { class: "err", text: errCopy({ code: "unavailable" }) })); return; }
+      go.disabled = true; fan.hidden = true; info.hidden = true;
+      const picks = picked.slice();
+      out.replaceChildren(h("div", { class: "spread" }, ...picks.map((i, k) => tcard(i, ["과거", "현재", "미래"][k]))), thinking("할매가 카드를 노려보는 중이에요"));
+      ctl = new AbortController();
+      try {
+        const r = await sample.json(`${RULES}
+
+[가게] 확신 타로. 주인은 '확신 할매'다. 50년 봤다고 우기며 근거 없이 확신에 차서 말하지만 속은 따뜻하다. 반말, 살짝 사투리, 웃기게. 겁주지 않는다. 메이저 아르카나의 전통적인 의미를 바탕으로 손님의 고민에 맞춰 풀이한다.
+
+${cardText(card)}
+
+뽑은 카드(모두 정방향): 과거=${ARCANA[picks[0]]}, 현재=${ARCANA[picks[1]]}, 미래=${ARCANA[picks[2]]}
+
+JSON 하나로만 답하라:
+{"safety": true 또는 false, "cards": [{"position": "과거", "name": "카드 이름", "reading": "할매 말투 풀이 2문장"}, {"position": "현재", ...}, {"position": "미래", ...}], "verdict": "할매의 확신에 찬 결론 한 줄, 35자 이내", "advice": "오늘 해볼 일 한 가지, 1~2문장", "wink": "재미로 보는 거라는 걸 할매 말투로 한 줄"}`, { signal: ctl.signal, modelTier: "default" });
+        const cards = (Array.isArray(r.cards) ? r.cards : []).slice(0, 3).map((c, k) => ({ position: ["과거", "현재", "미래"][k], name: ARCANA[picks[k]], reading: S(c && c.reading, 300) }));
+        if (cards.length !== 3 || !S(r.verdict, 1)) throw { code: "invalid_json" };
+        results.tarot = { picks, safety: !!r.safety, cards, verdict: S(r.verdict, 80), advice: S(r.advice, 300), wink: S(r.wink, 120) };
+        saveAll(); renderTarot(out, results.tarot); go.hidden = true;
+        body.append(h("button", { class: "ghost", text: "카드 다시 뽑기", onclick: () => { results.tarot = null; saveAll(); openShop("tarot"); } }));
+        if (!results.tarot.safety) emitEv({ k: "tarot", c: picks[1] });
+      } catch (e) { const m = errCopy(e); out.replaceChildren(m ? h("p", { class: "err", text: m }) : ""); fan.hidden = false; info.hidden = false; go.disabled = false; }
+      finally { ctl = null; }
+    });
+  }
+
+  /* 진단서 발급소 */
+  const visited = () => ["mbti", "mirror", "tarot"].filter((k) => k === "mirror" ? results.mirror && results.mirror.turns && results.mirror.turns.length > 0 : !!results[k]);
+  function summaries() {
+    const out = [];
+    if (results.mbti) out.push(`- MBTI 통역소: ${results.mbti.headline} / ${results.mbti.translation}`);
+    if (results.mirror) out.push(`- 입장바꿔방(그 사람 역할 대사): ${results.mirror.turns.filter((t) => t.role === "assistant").slice(-3).map((t) => t.content).join(" / ")}`);
+    if (results.tarot) out.push(`- 확신 타로: ${results.tarot.cards.map((c) => c.name).join(", ")} → ${results.tarot.verdict} / ${results.tarot.advice}`);
+    return out.join("\n");
+  }
+  function buildCert(body) {
+    const v = visited();
+    body.append(cardSummary());
+    if (v.length < 2) {
+      body.append(h("p", { class: "prose", text: `진단서는 가게 두 곳 이상에서 이야기를 들은 손님만 뗄 수 있어요. 지금 ${v.length}곳 들렀어요.` }), stampList());
+      return;
+    }
+    const out = h("div", { style: "display:grid;gap:12px" });
+    const go = h("button", { class: "primary", text: results.cert ? "진단서 다시 떼기" : "진단서 발급받기" });
+    body.append(go, out);
+    if (results.cert) showCert(out, results.cert);
+    go.addEventListener("click", async () => {
+      if (!sample) { out.replaceChildren(h("p", { class: "err", text: errCopy({ code: "unavailable" }) })); return; }
+      go.disabled = true; out.replaceChildren(thinking("직원이 골목 소문을 모아 진단서를 쓰는 중이에요"));
+      ctl = new AbortController();
+      try {
+        const r = await sample.json(`${RULES}
+
+[가게] 진단서 발급소. 손님이 골목에서 들은 이야기를 모아 재미있는 '관계 진단서'를 쓴다. 의학 진단처럼 쓰지 말고, 웃기면서도 쓸모 있게.
+
+${cardText(card)}
+
+[골목에서 들은 이야기]
+${summaries()}
+
+JSON 하나로만 답하라:
+{"safety": true 또는 false, "title": "이 관계의 별명, 14자 이내, 웃기게", "temp_gap": 0에서 100 사이 정수(서로의 소통 온도 차, 클수록 차이가 큼), "my_lang": "손님의 소통 방식 한 줄, 25자 이내", "their_lang": "그 사람의 소통 방식 한 줄, 25자 이내", "key": "핵심 진단 한 줄, 40자 이내", "rx": ["처방 3개, 각 30자 이내"], "try_tonight": "오늘 밤 그 사람에게 해볼 한 마디, 40자 이내"}`, { signal: ctl.signal, modelTier: "default" });
+        const gap = Math.max(0, Math.min(100, Math.round(Number(r.temp_gap) || 50)));
+        const c = { safety: !!r.safety, title: S(r.title, 30), temp_gap: gap, my_lang: S(r.my_lang, 50), their_lang: S(r.their_lang, 50), key: S(r.key, 80), rx: Array.isArray(r.rx) ? r.rx.slice(0, 3).map((x) => S(x, 60)) : [], try_tonight: S(r.try_tonight, 80) };
+        if (!c.title || !c.key) throw { code: "invalid_json" };
+        results.cert = c; saveAll(); await showCert(out, c); go.textContent = "진단서 다시 떼기";
+        if (!c.safety) emitEv({ k: "cert", a: card.me, b: card.them });
+      } catch (e) { const m = errCopy(e); out.replaceChildren(m ? h("p", { class: "err", text: m }) : ""); if (results.cert) showCert(out, results.cert); }
+      finally { go.disabled = false; ctl = null; }
+    });
+  }
+  async function showCert(out, c) {
+    out.replaceChildren();
+    if (c.safety) { out.append(safetyBox()); return; }
+    const img = h("img", { class: "certimg", alt: `관계 진단서: ${c.title}` });
+    out.append(img, h("p", { class: "fine", text: "휴대폰에서는 길게 눌러, 컴퓨터에서는 오른쪽 클릭으로 저장하세요. 4:5 비율이라 바로 올리기 좋아요." }));
+    img.src = await drawCert(c);
+  }
+  function wrap(x, text, maxW) {
+    const out = []; let line = "";
+    for (const ch of String(text)) { const t = line + ch; if (x.measureText(t).width > maxW && line) { const sp = line.lastIndexOf(" "); if (sp > line.length * .5) { out.push(line.slice(0, sp)); line = line.slice(sp + 1) + ch; } else { out.push(line); line = ch; } } else line = t; }
+    if (line) out.push(line); return out;
+  }
+  async function drawCert(c) {
+    try { await Promise.all(['60px "Black Han Sans"', '30px "IBM Plex Sans KR"', '700 30px "IBM Plex Sans KR"', '24px "Nanum Gothic Coding"'].map((f) => document.fonts.load(f))); } catch {}
+    const W = 1080, H = 1350, cv = document.createElement("canvas"); cv.width = W; cv.height = H; const x = cv.getContext("2d");
+    x.fillStyle = "#0b0c11"; x.fillRect(0, 0, W, H);
+    const P = 70; x.fillStyle = "#f3efe6"; x.fillRect(P, P, W - P * 2, H - P * 2);
+    x.strokeStyle = "#1d1b19"; x.lineWidth = 3; x.strokeRect(P + 24, P + 24, W - P * 2 - 48, H - P * 2 - 48);
+    const L = P + 60, R = W - P - 60;
+    x.fillStyle = "#1d1b19"; x.font = '64px "Black Han Sans", sans-serif'; x.textBaseline = "alphabetic"; x.fillText("관계 진단서", L, P + 130);
+    const d = new Date(); x.font = '24px "Nanum Gothic Coding", monospace'; x.fillStyle = "#6a655c"; x.textAlign = "right";
+    x.fillText(`발급 ${d.getFullYear()}.${pad(d.getMonth() + 1)}.${pad(d.getDate())}`, R, P + 100); x.fillText(`No. ${String(d.getTime()).slice(-6)}`, R, P + 132); x.textAlign = "left";
+    // 표
+    let y = P + 175; x.fillStyle = "#1d1b19"; x.fillRect(L, y, R - L, 3);
+    const cells = [["손님", card.me || "모름"], ["그 사람", card.them || "모름"], ["관계", card.rel], ["기간", card.dur || "-"]];
+    const cw = (R - L) / 4; x.font = '22px "IBM Plex Sans KR", sans-serif';
+    cells.forEach(([k, v], i) => { x.fillStyle = "#8a847a"; x.fillText(k, L + i * cw + 6, y + 40); x.fillStyle = "#1d1b19"; x.font = '700 30px "IBM Plex Sans KR", sans-serif'; x.fillText(v, L + i * cw + 6, y + 80); x.font = '22px "IBM Plex Sans KR", sans-serif'; });
+    y += 105; x.fillRect(L, y, R - L, 2);
+    // 별명
+    y += 70; x.fillStyle = "#8a847a"; x.font = '24px "IBM Plex Sans KR", sans-serif'; x.fillText("진단명", L, y);
+    y += 70; x.fillStyle = "#1d1b19"; x.font = '68px "Black Han Sans", sans-serif'; wrap(x, c.title, R - L).slice(0, 2).forEach((ln, i) => x.fillText(ln, L, y + i * 78)); y += (wrap(x, c.title, R - L).slice(0, 2).length - 1) * 78;
+    // 온도차
+    y += 70; x.fillStyle = "#8a847a"; x.font = '24px "IBM Plex Sans KR", sans-serif'; x.fillText("소통 온도 차", L, y);
+    x.textAlign = "right"; x.fillStyle = "#d23b2a"; x.font = '52px "Black Han Sans", sans-serif'; x.fillText(`${c.temp_gap}%`, R, y + 8); x.textAlign = "left";
+    y += 26; x.fillStyle = "#ddd6c8"; x.fillRect(L, y, R - L, 20); const grd = x.createLinearGradient(L, 0, R, 0); grd.addColorStop(0, "#4fd2ff"); grd.addColorStop(1, "#ff5c9e"); x.fillStyle = grd; x.fillRect(L, y, (R - L) * c.temp_gap / 100, 20);
+    // 두 사람의 언어
+    y += 80; const half = (R - L - 30) / 2;
+    [["손님의 언어", c.my_lang, "#2a8ab8"], ["그 사람의 언어", c.their_lang, "#c4386f"]].forEach(([k, v, col], i) => {
+      const lx = L + i * (half + 30); x.fillStyle = col; x.font = '700 24px "IBM Plex Sans KR", sans-serif'; x.fillText(k, lx, y);
+      x.fillStyle = "#1d1b19"; x.font = '30px "IBM Plex Sans KR", sans-serif'; wrap(x, v, half).slice(0, 2).forEach((ln, j) => x.fillText(ln, lx, y + 46 + j * 42));
+    });
+    y += 125; x.fillStyle = "#1d1b19"; x.fillRect(L, y, R - L, 2);
+    // 핵심 + 처방
+    y += 60; x.font = '700 34px "IBM Plex Sans KR", sans-serif'; wrap(x, c.key, R - L).slice(0, 2).forEach((ln, i) => x.fillText(ln, L, y + i * 46)); y += wrap(x, c.key, R - L).slice(0, 2).length * 46 + 20;
+    x.fillStyle = "#8a847a"; x.font = '24px "IBM Plex Sans KR", sans-serif'; x.fillText("처방", L, y); y += 44;
+    x.fillStyle = "#1d1b19"; x.font = '30px "IBM Plex Sans KR", sans-serif'; c.rx.forEach((r, i) => { x.fillText(`${i + 1}. ${r}`, L, y + i * 46); }); y += c.rx.length * 46 + 20;
+    // 오늘 밤 한 마디
+    const bh = 112; y = Math.min(y, H - P - 40 - bh); x.fillStyle = "#1d1b19"; x.fillRect(L, y, R - L, bh);
+    x.fillStyle = "#ffd84d"; x.font = '22px "IBM Plex Sans KR", sans-serif'; x.fillText("오늘 밤 해볼 한 마디", L + 28, y + 40);
+    x.fillStyle = "#f3efe6"; x.font = '700 32px "IBM Plex Sans KR", sans-serif'; x.fillText(wrap(x, `"${c.try_tonight}"`, R - L - 56)[0], L + 28, y + 88);
+    // 도장
+    x.save(); x.translate(L + 470, P + 105); x.rotate(-.2); x.strokeStyle = x.fillStyle = "rgba(210,59,42,.85)"; x.lineWidth = 6; x.beginPath(); x.arc(0, 0, 70, 0, Math.PI * 2); x.stroke();
+    x.lineWidth = 2; x.beginPath(); x.arc(0, 0, 58, 0, Math.PI * 2); x.stroke(); x.textAlign = "center"; x.font = '32px "Black Han Sans", sans-serif'; x.fillText("왜그래", 0, -2); x.font = '19px "IBM Plex Sans KR", sans-serif'; x.fillText("골목 발급", 0, 26); x.restore();
+    x.fillStyle = "#8a8f9c"; x.font = '22px "IBM Plex Sans KR", sans-serif'; x.textAlign = "center"; x.fillText("재미로 보는 진단서예요. AI가 한쪽 이야기만 듣고 썼어요.", W / 2, H - 26); x.textAlign = "left";
+    return cv.toDataURL("image/png");
+  }
+
+  /* 도장 */
+  function stampList() {
+    const v = visited();
+    return h("div", { class: "stamps" }, ...["mbti", "mirror", "tarot"].map((k) => {
+      const done = v.includes(k), sh = SHOPS[k];
+      const row = h("div", { class: "stamp-row" + (done ? " done" : ""), style: `--c:${sh.color}` },
+        h("div", { class: "dot", text: done ? sh.stamp : "" }), h("span", null, sh.name, h("small", { text: done ? "도장 받음 · 다시 보려면 가게로" : "아직 안 들렀어요" })),
+        h("button", { class: "ghost", text: "가게로", onclick: () => walkTo(k) }));
+      return row;
+    }));
+  }
+  function walkTo(key) { const s = spots.find((p) => p.key === key); if (!s) return; closeSheet(); route = [{ x: 0, z: s.z }, { x: s.x * .8, z: s.z }]; target = { x: 0, z: me.z }; toast(`${SHOPS[key].name}(으)로 걸어가요`); }
+  function syncStamps() { $("stampN").textContent = `${visited().length}/3`; }
+  $("actStamp").addEventListener("click", () => openSheet("cert", (body) => {
+    body.prepend(h("p", { class: "prose", text: "가게 세 곳에서 도장을 받아 보세요. 두 곳 이상 들르면 진단서를 뗄 수 있어요." }));
+    body.append(stampList(), h("button", { class: "primary", text: "진단서 발급소로 가기", onclick: () => walkTo("cert") }));
+  }));
+  $("actCard").addEventListener("click", () => openShop("desk"));
+  $("actWave").addEventListener("click", () => { me.waveUntil = Date.now() + 2400; sendPresence(true); });
+  $("aboutBtn").addEventListener("click", () => openSheet("desk", (body) => {
+    body.replaceChildren(
+      h("p", { class: "prose", text: "왜그래 골목은 연인이 왜 그러는지 답답할 때 들르는 재미용 상담 골목이에요." }),
+      h("div", { class: "box" }, h("h4", { text: "이렇게 놀아요" }), h("ul", null,
+        h("li", { text: "골목 입구 고민 접수처에서 고민 카드를 써요." }),
+        h("li", { text: "MBTI 통역소, 입장바꿔방, 확신 타로에 들어가 같은 고민을 다른 관점으로 들어요." }),
+        h("li", { text: "두 곳 이상 들르면 진단서 발급소에서 관계 진단서를 받아요." }))),
+      h("div", { class: "box" }, h("h4", { text: "알아 두세요" }), h("ul", null,
+        h("li", { text: "가게 주인의 답은 AI가 만든 이야기예요. 재미와 대화의 실마리로만 써 주세요." }),
+        h("li", { text: "한쪽 이야기만 듣고 하는 말이라 그 사람의 진짜 마음과 다를 수 있어요." }),
+        h("li", { text: "고민 카드와 답은 이 기기에만 보관돼요. 다른 손님에게는 MBTI 조합과 뽑은 카드 이름만 보여요." }))),
+      safetyBox());
+  }));
+  async function copyText(t) { try { await navigator.clipboard.writeText(t); toast("복사했어요"); } catch { toast("복사가 막혀 있어요. 글자를 길게 눌러 복사해 주세요"); } }
+
+  /* ───────── 함께 있는 손님 (room) ───────── */
+  let room = null; const peers = new Map(); let myEv = null;
+  function emitEv(ev) { myEv = Object.assign({ t: Date.now() }, ev); sendPresence(true); showFeed(feedText(myEv, true)); }
+  function feedText(ev, mine) {
+    const who = mine ? "내가" : "방금 누군가";
+    if (ev.k === "mbti") return [who, ` ${ev.a || "?"}의 ${ev.b || "?"} 고민을 `, "통역받았어요"];
+    if (ev.k === "tarot") return [who, " 지금 상황 카드로 ", `'${ARCANA[ev.c]}'`, "를 뽑았어요"];
+    if (ev.k === "mirror") return [who, " 거울 앞에 앉았어요", ""];
+    if (ev.k === "cert") return [who, ` ${ev.a || "?"}·${ev.b || "?"} 커플 `, "진단서를 뗐어요"];
+    return null;
+  }
+  let feedT;
+  function showFeed(parts) {
+    if (!parts) return; const f = $("feed"); f.replaceChildren(h("b", { text: parts[0] }), parts[1], parts[2] ? h("b", { text: parts[2] }) : "", parts[3] || "");
+    f.style.opacity = 1; clearTimeout(feedT); feedT = setTimeout(() => { f.style.opacity = 0; }, 4200);
+  }
+  function validEv(ev) {
+    if (!ev || typeof ev !== "object" || typeof ev.t !== "number") return null;
+    const m = (v) => (v === "" || MBTIS.includes(v) ? v : null);
+    if (ev.k === "mbti" || ev.k === "cert") { const a = m(ev.a), b = m(ev.b); return a === null || b === null ? null : { k: ev.k, a, b, t: ev.t }; }
+    if (ev.k === "tarot") return Number.isInteger(ev.c) && ev.c >= 0 && ev.c < 22 ? { k: "tarot", c: ev.c, t: ev.t } : null;
+    if (ev.k === "mirror") return { k: "mirror", t: ev.t };
+    return null;
+  }
+  function presenceState() { return { x: +me.x.toFixed(2), z: +me.z.toFixed(2), r: +me.r.toFixed(2), m: me.moving ? 1 : 0, w: me.waveUntil > Date.now() ? me.waveUntil : 0, c: myColor, ev: myEv }; }
+  let lastSent = 0, lastKey = "";
+  function sendPresence(force) {
+    if (!room) return; const now = performance.now(); if (!force && now - lastSent < 140) return;
+    const p = presenceState(), k = JSON.stringify(p); if (k === lastKey) return; lastKey = k; lastSent = now; room.presence(p).catch(() => {});
+  }
+  function updateWho() { $("whoText").textContent = room ? `지금 ${1 + peers.size}명 골목에` : "골목 영업 중"; }
+  const clamp = (v, lo, hi) => Math.max(lo, Math.min(hi, v));
+  function onPeers(change) {
+    const seen = new Set();
+    for (const p of change.peers) {
+      if (p.isMe || p.kind !== "viewer") continue;
+      const pr = p.presence || {}; if (typeof pr.x !== "number" || typeof pr.z !== "number") continue;
+      seen.add(p.peer); let e = peers.get(p.peer);
+      if (!e) {
+        if (peers.size >= 40) continue;
+        const tag = h("div", { class: "tag peer" }); $("tags").append(tag);
+        e = { a: makeAvatar(Number.isInteger(pr.c) ? Math.abs(pr.c) % 48 : 0), st: { x: clamp(pr.x, -AW, AW), z: clamp(pr.z, ZMIN, ZMAX), r: 0 }, tag, evT: (pr.ev && pr.ev.t) || 0 };
+        peers.set(p.peer, e);
+      }
+      Object.assign(e.st, { tx: clamp(pr.x, -AW, AW), tz: clamp(pr.z, ZMIN, ZMAX), tr: +pr.r || 0, moving: pr.m === 1, waveUntil: Math.min(+pr.w || 0, Date.now() + 3000) });
+      const ev = validEv(pr.ev);
+      if (ev && ev.t > e.evT) { e.evT = ev.t; if (Date.now() - ev.t < 60000) showFeed(feedText(ev, false)); }
+    }
+    for (const [k, e] of peers) if (!seen.has(k)) { scene.remove(e.a.g); e.tag.remove(); peers.delete(k); }
+    updateWho();
+  }
+  (async () => {
+    if (!window.claude || !window.claude.use) return;
+    try { sample = await window.claude.use("sample"); } catch { sample = null; }
+    try { room = await window.claude.use("room"); if (room) { room.onPeers(onPeers, () => { room = null; updateWho(); }); sendPresence(true); } } catch { room = null; }
+    updateWho();
+  })();
+
+  /* ───────── 이름표 ───────── */
+  const myTag = h("div", { class: "tag" }, h("b", { text: "나" }), h("span", { id: "myTagText", text: "골목 손님" })); $("tags").append(myTag);
+  const v3 = new THREE.Vector3();
+  function placeTag(tag, x, y, z) {
+    v3.set(x, y, z).project(camera);
+    if (v3.z > 1 || v3.z < -1) { tag.style.visibility = "hidden"; return; }
+    tag.style.visibility = "";
+    tag.style.transform = `translate(${(v3.x * .5 + .5) * innerWidth}px, ${(-v3.y * .5 + .5) * innerHeight}px) translate(-50%, -100%)`;
+  }
+
+  /* ───────── 루프 ───────── */
+  function resize() {
+    renderer.setSize(innerWidth, innerHeight, false); camera.aspect = innerWidth / innerHeight;
+    const tall = camera.aspect < .8; camera.fov = tall ? 62 : 54; if (tall && camDist < 5.4) { camDist = 5.6; pitch = .44; }
+    camera.updateProjectionMatrix();
+  }
+  addEventListener("resize", resize); resize();
+  syncStamps(); updateWho();
+  const camPos = new THREE.Vector3(me.x, 3, me.z + 3), look = new THREE.Vector3(), want = new THREE.Vector3();
+  let last = performance.now();
+  function loop(now) {
+    const dt = Math.min(.05, (now - last) / 1000); last = now; const t = now / 1000;
+    let ix = 0, iy = 0;
+    if (!sheetOpen) {
+      if (keys["w"] || keys["arrowup"]) iy -= 1; if (keys["s"] || keys["arrowdown"]) iy += 1;
+      if (keys["a"] || keys["arrowleft"]) ix -= 1; if (keys["d"] || keys["arrowright"]) ix += 1;
+      if (joy.active) { ix += joy.x; iy += joy.y; }
+    }
+    const sy = Math.sin(yaw), cy = Math.cos(yaw);
+    let mx = 0, mz = 0;
+    if (Math.hypot(ix, iy) > .15) { mx = sy * iy + cy * ix; mz = cy * iy - sy * ix; target = null; route = []; hideHint(); }
+    else if (target && !sheetOpen) { const dx = target.x - me.x, dz = target.z - me.z, L = Math.hypot(dx, dz); if (L < .12) target = route.shift() || null; else { mx = dx / L; mz = dz / L; } }
+    const ml = Math.hypot(mx, mz); me.moving = ml > .05;
+    if (me.moving) {
+      const sp = 2.8 * Math.min(1, ml) * dt, nx = mx / ml, nz = mz / ml, ox = me.x, oz = me.z;
+      if (!blocked(me.x + nx * sp, me.z)) me.x += nx * sp;
+      if (!blocked(me.x, me.z + nz * sp)) me.z += nz * sp;
+      if (target && Math.hypot(me.x - ox, me.z - oz) < sp * .2) target = route.shift() || null;
+      let d = Math.atan2(nx, nz) - me.r; d = Math.atan2(Math.sin(d), Math.cos(d)); me.r += d * Math.min(1, dt * 12);
+    }
+    meA.g.position.set(me.x, 0, me.z); meA.g.rotation.y = me.r; animateAvatar(meA, me, t, dt); sendPresence(false);
+    for (const e of peers.values()) {
+      const s = e.st, k = Math.min(1, dt * 8); s.x += (s.tx - s.x) * k; s.z += (s.tz - s.z) * k;
+      let d = s.tr - s.r; d = Math.atan2(Math.sin(d), Math.cos(d)); s.r += d * k;
+      e.a.g.position.set(s.x, 0, s.z); e.a.g.rotation.y = s.r; animateAvatar(e.a, s, t, dt);
+      e.tag.textContent = s.waveUntil > Date.now() ? "안녕하세요" : "";
+    }
+    const hor = Math.cos(pitch) * camDist;
+    want.set(me.x + sy * hor, 1 + Math.sin(pitch) * camDist, me.z + cy * hor);
+    want.x = clamp(want.x, -AW + .6, AW - .6); want.z = clamp(want.z, ZMIN + .5, 13.8); want.y = Math.min(6.5, want.y);
+    camPos.lerp(want, Math.min(1, dt * 6)); camera.position.copy(camPos); look.set(me.x, 1.2, me.z); camera.lookAt(look);
+    if (!reduced) {
+      const pa = rain.geometry.attributes.position.array;
+      for (let i = 0; i < rn; i++) { const o = i * 6; pa[o + 1] -= 9 * dt; pa[o + 4] -= 9 * dt; if (pa[o + 4] < 0) { pa[o + 1] = 8; pa[o + 4] = 7.65; } }
+      rain.geometry.attributes.position.needsUpdate = true;
+      signLights.forEach((l, i) => { l.intensity = 1.5 + Math.sin(t * 2 + i) * .08 + (Math.random() < .004 ? -1 : 0); });
+      endLight.intensity = 2 + Math.sin(t * 1.5) * .2;
+      tail.rotation.z = .9 + Math.sin(t * (catWiggle > 0 ? 10 : 1)) * (catWiggle > 0 ? .5 : .15); catWiggle = Math.max(0, catWiggle - dt);
+    }
+    renderer.render(scene, camera);
+    $("myTagText").textContent = me.waveUntil > Date.now() ? "안녕하세요" : me.moving ? "두리번두리번" : card ? "고민 상담 중" : "골목 손님";
+    placeTag(myTag, me.x, 2.15, me.z);
+    for (const e of peers.values()) placeTag(e.tag, e.st.x, 2.1, e.st.z);
+    updatePrompt();
+    requestAnimationFrame(loop);
+  }
+  requestAnimationFrame((n) => { last = n; loop(n); setTimeout(() => { const l = $("loading"); l.style.opacity = 0; setTimeout(() => l.remove(), 800); }, 400); });
+  if (document.fonts) document.fonts.ready.then(() => { redrawables.forEach((t) => { const c = t.userData.c; t.userData.draw(c.getContext("2d"), c.width, c.height); t.needsUpdate = true; }); }).catch(() => {});
+})();
+</script>
