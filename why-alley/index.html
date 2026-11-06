@@ -426,9 +426,10 @@ ${worry}` : ""}`;
   });
   redrawables.push(shutterTex);
 
-  const signLights = [], doors = [];
+  const signLights = [], doors = [], tapTargets = [];   // tapTargets: 누르면 그 가게 앞으로 가는 건물들
   function shop(side, z, w, key, label, color, open, sub) {
     const g = new THREE.Group(); g.position.set(side * AW, 0, z); g.rotation.y = side < 0 ? Math.PI / 2 : -Math.PI / 2; BUILD.add(g);
+    g.userData.spotKey = key; tapTargets.push(g);
     const H = 6 + rnd() * 3;
     const wallC = ["#3a3330", "#2f3438", "#3b3a33", "#33303a", "#2d3330"][Math.floor(rnd() * 5)];
     const wall = box(w, H, .3, mat(0xffffff, { map: facadeTex(wallC), roughness: .95 }), 0, H / 2, -.15, g);
@@ -544,6 +545,7 @@ ${worry}` : ""}`;
   /* 운세 자판기 (오늘의 운세) */
   {
     const g = new THREE.Group(); g.position.set(-AW + .45, 0, 6.55); g.rotation.y = Math.PI / 2; BUILD.add(g);
+    g.userData.spotKey = "today"; tapTargets.push(g);
     box(1.8, 6, .3, mat(0x2e2a2a, { roughness: .95 }), 0, 3, -.5, g);
     box(.95, 1.95, .7, mat(0xd23b2a, { roughness: .45, metalness: .2 }), 0, .98, 0, g);
     const face = tex(256, 384, (c, w, hh) => {
@@ -754,7 +756,7 @@ ${worry}` : ""}`;
   }
   const solid = (S, x, z, hw, hd) => S.solids.push({ x0: S.ox + x - hw, x1: S.ox + x + hw, z0: z - hd, z1: z + hd });
   function keeperAt(S, k, x, z, label, greetY) {
-    k.g.position.set(S.ox + x, 0, z); scene.add(k.g); k.g.visible = false;
+    k.g.position.set(S.ox + x, 0, z); scene.add(k.g); k.g.visible = false; k.g.userData.spotKind = "keeper";
     S.keeper = Object.assign(k, { x: S.ox + x, z, y: greetY || 1.95 });
     S.spots.push({ sp: S.key, kind: "keeper", x: S.ox + x, z: z + 1.45, r: 1.35, label, color: S.G.userData.color });
   }
@@ -1216,7 +1218,7 @@ ${worry}` : ""}`;
   addEventListener("keyup", (e) => { keys[e.key.toLowerCase()] = false; });
   addEventListener("blur", () => { for (const k in keys) keys[k] = false; });
   const joy = { active: false, id: null, ox: 0, oy: 0, x: 0, y: 0 };
-  let drag = null, target = null, route = [];   // route: 골목 가운데로 돌아가는 경유지
+  let drag = null, target = null, route = [], arriveFace = null;   // route: 경유지, arriveFace: 도착하면 바라볼 방향
   const ray = new THREE.Raycaster(), ndc = new THREE.Vector2(), el = renderer.domElement, floorPlane = new THREE.Plane(new THREE.Vector3(0, 1, 0), 0);
   const clamp = (v, lo, hi) => Math.max(lo, Math.min(hi, v));
   el.addEventListener("pointerdown", (e) => {
@@ -1249,10 +1251,29 @@ ${worry}` : ""}`;
   function tapAt(cx, cy) {
     const r = el.getBoundingClientRect();
     ndc.set(((cx - r.left) / r.width) * 2 - 1, -((cy - r.top) / r.height) * 2 + 1); ray.setFromCamera(ndc, camera);
+    const S = SPACES[space];
+    // ① 가게 건물·간판·자판기, 또는 가게 안의 주인을 눌렀으면 그 앞으로
+    const pool = S ? (S.keeper ? [S.keeper.g] : []) : tapTargets;
+    const hit = pool.length ? ray.intersectObjects(pool, true)[0] : null;
+    if (hit) {
+      let o = hit.object; while (o && !o.userData.spotKey && !o.userData.spotKind) o = o.parent;
+      const sp = o && (S ? S.spots.find((p) => p.kind === o.userData.spotKind) : spots.find((p) => p.key === o.userData.spotKey));
+      if (sp) { goToSpot(sp); return; }
+    }
     const pt = ray.ray.intersectPlane(floorPlane, new THREE.Vector3()); if (!pt) return;
-    const S = SPACES[space]; route = [];
-    target = S ? { x: clamp(pt.x, S.ox - S.W / 2 + .5, S.ox + S.W / 2 - .5), z: clamp(pt.z, -S.D / 2 + .5, S.D / 2 - .5) }
-               : { x: clamp(pt.x, -AW + .8, AW - .8), z: clamp(pt.z, ZMIN + .7, 12.3) };
+    // ② 가게 앞(문 근처) 바닥을 눌렀으면 문 앞으로
+    let best = null, bd = 2.0;
+    for (const p of (S ? S.spots : spots)) { const d = Math.hypot(p.x - pt.x, p.z - pt.z); if (d < bd) { bd = d; best = p; } }
+    if (best) { goToSpot(best); return; }
+    route = []; arriveFace = null;
+    if (S) { target = { x: clamp(pt.x, S.ox - S.W / 2 + .5, S.ox + S.W / 2 - .5), z: clamp(pt.z, -S.D / 2 + .5, S.D / 2 - .5) }; return; }
+    // ③ 그냥 바닥: 건너편 골목이면 칸막이 틈이나 입구 쪽으로 돌아서
+    const tx = clamp(pt.x, -AW + .8, AW - .8), tz = clamp(pt.z, ZMIN + .7, 12.3);
+    const inDiv = (z) => z < 8.95 && z > DIV_END, cl = me.x < 0 ? -1 : 1, tl = tx < 0 ? -1 : 1;
+    if (cl !== tl && inDiv(me.z) && Math.abs(tx) > .5) {
+      const cross = Math.abs(me.z - .3) + Math.abs(tz - .3) < Math.abs(me.z - 9.3) + Math.abs(tz - 9.3) ? .3 : 9.3;
+      route.push({ x: cl * LANE_X, z: cross }, { x: tl * LANE_X, z: cross }, { x: tx, z: tz }); target = route.shift();
+    } else target = { x: tx, z: tz };
   }
   let hintShown = true;
   function hideHint() { if (hintShown) { hintShown = false; $("hint").style.opacity = 0; } }
@@ -1977,12 +1998,22 @@ JSON 하나로만 답하라:
       return row;
     }));
   }
-  function walkTo(key) { const s = spots.find((p) => p.key === key); if (!s) return; closeSheet(); if (space !== "alley") { exitShop(() => walkTo(key)); return; } const cl = me.x < 0 ? -1 : 1, tl = s.x < 0 ? -1 : 1, inDiv = (z) => z < 8.95 && z > DIV_END;
+  function walkTo(key) { const s = spots.find((p) => p.key === key); if (!s) return; closeSheet(); if (space !== "alley") { exitShop(() => walkTo(key)); return; } goToSpot(s); toast(`${SHOPS[key] ? SHOPS[key].name : s.label}(으)로 걸어가요`); }
+  function goToSpot(s) {
+    hideHint();
+    const S = SPACES[space];
+    if (S) {   // 가게 안: 주인 앞이나 문 앞으로 바로
+      route = []; target = { x: s.x, z: s.z }; arriveFace = s.kind === "keeper" ? Math.PI : s.kind === "exit" ? 0 : null; return;
+    }
+    const stop = s.key === "today" ? { x: s.x + .2, z: s.z } : s.key === "cat" ? { x: s.x, z: s.z } : { x: s.x * .8, z: s.z };
+    const cl = me.x < 0 ? -1 : 1, tl = s.x < 0 ? -1 : 1, inDiv = (z) => z < 8.95 && z > DIV_END;
     route = [];
     if (cl !== tl && inDiv(me.z)) { const cross = Math.abs(me.z - .3) + Math.abs(s.z - .3) < Math.abs(me.z - 9.3) + Math.abs(s.z - 9.3) ? .3 : 9.3; route.push({ x: cl * LANE_X, z: cross }, { x: tl * LANE_X, z: cross }); }
     else route.push({ x: tl * LANE_X, z: me.z });
-    route.push({ x: tl * LANE_X, z: s.z }, { x: key === "today" ? s.x + .2 : s.x * .8, z: s.z });
-    target = route.shift(); toast(`${SHOPS[key].name}(으)로 걸어가요`); }
+    route.push({ x: tl * LANE_X, z: s.z }, stop);
+    target = route.shift();
+    arriveFace = s.x < 0 ? -Math.PI / 2 : Math.PI / 2;
+  }
   function syncStamps() { $("stampN").textContent = `${visited().length}/3`; }
   $("actStamp").addEventListener("click", () => openSheet("cert", (body) => {
     body.prepend(h("p", { class: "prose", text: "가게 세 곳에서 도장을 받아 보세요. 두 곳 이상 들르면 진단서를 뗄 수 있어요." }));
@@ -2105,7 +2136,7 @@ JSON 하나로만 답하라:
     }
     const sy = Math.sin(yaw), cy = Math.cos(yaw);
     let mx = 0, mz = 0;
-    if (Math.hypot(ix, iy) > .15) { mx = sy * iy + cy * ix; mz = cy * iy - sy * ix; target = null; route = []; hideHint(); }
+    if (Math.hypot(ix, iy) > .15) { mx = sy * iy + cy * ix; mz = cy * iy - sy * ix; target = null; route = []; arriveFace = null; hideHint(); }
     else if (target && !sheetOpen) { const dx = target.x - me.x, dz = target.z - me.z, L = Math.hypot(dx, dz); if (L < .12) target = route.shift() || null; else { mx = dx / L; mz = dz / L; } }
     const ml = Math.hypot(mx, mz); me.moving = ml > .05;
     if (me.moving) {
@@ -2116,6 +2147,7 @@ JSON 하나로만 답하라:
       let d = Math.atan2(nx, nz) - me.r; d = Math.atan2(Math.sin(d), Math.cos(d)); me.r += d * Math.min(1, dt * 12);
     }
     me.umb = rainOn && space === "alley"; sun.visible = space === "alley";
+    if (!target && !me.moving && arriveFace !== null) { let d = arriveFace - me.r; d = Math.atan2(Math.sin(d), Math.cos(d)); me.r += d * Math.min(1, dt * 8); if (Math.abs(d) < .02) arriveFace = null; }
     meA.g.position.set(me.x, 0, me.z); meA.g.rotation.y = me.r; animateAvatar(meA, me, t, dt); sendPresence(false);
     for (const e of peers.values()) {
       const s = e.st, k = Math.min(1, dt * 8); s.x += (s.tx - s.x) * k; s.z += (s.tz - s.z) * k;
