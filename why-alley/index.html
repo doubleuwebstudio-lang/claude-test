@@ -148,6 +148,13 @@ select:focus, input:focus, textarea:focus { outline: none; border-color: var(--a
 .chip { border: 1px solid var(--line); border-radius: 999px; padding: 5px 11px; font-size: 13px; color: var(--fg); background: var(--panel-2); }
 .chip:hover { border-color: var(--acc); color: var(--acc); }
 .history { display: grid; gap: 8px; }
+.chip.on { border-color: var(--acc); color: #0b0c11; background: var(--acc); }
+.months { display: grid; gap: 8px; }
+.month { display: grid; grid-template-columns: 40px minmax(0, 1fr); gap: 10px; font-size: 14.5px; }
+.month b { color: var(--acc); font-weight: 600; font-family: var(--f-code); font-size: 13px; padding-top: 2px; }
+.month.locked span { filter: blur(5px); user-select: none; }
+.lockbox { border-color: color-mix(in srgb, var(--acc) 50%, var(--line)); }
+input[type="date"] { width: 100%; box-sizing: border-box; background: var(--panel-2); border: 1px solid var(--line); border-radius: 10px; padding: 9px 12px; font-size: 15px; color: var(--fg); }
 .hist { display: grid; gap: 2px; text-align: left; background: var(--panel-2); border-left: 3px solid var(--c); border-radius: 0 10px 10px 0; padding: 9px 12px; }
 .hist b { font-size: 12px; color: var(--c); font-weight: 600; } .hist span { font-size: 14.5px; overflow-wrap: anywhere; } .hist small { font-size: 12.5px; color: var(--muted); }
 .cardsum p { margin: 0; overflow-wrap: anywhere; }
@@ -245,7 +252,7 @@ select:focus, input:focus, textarea:focus { outline: none; border-color: var(--a
 <div class="feed glass" id="feed" style="opacity:0"></div>
 
 <button class="prompt glass" id="prompt" hidden></button>
-<div class="hint" id="hint">가게마다 맡는 고민이 달라요 · 끌어서 둘러보고 바닥을 눌러 걸어요</div>
+<div class="hint" id="hint">입구 오른쪽에 신년운세 천막이 열렸어요 · 끌어서 둘러보고 바닥을 눌러 걸어요</div>
 <div class="joy" id="joy" hidden><i id="joyKnob"></i></div>
 
 <nav class="actions glass" aria-label="행동">
@@ -290,6 +297,7 @@ select:focus, input:focus, textarea:focus { outline: none; border-color: var(--a
     mbti:   { name: "MBTI 통역소", color: "#4fd2ff", greet: "그 사람이 한 말이나 행동, 그 사람 언어로 번역해 드립니다.", stamp: "통역" },
     mirror: { name: "입장바꿔방", color: "#ff5c9e", greet: "그 사람에게 못 한 말이 있죠? 거울 앞에서 먼저 해 보세요.", stamp: "거울" },
     tarot:  { name: "확신 타로", color: "#b77bff", greet: "앞으로 어찌 될지 궁금하지? 물어볼 거 하나 대고 카드 세 장 골라.", stamp: "타로" },
+    newyear: { name: "신년운세 천막", color: "#ff4a3d", greet: "2027 정미년 연애운, 할매가 특별 출장 나와서 봐줄게." },
     cert:   { name: "진단서 발급소", color: "#5ee08f", greet: "가게마다 맡긴 고민을 모아서 이 관계 전체를 보는 진단서를 떼 드려요." }
   };
   // 손님 카드: 두 사람의 MBTI와 사이. 고민은 가게마다 따로 맡긴다 (모두 이 기기에만)
@@ -300,7 +308,7 @@ select:focus, input:focus, textarea:focus { outline: none; border-color: var(--a
   const saveAll = () => { local.set("whyalley.profile", card); local.set("whyalley.results2", results); local.set("whyalley.drafts", drafts); syncStamps(); };
 
   /* ───────── 점술가에게 묻기 (sample) ───────── */
-  let sample = null;
+  let sample = null, db = null, uid = null;
   const RULES = `[공통 규칙]
 - 너는 '왜그래 골목'이라는 재미로 보는 연애 상담 골목의 가게 주인이다. 한국어로 답한다.
 - 손님이 들려준 건 한쪽 이야기일 뿐이다. 상대를 나쁜 사람으로 단정하거나 나르시시스트·소시오패스 같은 진단명을 붙이지 않는다.
@@ -460,8 +468,7 @@ ${worry}` : ""}`;
   shop(1, 6.2, 5, "mirror", "입장바꿔방", "#ff5c9e", true, "그 사람이 거울에 나타나요");
   shop(1, -.6, 4.6, "soon2", "싸움 판정소", "#ff9a4d", false, "곧 문 열어요");
   shop(1, -7.6, 5, "cert", "진단서 발급소", "#5ee08f", true, "관계 진단서 즉시 발급");
-  shop(1, 11.4, 3.6, "none", "24시 편의점", "#e8f0ff", true, "");
-  spots.pop();   // 편의점은 장식
+  shop(1, 11.4, 3.6, "newyear", "신년운세", "#ff4a3d", true, "2027 정미년 · 할매 특별 출장");
 
   /* 막다른 벽의 네온 */
   const brick = tex(512, 256, (x, w, hh) => {
@@ -476,6 +483,16 @@ ${worry}` : ""}`;
   box(.25, 5, .25, mat(0x1a1b20, { metalness: .5 }), -AW + .2, 2.5, 12.8); box(.25, 5, .25, mat(0x1a1b20, { metalness: .5 }), AW - .2, 2.5, 12.8);
   const gate = sign("왜그래 골목", "#ffd84d", 5.6, .9, { lit: true, sub: "걔가 왜 그러는지, 가게마다 물어보세요" }); gate.position.set(0, 4.7, 12.7); gate.rotation.y = Math.PI; BUILD.add(gate);
   const gate2 = gate.clone(); gate2.rotation.y = 0; gate2.position.z = 12.9; BUILD.add(gate2);
+  // 신년 청사초롱 줄
+  const alleyLanterns = [];
+  for (let k = 0; k < 2; k++) for (let i = 0; i < 6; i++) {
+    const t = i / 5, lx2 = -AW + .5 + t * (AW * 2 - 1), lz = 10.2 + k * 1.6, ly = 4.3 - Math.sin(t * Math.PI) * .5;
+    const lg = new THREE.Group(); lg.position.set(lx2, ly, lz); BUILD.add(lg);
+    const red = new THREE.Mesh(new THREE.CylinderGeometry(.14, .14, .24, 10), basic({ color: 0xff5040 })); lg.add(red);
+    const blue = new THREE.Mesh(new THREE.CylinderGeometry(.14, .14, .1, 10), basic({ color: 0x3a5ae0 })); blue.position.y = .17; lg.add(blue);
+    box(.02, .18, .02, mat(0xe0b040), 0, -.21, 0, lg); alleyLanterns.push(lg);
+  }
+  const nyLight = new THREE.PointLight(0xff5a40, 1.2, 8, 1.8); nyLight.position.set(2.4, 3.2, 11.2); BUILD.add(nyLight);
 
   /* 머리 위 전구 줄 */
   const bulbM = basic({ color: 0xffe3a0 });
@@ -518,7 +535,7 @@ ${worry}` : ""}`;
   }
   stool(-2.9, 1.2, 0xd23b2a); stool(-2.7, .4, 0x2a7bd2); stool(2.8, -3, 0xd23b2a);
   function crate(x, z, y = 0) { box(.6, .4, .45, mat(0x2a6a4a, { roughness: .7 }), x, y + .2, z); if (!y) solids.push({ x0: x - .32, x1: x + .32, z0: z - .25, z1: z + .25 }); }
-  crate(2.95, 9.4); crate(2.95, 9.4, .4); crate(-3.05, -8.2);
+  crate(-3.05, 11.9); crate(-3.05, 11.9, .4); crate(-3.05, -8.2);
   function pot(x, z) { const p = new THREE.Mesh(new THREE.CylinderGeometry(.22, .17, .4, 12), mat(0x8a4a2a)); p.position.set(x, .2, z); BUILD.add(p); const leaf = new THREE.Mesh(new THREE.SphereGeometry(.32, 10, 8), mat(0x2f5a32)); leaf.position.set(x, .62, z); leaf.scale.y = 1.2; BUILD.add(leaf); solids.push({ x0: x - .25, x1: x + .25, z0: z - .25, z1: z + .25 }); }
   pot(-3.1, 6.2); pot(3.1, 3.6); pot(-3.1, -12.6); pot(3.1, -12.6);
   const cat = new THREE.Group(); cat.position.set(-3.05, .62, -8.2); cat.rotation.y = .8; BUILD.add(cat);
@@ -967,6 +984,64 @@ ${worry}` : ""}`;
     neonText(G, "발급", "#5ee08f", -.6, 2.95, -D / 2 + .04, .8, .3);
   });
 
+  /* ───────── 신년운세 천막 (기간 한정) ───────── */
+  let nyLanterns = [];
+  buildRoom("newyear", 160, { color: "#ff4a3d", wall: 0x5a1a1a, light: 0xffe0b8, floor: floorCanvas((c, w, hh) => { c.fillStyle = "#6a2a1e"; c.fillRect(0, 0, w, hh); c.strokeStyle = "rgba(240,190,90,.35)"; c.lineWidth = 3; for (let i = 0; i < 8; i++) { c.strokeRect(i * 32 + 6, 6, 20, hh - 12); } }),
+    greet: "새해 연애운 봐줄게. 할매가 정미년 특별 출장 나왔어.",
+    fill(G, S, W, D) {
+      G.userData.color = "#ff4a3d";
+      const gold = mat(0xe0b040, { metalness: .7, roughness: .3, emissive: 0x2a1a00 });
+      // 금색 띠 장식
+      box(W, .08, .04, gold, 0, 2.6, -D / 2 + .03); box(.04, .08, D, gold, -W / 2 + .03, 2.6, 0); box(.04, .08, D, gold, W / 2 - .03, 2.6, 0);
+      // 큰 붓글씨 족자
+      const scroll = tex(256, 640, (c, w, hh) => {
+        c.fillStyle = "#f3e6c8"; c.fillRect(0, 0, w, hh); c.fillStyle = "#8a1c1c"; c.fillRect(0, 0, w, 24); c.fillRect(0, hh - 24, w, 24);
+        c.fillStyle = "#1d1b19"; c.font = '96px "Black Han Sans", serif'; c.textAlign = "center"; c.textBaseline = "middle";
+        ["丁", "未", "年"].forEach((ch, i) => c.fillText(ch, w / 2, 130 + i * 160));
+        c.fillStyle = "#d23b2a"; c.fillRect(w / 2 - 26, hh - 100, 52, 52); c.fillStyle = "#fff"; c.font = '24px "Black Han Sans"'; c.fillText("할매", w / 2, hh - 74);
+      });
+      redrawables.push(scroll);
+      const sc = new THREE.Mesh(new THREE.PlaneGeometry(.75, 1.9), mat(0xffffff, { map: scroll, roughness: .9 })); sc.position.set(-1.8, 1.9, -D / 2 + .03); G.add(sc);
+      poster(G, "2027", "정미년 · 붉은 양의 해", "#ff4a3d", 1.8, 2, -D / 2 + .03, 1.2, .9);
+      neonText(G, "신년운세", "#ff4a3d", 0, 2.95, -D / 2 + .04, 1.6, .4);
+      // 상과 할매
+      box(1.8, .06, .9, mat(0x7a2a1a, { roughness: .5 }), 0, .55, -1.3); box(1.6, .5, .7, mat(0x4a1a12), 0, .27, -1.3); solid(S, 0, -1.3, .95, .5);
+      const cloth = box(1.82, .01, .5, mat(0xe0b040, { roughness: .6 }), 0, .585, -1.3);
+      // 복주머니
+      [[-.55, 0xd23b2a], [.55, 0x2a6ad2]].forEach(([x, c]) => { const bag = new THREE.Mesh(new THREE.SphereGeometry(.13, 14, 10), mat(c, { roughness: .8 })); bag.scale.y = .9; bag.position.set(x, .7, -1.2); G.add(bag); const tie = new THREE.Mesh(new THREE.TorusGeometry(.05, .015, 6, 12), gold); tie.rotation.x = Math.PI / 2; tie.position.set(x, .82, -1.2); G.add(tie); });
+      // 떡국
+      const bowl = new THREE.Mesh(new THREE.CylinderGeometry(.13, .09, .09, 16), mat(0xf3efe6)); bowl.position.set(0, .63, -1.05); G.add(bowl);
+      const soup = new THREE.Mesh(new THREE.CircleGeometry(.12, 16), mat(0xf6f0dc)); soup.rotation.x = -Math.PI / 2; soup.position.set(0, .675, -1.05); G.add(soup); steam(G, 0, .85, -1.05); steam(G, .04, .95, -1.05);
+      // 양 인형 (붉은 양의 해)
+      const sheep = new THREE.Group(); sheep.position.set(1.6, 0, -2.4); sheep.rotation.y = -.5; G.add(sheep);
+      const wool = mat(0xf3ece0, { roughness: 1 });
+      for (let i = 0; i < 9; i++) { const p = new THREE.Mesh(new THREE.SphereGeometry(.16, 10, 8), wool); p.position.set(Math.cos(i * .7) * .16, .42 + Math.sin(i * 1.7) * .06, Math.sin(i * .7) * .12); sheep.add(p); }
+      const sh = new THREE.Mesh(new THREE.SphereGeometry(.12, 12, 10), mat(0x3a2a24)); sh.position.set(0, .5, .26); sheep.add(sh);
+      [-1, 1].forEach((sx) => { const ear = new THREE.Mesh(new THREE.SphereGeometry(.05, 8, 6), mat(0x3a2a24)); ear.scale.set(1.6, .6, 1); ear.position.set(sx * .13, .54, .24); sheep.add(ear); const hornM = new THREE.Mesh(new THREE.TorusGeometry(.05, .018, 6, 12, Math.PI * 1.4), mat(0xd23b2a)); hornM.position.set(sx * .08, .62, .22); hornM.rotation.y = Math.PI / 2; sheep.add(hornM); });
+      for (let i = 0; i < 4; i++) box(.04, .26, .04, mat(0x3a2a24), (i % 2 ? .1 : -.1), .13, (i < 2 ? .1 : -.1), sheep);
+      const scarf = new THREE.Mesh(new THREE.TorusGeometry(.12, .03, 6, 16), mat(0xd23b2a)); scarf.position.set(0, .44, .2); scarf.rotation.x = Math.PI / 2.4; sheep.add(scarf);
+      bobbers.push({ o: sheep, axis: "z", amp: .05, sp: 1.3 });
+      solid(S, 1.6, -2.4, .3, .3);
+      // 청사초롱
+      for (let i = 0; i < 5; i++) {
+        const lg = new THREE.Group(); lg.position.set(-2.2 + i * 1.1, RH2 - .55 - (i % 2) * .15, .2 + (i % 2) * .6); G.add(lg);
+        const red = new THREE.Mesh(new THREE.CylinderGeometry(.16, .16, .26, 12), new THREE.MeshStandardMaterial({ color: 0xd23b2a, emissive: 0xd23b2a, emissiveIntensity: .7, roughness: .6 })); lg.add(red);
+        const blue = new THREE.Mesh(new THREE.CylinderGeometry(.16, .16, .12, 12), new THREE.MeshStandardMaterial({ color: 0x2a4ad2, emissive: 0x2a4ad2, emissiveIntensity: .5, roughness: .6 })); blue.position.y = .19; lg.add(blue);
+        const tas = box(.02, .2, .02, mat(0xe0b040), 0, -.25, 0, lg);
+        const str = new THREE.Mesh(new THREE.CylinderGeometry(.005, .005, .5, 4), mat(0x222222)); str.position.y = .5; lg.add(str);
+        bobbers.push({ o: lg, axis: "z", amp: .04, sp: .9 + i * .1 });
+      }
+      const ll = new THREE.PointLight(0xff6a4a, .9, 7, 1.8); ll.position.set(0, 2.6, .6); G.add(ll);
+      // 방석 두 개
+      [[-.5, -.3], [.5, -.3]].forEach(([x, z]) => { const cu = new THREE.Mesh(new THREE.CylinderGeometry(.32, .34, .12, 16), mat(0xe0b040, { roughness: 1 })); cu.position.set(x, .06, z); G.add(cu); });
+      wallClock(G, W / 2 - .03, 2.2, -1.6, -Math.PI / 2, 0xe0b040);
+      windowIn(G, -W / 2 + .02, 1.9, .9, Math.PI / 2, 1.5, 1.1);
+      umbrellaStand(G, 1.15, D / 2 - .45, [0xd23b2a, 0x2a4ad2]); solid(S, 1.15, D / 2 - .45, .2, .2);
+      const halmae2 = makeKeeper({ coat: 0x8a1c1c, hair: "bun", hairColor: 0xd8d0e6, shawl: 0xe0b040, glasses: 0xc9a26a, seated: true });
+      keeperAt(S, halmae2, 0, -2.2, "할매에게 새해 연애운 묻기", 1.95);
+      const stool = new THREE.Mesh(new THREE.CylinderGeometry(.25, .25, .45, 12), mat(0x3a1a12)); stool.position.set(0, .22, -2.25); G.add(stool);
+    } });
+
   /* ───────── 시간과 날씨: 보는 사람의 시계에 맞춤 ───────── */
   let rainOn = local.get("whyalley.rain", true);
   const KEYS = [   // h: 시각, sky: 하늘, hs/hg: 반구광, hi: 세기, ai: 주변광, si: 해, sc: 햇빛색, lamp: 가로등·간판 세기
@@ -1139,6 +1214,7 @@ ${worry}` : ""}`;
     mbti: '<circle cx="24" cy="25" r="13" fill="#f0cfae"/><path d="M11 22q2-12 13-12t13 12q-4-6-13-6t-13 6z" fill="#2b2f3a"/><circle cx="19" cy="26" r="4.2" fill="none" stroke="#4fd2ff" stroke-width="1.8"/><circle cx="29" cy="26" r="4.2" fill="none" stroke="#4fd2ff" stroke-width="1.8"/><path d="M23.2 26h1.6" stroke="#4fd2ff" stroke-width="1.8"/><circle cx="19" cy="26" r="1.4" fill="#1d1b19"/><circle cx="29" cy="26" r="1.4" fill="#1d1b19"/><path d="M21 33h6" stroke="#1d1b19" stroke-width="1.6" stroke-linecap="round"/>',
     mirror: '<ellipse cx="24" cy="24" rx="14" ry="18" fill="#1c1f2b" stroke="#ff5c9e" stroke-width="2.4"/><circle cx="24" cy="20" r="6" fill="#ff5c9e" opacity=".35"/><path d="M14 36q10-12 20 0" fill="#ff5c9e" opacity=".35"/>',
     tarot: '<circle cx="24" cy="27" r="12" fill="#f0cfae"/><path d="M10 26q0-16 14-16t14 16q-3-9-14-9t-14 9z" fill="#b77bff"/><circle cx="24" cy="9" r="4" fill="#d8d0e6"/><path d="M18 27q1.5-1.5 3 0M27 27q1.5-1.5 3 0" stroke="#1d1b19" stroke-width="1.6" fill="none" stroke-linecap="round"/><path d="M19 33q5 4 10 0" stroke="#1d1b19" stroke-width="1.6" fill="none" stroke-linecap="round"/><circle cx="17" cy="31" r="2" fill="#e89a8a" opacity=".6"/><circle cx="31" cy="31" r="2" fill="#e89a8a" opacity=".6"/>',
+    newyear: '<circle cx="24" cy="27" r="12" fill="#f0cfae"/><path d="M10 26q0-16 14-16t14 16q-3-9-14-9t-14 9z" fill="#d23b2a"/><circle cx="24" cy="9" r="4" fill="#d8d0e6"/><path d="M18 27q1.5-1.5 3 0M27 27q1.5-1.5 3 0" stroke="#1d1b19" stroke-width="1.6" fill="none" stroke-linecap="round"/><path d="M19 33q5 4 10 0" stroke="#1d1b19" stroke-width="1.6" fill="none" stroke-linecap="round"/><rect x="15" y="38" width="18" height="6" rx="2" fill="#e0b040"/>',
     cert: '<rect x="11" y="8" width="26" height="32" rx="3" fill="#f3efe6"/><path d="M16 16h16M16 21h16M16 26h10" stroke="#9a948a" stroke-width="1.6" stroke-linecap="round"/><circle cx="30" cy="33" r="6" fill="none" stroke="#d23b2a" stroke-width="2"/><path d="M27.5 33l1.8 1.8 3.2-3.4" stroke="#d23b2a" stroke-width="1.8" fill="none" stroke-linecap="round"/>'
   };
   function openSheet(key, build) {
@@ -1195,6 +1271,7 @@ ${worry}` : ""}`;
     if (key === "mirror") return openSheet("mirror", buildMirror);
     if (key === "tarot") return openSheet("tarot", buildTarot);
     if (key === "cert") return openSheet("cert", buildCert);
+    if (key === "newyear") return openSheet("newyear", buildNewYear);
   }
 
   /* 고민 접수처: 손님 카드 + 맡긴 고민 내역 */
@@ -1412,6 +1489,128 @@ JSON 하나로만 답하라:
   }
 
   /* 진단서 발급소 */
+  /* 신년운세 천막: 띠 × 별자리 × MBTI × 연애 상태 조합으로 정해지는 2027 연애운 */
+  const ZODIAC = ["쥐", "소", "호랑이", "토끼", "용", "뱀", "말", "양", "원숭이", "닭", "개", "돼지"];
+  const SIGNS = [["염소자리", 1, 19], ["물병자리", 2, 18], ["물고기자리", 3, 20], ["양자리", 4, 19], ["황소자리", 5, 20], ["쌍둥이자리", 6, 21], ["게자리", 7, 22], ["사자자리", 8, 22], ["처녀자리", 9, 22], ["천칭자리", 10, 23], ["전갈자리", 11, 22], ["사수자리", 12, 21], ["염소자리", 12, 31]];
+  const STATUS = ["솔로", "썸 타는 중", "연애 중"];
+  function zodiacOf(y, m, d) { const yy = (m < 2 || (m === 2 && d < 4)) ? y - 1 : y; return ((yy - 4) % 12 + 12) % 12; }   // 입춘(2월 4일 무렵) 기준
+  function signOf(m, d) { for (const [n, mm, dd] of SIGNS) if (m < mm || (m === mm && d <= dd)) return n; return "염소자리"; }
+  const nyCache = local.get("whyalley.ny", {});
+  let nyForm = Object.assign({ birth: "", status: card.rel === "연애 중" || card.rel === "결혼했어요" ? "연애 중" : card.rel === "썸 타는 중" ? "썸 타는 중" : "솔로" }, local.get("whyalley.nyform", {}));
+  let nyGoal = local.get("whyalley.nygoal", "");
+  let nyUnlocked = local.get("whyalley.nyopen", false);
+  function nyKey(z, s, mb, st) { return [z, s, mb || "모름", st].join("|"); }
+  function buildNewYear(body) {
+    const birth = h("input", { type: "date", id: "nyBirth", min: "1940-01-01", max: "2014-12-31" }); birth.value = nyForm.birth || "";
+    const mbti = h("select", { id: "nyMbti" }, h("option", { value: "", text: "모름" }), ...MBTIS.map((m) => { const o = h("option", { value: m, text: m }); if (card.me === m) o.selected = true; return o; }));
+    const st = h("select", { id: "nyStatus" }, ...STATUS.map((s) => { const o = h("option", { value: s, text: s }); if (nyForm.status === s) o.selected = true; return o; }));
+    const info = h("p", { class: "fine" });
+    const go = h("button", { class: "primary", text: "할매, 새해 연애운 봐 주세요" });
+    const out = h("div", { style: "display:grid;gap:12px" });
+    const calc = () => {
+      const v = birth.value; if (!/^\d{4}-\d{2}-\d{2}$/.test(v)) { info.textContent = "생년월일만 받아요. 이름은 묻지 않아요."; go.disabled = true; return null; }
+      const [y, m, d] = v.split("-").map(Number); const z = zodiacOf(y, m, d), s = signOf(m, d);
+      info.textContent = `${ZODIAC[z]}띠 · ${s}  (띠는 입춘 기준이에요)`; go.disabled = false;
+      return { z, s, mb: mbti.value, st: st.value };
+    };
+    [birth, mbti, st].forEach((x) => x.addEventListener("input", calc)); calc();
+    body.append(
+      h("div", { class: "row2" }, h("div", { class: "field" }, h("label", { for: "nyBirth", text: "생년월일" }), birth), h("div", { class: "field" }, h("label", { for: "nyStatus", text: "지금 연애 상태" }), st)),
+      h("div", { class: "field" }, h("label", { for: "nyMbti", text: "나의 MBTI" }), mbti), info, go, out);
+    const show = (key, who) => renderNewYear(out, nyCache[key], who);
+    const first = calc(); if (first && nyCache[nyKey(first.z, first.s, first.mb, first.st)]) show(nyKey(first.z, first.s, first.mb, first.st), first);
+    go.addEventListener("click", async () => {
+      const c = calc(); if (!c) return;
+      nyForm = { birth: birth.value, status: c.st }; local.set("whyalley.nyform", nyForm);
+      const key = nyKey(c.z, c.s, c.mb, c.st);
+      if (nyCache[key]) { show(key, c); return; }
+      if (!sample) { out.replaceChildren(h("p", { class: "err", text: errCopy({ code: "unavailable" }) })); return; }
+      go.disabled = true; out.replaceChildren(thinking("할매가 2027년 달력을 넘겨 보는 중이에요"));
+      ctl = new AbortController();
+      try {
+        const r = await sample.json(`${RULES}
+
+[가게] 신년운세 천막. 2027년 정미년(붉은 양의 해)을 맞아 확신 할매가 특별 출장을 나왔다. 반말, 살짝 사투리, 웃기면서 따뜻하게. 띠·별자리·MBTI의 전통적인 이미지를 재료로 삼되 미래를 맞히는 척 단정하지 말고, 그 달에 연애에서 실제로 해볼 만한 행동을 담는다. 겁주지 않고, 건강·돈·투자 이야기는 하지 않는다. 이 결과는 같은 조합의 모든 손님에게 똑같이 보여 주므로 특정 개인을 아는 척하지 않는다.
+
+[손님 조합]
+- 띠: ${ZODIAC[c.z]}띠
+- 별자리: ${c.s}
+- MBTI: ${c.mb || "모름"}
+- 연애 상태: ${c.st}
+
+JSON 하나로만 답하라:
+{"title": "2027 연애운 한 줄 제목, 20자 이내", "summary": "할매 말투 총평 3~4문장", "keywords": ["올해 키워드 3개, 각 6자 이내"], "lucky_color": "행운의 색 하나", "lucky_place": "행운의 데이트 장소 하나, 15자 이내", "months": ["1월부터 12월까지 12개, 각 달의 연애 흐름과 해볼 행동 1~2문장"], "do": ["올해 해볼 것 3개, 각 30자 이내"], "dont": ["올해 피할 것 2개, 각 30자 이내"], "goals": ["올해의 관계 목표 후보 3개, 각 25자 이내"]}`, { signal: ctl.signal, modelTier: "default" });
+        const months = Array.isArray(r.months) ? r.months.slice(0, 12).map((x) => S(typeof x === "string" ? x : x && x.text, 200)) : [];
+        const clean = { title: S(r.title, 40), summary: S(r.summary, 500), keywords: (r.keywords || []).slice(0, 3).map((k) => S(k, 14)), lucky_color: S(r.lucky_color, 20), lucky_place: S(r.lucky_place, 30), months, do: (r.do || []).slice(0, 3).map((x) => S(x, 60)), dont: (r.dont || []).slice(0, 2).map((x) => S(x, 60)), goals: (r.goals || []).slice(0, 3).map((x) => S(x, 50)) };
+        if (!clean.title || months.length < 12) throw { code: "invalid_json" };
+        nyCache[key] = clean; local.set("whyalley.ny", nyCache); show(key, c);
+        emitEv({ k: "ny", z: c.z });
+      } catch (e) { const m = errCopy(e); out.replaceChildren(m ? h("p", { class: "err", text: m }) : ""); }
+      finally { go.disabled = false; ctl = null; }
+    });
+  }
+  function renderNewYear(out, r, who) {
+    out.replaceChildren();
+    out.append(h("p", { class: "fine", text: `${ZODIAC[who.z]}띠 · ${who.s} · ${who.mb || "MBTI 모름"} · ${who.st}` }), h("p", { class: "headline", text: r.title }), h("p", { class: "prose", text: r.summary }),
+      h("div", { class: "chips" }, ...r.keywords.map((k) => h("span", { class: "chip", text: "#" + k }))),
+      h("div", { class: "box" }, h("h4", { text: "올해의 행운" }), h("p", { class: "prose", text: `행운의 색 ${r.lucky_color} · 행운의 데이트 장소 ${r.lucky_place}` })));
+    const monthList = h("div", { class: "months" }, ...r.months.map((t, i) => h("div", { class: "month" + (i >= 3 && !nyUnlocked ? " locked" : "") }, h("b", { text: `${i + 1}월` }), h("span", { text: t }))));
+    out.append(h("div", { class: "box" }, h("h4", { text: "달마다 연애 흐름" }), monthList));
+    const detail = h("div", { style: "display:grid;gap:12px" });
+    const renderDetail = () => {
+      detail.replaceChildren(
+        h("div", { class: "box" }, h("h4", { text: "올해 해볼 것" }), h("ul", null, ...r.do.map((x) => h("li", { text: x })))),
+        h("div", { class: "box" }, h("h4", { text: "올해 피할 것" }), h("ul", null, ...r.dont.map((x) => h("li", { text: x })))),
+        h("div", { class: "box" }, h("h4", { text: "올해의 관계 목표 하나 고르기" }), h("div", { class: "chips" }, ...r.goals.map((g) => h("button", { class: "chip" + (nyGoal === g ? " on" : ""), "aria-pressed": String(nyGoal === g), text: g, onclick: () => { nyGoal = g; local.set("whyalley.nygoal", g); toast("올해의 관계 목표로 정했어요. 매달 할매가 물어볼 거예요"); renderDetail(); } })))));
+    };
+    if (nyUnlocked) renderDetail();
+    else {
+      const unlock = h("button", { class: "primary", text: "상세판 열기 · 복채 2,900원" });
+      unlock.addEventListener("click", () => {
+        nyUnlocked = true; local.set("whyalley.nyopen", true); recordIntent("ny_detail");
+        toast("시제품이라 지금은 무료로 열어 드려요"); renderNewYear(out, r, who);
+      });
+      detail.append(h("div", { class: "box lockbox" }, h("h4", { text: "상세판에 들어 있는 것" }), h("ul", null, h("li", { text: "4월부터 12월까지 달마다 연애 흐름" }), h("li", { text: "올해 해볼 것 3가지, 피할 것 2가지" }), h("li", { text: "올해의 관계 목표 정하기" })), unlock,
+        h("p", { class: "fine", text: "시제품이라 실제로 결제되지 않아요. 눌러 주시면 정식 출시 때 가격을 정하는 데 참고할게요." })));
+    }
+    out.append(detail);
+    const cardBtn = h("button", { class: "ghost", text: "공유 카드 만들기" }); const cardOut = h("div", { style: "display:grid;gap:8px" });
+    cardBtn.addEventListener("click", async () => { cardBtn.disabled = true; const img = h("img", { class: "certimg", alt: `2027 연애 신년운세: ${r.title}` }); cardOut.replaceChildren(img, h("p", { class: "fine", text: "길게 누르거나 오른쪽 클릭으로 저장하세요." })); img.src = await drawNyCard(r, who); cardBtn.disabled = false; recordIntent("ny_card"); });
+    out.append(cardBtn, cardOut, h("p", { class: "fine", text: "재미로 보는 운세예요. 같은 띠·별자리·MBTI·연애 상태라면 같은 결과가 나와요." }));
+  }
+  async function drawNyCard(r, who) {
+    try { await Promise.all(['64px "Black Han Sans"', '30px "IBM Plex Sans KR"', '700 30px "IBM Plex Sans KR"'].map((f) => document.fonts.load(f))); } catch {}
+    const W = 1080, H = 1350, cv = document.createElement("canvas"); cv.width = W; cv.height = H; const x = cv.getContext("2d");
+    const g = x.createLinearGradient(0, 0, 0, H); g.addColorStop(0, "#8a1c1c"); g.addColorStop(1, "#4a0e0e"); x.fillStyle = g; x.fillRect(0, 0, W, H);
+    x.strokeStyle = "#e0b040"; x.lineWidth = 6; x.strokeRect(50, 50, W - 100, H - 100); x.lineWidth = 2; x.strokeRect(68, 68, W - 136, H - 136);
+    // 양 문양
+    x.fillStyle = "rgba(243,236,224,.9)"; for (let i = 0; i < 9; i++) { x.beginPath(); x.arc(W - 200 + Math.cos(i * .7) * 46, 220 + Math.sin(i * 1.7) * 18, 34, 0, Math.PI * 2); x.fill(); }
+    x.fillStyle = "#3a2a24"; x.beginPath(); x.arc(W - 200, 250, 30, 0, Math.PI * 2); x.fill();
+    x.fillStyle = "#e0b040"; x.font = '30px "IBM Plex Sans KR", sans-serif'; x.fillText("2027 정미년 · 붉은 양의 해", 120, 170);
+    x.fillStyle = "#fff6e0"; x.font = '84px "Black Han Sans", sans-serif'; x.fillText("연애 신년운세", 120, 270);
+    x.fillStyle = "#f3d9a0"; x.font = '28px "IBM Plex Sans KR", sans-serif'; x.fillText(`${ZODIAC[who.z]}띠 · ${who.s} · ${who.mb || "MBTI 모름"} · ${who.st}`, 120, 340);
+    x.fillStyle = "#e0b040"; x.fillRect(120, 380, W - 240, 3);
+    x.fillStyle = "#ffffff"; x.font = '62px "Black Han Sans", sans-serif'; let y = 480; wrap(x, r.title, W - 240).slice(0, 2).forEach((l) => { x.fillText(l, 120, y); y += 76; });
+    y += 10; x.font = '32px "IBM Plex Sans KR", sans-serif'; x.fillStyle = "#f6e8d0"; wrap(x, r.summary, W - 240).slice(0, 6).forEach((l) => { x.fillText(l, 120, y); y += 48; });
+    y += 30; x.font = '700 32px "IBM Plex Sans KR", sans-serif'; let kx = 120;
+    r.keywords.forEach((k) => { const t = "#" + k, w = x.measureText(t).width + 48; x.fillStyle = "rgba(224,176,64,.2)"; x.fillRect(kx, y - 38, w, 56); x.fillStyle = "#e0b040"; x.fillText(t, kx + 24, y); kx += w + 16; });
+    y += 90; x.fillStyle = "#f3d9a0"; x.font = '28px "IBM Plex Sans KR", sans-serif'; x.fillText(`행운의 색  ${r.lucky_color}`, 120, y); x.fillText(`행운의 데이트 장소  ${r.lucky_place}`, 120, y + 46);
+    y += 130; x.fillStyle = "#e0b040"; x.fillRect(120, y - 40, W - 240, 2);
+    if (nyGoal) { x.fillStyle = "#e0b040"; x.font = '26px "IBM Plex Sans KR", sans-serif'; x.fillText("올해의 관계 목표", 120, y + 10); x.fillStyle = "#ffffff"; x.font = '700 34px "IBM Plex Sans KR", sans-serif'; x.fillText(wrap(x, nyGoal, W - 360)[0], 120, y + 62); }
+    else { x.fillStyle = "#e0b040"; x.font = '26px "IBM Plex Sans KR", sans-serif'; x.fillText("올해 첫 석 달", 120, y + 10); x.font = '26px "IBM Plex Sans KR", sans-serif'; x.fillStyle = "#f6e8d0";
+      r.months.slice(0, 3).forEach((m, i) => x.fillText(`${i + 1}월  ${wrap(x, m, W - 420)[0]}`, 120, y + 58 + i * 44)); }
+    x.save(); x.translate(W - 210, H - 230); x.rotate(-.2); x.strokeStyle = x.fillStyle = "rgba(255,90,70,.9)"; x.lineWidth = 6; x.beginPath(); x.arc(0, 0, 80, 0, Math.PI * 2); x.stroke();
+    x.textAlign = "center"; x.font = '40px "Black Han Sans", sans-serif'; x.fillText("확신", 0, -6); x.font = '24px "IBM Plex Sans KR", sans-serif'; x.fillText("할매 보증", 0, 30); x.restore();
+    x.fillStyle = "#e0b040"; x.font = '26px "Black Han Sans", sans-serif'; x.fillText("왜그래 골목 · 신년운세 천막", 120, H - 110);
+    x.fillStyle = "rgba(246,232,208,.6)"; x.font = '20px "IBM Plex Sans KR", sans-serif'; x.fillText("재미로 보는 운세예요", 120, H - 80);
+    return cv.toDataURL("image/png");
+  }
+  // 결제 의향 기록: 누가 '상세판 열기'를 눌렀는지 (사람당 한 줄, 주인만 볼 수 있음)
+  async function recordIntent(kind) {
+    if (!db || !uid) return;
+    try { const ref = db.doc("intent/" + uid); const cur = await ref.get(); const prev = cur.exists ? cur.data() : {}; await ref.set(Object.assign({}, prev, { [kind]: true, at: Date.now() })); } catch {}
+  }
+
   const visited = () => ["mbti", "mirror", "tarot"].filter((k) => k === "mirror" ? results.mirror && results.mirror.turns && results.mirror.turns.length > 0 : !!(results[k] && results[k].worry));
   function summaries() {
     const out = [];
@@ -1541,7 +1740,8 @@ JSON 하나로만 답하라:
         h("li", { text: "입장바꿔방: 그 사람에게 못 한 말을 거울 앞에서 연습해요." }),
         h("li", { text: "확신 타로: 앞으로 어떻게 될지 할매한테 물어봐요." }),
         h("li", { text: "두 곳 이상에 고민을 맡기면 진단서 발급소에서 관계 전체를 보는 진단서를 받아요." }),
-        h("li", { text: "고민 접수처에 손님 카드(MBTI, 사이)를 등록해 두면 가게마다 다시 안 적어도 돼요." }))),
+        h("li", { text: "고민 접수처에 손님 카드(MBTI, 사이)를 등록해 두면 가게마다 다시 안 적어도 돼요." }),
+        h("li", { text: "기간 한정: 입구 오른쪽 신년운세 천막에서 2027 연애운을 봐요." }))),
       h("div", { class: "box" }, h("h4", { text: "알아 두세요" }), h("ul", null,
         h("li", { text: "가게 주인의 답은 AI가 만든 이야기예요. 재미와 대화의 실마리로만 써 주세요." }),
         h("li", { text: "한쪽 이야기만 듣고 하는 말이라 그 사람의 진짜 마음과 다를 수 있어요." }),
@@ -1558,6 +1758,7 @@ JSON 하나로만 답하라:
     if (ev.k === "mbti") return [who, ` ${ev.a || "?"}의 ${ev.b || "?"} 고민을 `, "통역받았어요"];
     if (ev.k === "tarot") return [who, " 지금 상황 카드로 ", `'${ARCANA[ev.c]}'`, "를 뽑았어요"];
     if (ev.k === "mirror") return [who, " 거울 앞에 앉았어요", ""];
+    if (ev.k === "ny") return [who, ` ${ZODIAC[ev.z]}띠의 `, "2027 연애운", "을 봤어요"];
     if (ev.k === "cert") return [who, ` ${ev.a || "?"}·${ev.b || "?"} 커플 `, "진단서를 뗐어요"];
     return null;
   }
@@ -1572,6 +1773,7 @@ JSON 하나로만 답하라:
     if (ev.k === "mbti" || ev.k === "cert") { const a = m(ev.a), b = m(ev.b); return a === null || b === null ? null : { k: ev.k, a, b, t: ev.t }; }
     if (ev.k === "tarot") return Number.isInteger(ev.c) && ev.c >= 0 && ev.c < 22 ? { k: "tarot", c: ev.c, t: ev.t } : null;
     if (ev.k === "mirror") return { k: "mirror", t: ev.t };
+    if (ev.k === "ny") return Number.isInteger(ev.z) && ev.z >= 0 && ev.z < 12 ? { k: "ny", z: ev.z, t: ev.t } : null;
     return null;
   }
   function presenceState() { return { x: +me.x.toFixed(2), z: +me.z.toFixed(2), r: +me.r.toFixed(2), m: me.moving ? 1 : 0, w: me.waveUntil > Date.now() ? me.waveUntil : 0, c: myColor, ev: myEv, sp: space, u: me.umb ? 1 : 0 }; }
@@ -1605,6 +1807,7 @@ JSON 하나로만 답하라:
   (async () => {
     if (!window.claude || !window.claude.use) return;
     try { sample = await window.claude.use("sample"); } catch { sample = null; }
+    try { const [d, u] = await Promise.all([window.claude.use("db"), window.claude.use("user")]); if (d && u) { uid = await u.id(); if (uid) db = d; } } catch { db = null; }
     try { room = await window.claude.use("room"); if (room) { room.onPeers(onPeers, () => { room = null; updateWho(); }); sendPresence(true); } } catch { room = null; }
     updateWho();
   })();
