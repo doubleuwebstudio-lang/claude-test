@@ -1,0 +1,542 @@
+<title>밤의 서점</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Hahmlet:wght@400;600;800&family=Gowun+Batang:wght@400;700&family=Gowun+Dodum&family=Nanum+Gothic+Coding&display=swap">
+<style>
+/* Layout: 한 칸짜리 심야 책방. 간판 → 책장(세로 책등) → 펼친 책(문장·필사·한 줄) → 대출 카드 → 내 책장. 밤에만 여는 가게라 어두운 화면 하나로 고정. */
+:root {
+  --night: #121827;      /* 가게 안 어둠, 남색 잉크 */
+  --night-2: #1a2236;    /* 한 단계 밝은 면 */
+  --line: #2c3550;       /* 구분선 */
+  --lamp: #f0c77a;       /* 스탠드 불빛 */
+  --lamp-dim: #a98a55;
+  --paper: #eee4cc;      /* 오래된 종이 */
+  --ink: #2b2520;        /* 종이 위 먹색 */
+  --stamp: #b4432e;      /* 대출 도장 */
+  --muted: #8f97ad;
+  --fg: #e6e2d8;
+  --wood: #3b2b21;
+  --wood-2: #2a1e17;
+  --f-display: "Hahmlet", "Nanum Myeongjo", "AppleMyungjo", serif;
+  --f-poem: "Gowun Batang", "Nanum Myeongjo", "AppleMyungjo", serif;
+  --f-ui: "Gowun Dodum", "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
+  --f-code: "Nanum Gothic Coding", ui-monospace, "SFMono-Regular", monospace;
+  color-scheme: dark;
+}
+html, body { background: var(--night); color: var(--fg); }
+body {
+  font-family: var(--f-ui);
+  font-size: 15px;
+  line-height: 1.65;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 0 48px;
+  background:
+    radial-gradient(ellipse 60% 420px at 78% 0%, rgba(240,199,122,.13), transparent 70%),
+    var(--night);
+  min-height: 100%;
+}
+.wrap { max-width: 920px; margin: 0 auto; display: grid; gap: 40px; }
+button { font: inherit; color: inherit; cursor: pointer; }
+:focus-visible { outline: 2px solid var(--lamp); outline-offset: 3px; border-radius: 4px; }
+
+/* 간판 */
+.sign { display: grid; grid-template-columns: 1fr auto; gap: 16px 24px; align-items: end; padding-top: 40px; }
+.sign h1 {
+  font-family: var(--f-display); font-weight: 800; font-size: clamp(44px, 9vw, 76px);
+  line-height: 1; margin: 0; letter-spacing: -.02em; color: var(--lamp);
+  text-shadow: 0 0 28px rgba(240,199,122,.35);
+}
+.sign p { margin: 10px 0 0; color: var(--muted); max-width: 34em; text-wrap: balance; }
+.hours { text-align: right; display: grid; gap: 6px; justify-items: end; }
+.clock { font-family: var(--f-code); font-size: 13px; color: var(--muted); font-variant-numeric: tabular-nums; }
+.status {
+  display: inline-flex; align-items: center; gap: 8px; font-size: 13px;
+  border: 1px solid var(--line); border-radius: 999px; padding: 4px 12px; white-space: nowrap;
+}
+.status i { width: 8px; height: 8px; border-radius: 50%; background: var(--muted); }
+.status.open i { background: var(--lamp); box-shadow: 0 0 10px var(--lamp); }
+.toolbar { display: flex; gap: 8px; flex-wrap: wrap; justify-content: flex-end; }
+.chip {
+  background: transparent; border: 1px solid var(--line); border-radius: 999px;
+  padding: 6px 14px; font-size: 13px; color: var(--fg);
+}
+.chip:hover { border-color: var(--lamp-dim); }
+.chip[aria-pressed="true"] { border-color: var(--lamp); color: var(--lamp); }
+
+.closed-note {
+  border: 1px dashed var(--line); border-radius: 10px; padding: 14px 16px; color: var(--muted);
+  display: flex; gap: 12px; flex-wrap: wrap; align-items: center; justify-content: space-between;
+}
+.closed-note strong { color: var(--fg); font-weight: 400; }
+
+/* 책장 */
+.section-head { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; flex-wrap: wrap; margin-bottom: 14px; }
+.section-head h2 { font-family: var(--f-display); font-weight: 600; font-size: 22px; margin: 0; }
+.section-head span { color: var(--muted); font-size: 13px; }
+.shelf {
+  --row: 230px;
+  display: flex; flex-wrap: wrap; align-items: flex-end; gap: 0 4px;
+  padding: 0 14px;
+  background:
+    repeating-linear-gradient(to bottom, transparent 0 calc(var(--row) - 16px), var(--wood) calc(var(--row) - 16px) calc(var(--row) - 4px), var(--wood-2) calc(var(--row) - 4px) var(--row)),
+    linear-gradient(#0e1320, #151c2d);
+  border-radius: 6px;
+}
+.slot { height: calc(var(--row) - 16px); display: flex; align-items: flex-end; }
+.spine {
+  writing-mode: vertical-rl; text-orientation: upright;
+  border: 0; border-radius: 3px 3px 1px 1px;
+  font-family: var(--f-poem); font-size: 14px; letter-spacing: .08em;
+  display: flex; align-items: center; justify-content: space-between; gap: 6px;
+  padding: 12px 0 10px;
+  white-space: nowrap; overflow: hidden;
+  color: #f1ead9;
+  box-shadow: inset -3px 0 0 rgba(0,0,0,.25), inset 2px 0 0 rgba(255,255,255,.08);
+  transition: transform .25s ease, filter .25s;
+  position: relative;
+}
+.spine small { font-family: var(--f-ui); font-size: .8em; opacity: .75; letter-spacing: 0; }
+.spine:hover, .spine:focus-visible { transform: translateY(-14px); filter: brightness(1.12); }
+.spine.tonight::after {
+  content: "오늘 밤"; writing-mode: horizontal-tb; position: absolute; top: -22px; left: 50%; transform: translateX(-50%);
+  font-family: var(--f-ui); font-size: 11px; color: var(--lamp); white-space: nowrap;
+}
+.spine.pulled { transform: translateY(-40px); opacity: .35; }
+.lean { transform: rotate(-4deg); transform-origin: bottom left; }
+
+/* 펼친 책 */
+.reader { display: grid; grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr); gap: 24px; align-items: start; }
+.page {
+  background: var(--paper); color: var(--ink); border-radius: 4px;
+  padding: 36px 32px 28px; position: relative; min-height: 320px;
+  box-shadow: 0 30px 60px -30px rgba(0,0,0,.8), 0 0 0 1px rgba(0,0,0,.2);
+  background-image: radial-gradient(circle at 20% 10%, rgba(255,255,255,.35), transparent 50%);
+}
+.page .call { font-family: var(--f-code); font-size: 12px; color: #7a6c5b; display: flex; justify-content: space-between; gap: 12px; }
+.poem { font-family: var(--f-poem); font-size: clamp(19px, 3.2vw, 23px); line-height: 1.9; margin: 26px 0 22px; white-space: pre-line; text-wrap: pretty; }
+.byline { font-family: var(--f-poem); font-size: 14px; color: #6b5d4e; }
+.byline b { color: var(--ink); font-weight: 700; }
+.page .placeholder { font-family: var(--f-poem); color: #8a7b68; font-size: 18px; line-height: 1.9; margin-top: 30px; }
+
+.tools { display: grid; gap: 20px; }
+.tool { border-top: 1px solid var(--line); padding-top: 16px; display: grid; gap: 10px; }
+.tool h3 { margin: 0; font-family: var(--f-display); font-weight: 600; font-size: 16px; display: flex; justify-content: space-between; align-items: baseline; gap: 8px; }
+.tool h3 span { font-family: var(--f-code); font-size: 12px; color: var(--muted); font-weight: 400; font-variant-numeric: tabular-nums; }
+.tool p { margin: 0; color: var(--muted); font-size: 13px; }
+.trace { font-family: var(--f-poem); font-size: 16px; line-height: 1.85; white-space: pre-wrap; }
+.trace .d { color: var(--lamp); }
+.trace .x { color: #ff9d86; text-decoration: underline wavy rgba(255,157,134,.6); }
+.trace .p { color: #4d5672; }
+textarea, input[type="text"] {
+  width: 100%; box-sizing: border-box; background: var(--night-2); color: var(--fg);
+  border: 1px solid var(--line); border-radius: 8px; padding: 10px 12px; font-family: var(--f-poem); font-size: 16px; line-height: 1.7;
+  resize: vertical;
+}
+textarea:focus, input[type="text"]:focus { outline: none; border-color: var(--lamp-dim); }
+.bar { height: 3px; background: var(--line); border-radius: 2px; overflow: hidden; }
+.bar b { display: block; height: 100%; width: 0; background: var(--lamp); transition: width .2s; }
+.done-msg { color: var(--lamp); font-size: 13px; }
+.primary {
+  background: var(--lamp); color: #1d1608; border: 0; border-radius: 8px; padding: 11px 16px; font-weight: 700;
+}
+.primary:hover { filter: brightness(1.06); }
+.primary:disabled { opacity: .4; cursor: not-allowed; }
+.ghost { background: transparent; border: 1px solid var(--line); border-radius: 8px; padding: 10px 14px; }
+.row { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+
+/* 대출 카드 */
+.card-out { display: grid; grid-template-columns: minmax(0, 320px) minmax(0, 1fr); gap: 24px; align-items: start; }
+.card-out img { width: 100%; border-radius: 4px; box-shadow: 0 20px 40px -20px rgba(0,0,0,.8); }
+.card-out .how { color: var(--muted); font-size: 14px; display: grid; gap: 10px; }
+.card-out .how b { color: var(--fg); font-weight: 400; }
+
+/* 내 책장 */
+.mine { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 12px; }
+.slip {
+  background: var(--night-2); border: 1px solid var(--line); border-radius: 6px; padding: 14px 16px;
+  display: grid; gap: 6px; text-align: left;
+}
+.slip:hover { border-color: var(--lamp-dim); }
+.slip .q { font-family: var(--f-poem); font-size: 15px; line-height: 1.6; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.slip .m { font-family: var(--f-code); font-size: 11px; color: var(--muted); display: flex; justify-content: space-between; gap: 8px; }
+.slip .n { font-size: 13px; color: var(--lamp-dim); overflow-wrap: anywhere; }
+.empty { color: var(--muted); border: 1px dashed var(--line); border-radius: 8px; padding: 18px; font-size: 14px; }
+
+footer { color: #5d6680; font-size: 12px; border-top: 1px solid var(--line); padding-top: 16px; display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+
+.toast {
+  position: fixed; left: 50%; bottom: calc(24px + env(safe-area-inset-bottom, 0px)); transform: translate(-50%, 20px);
+  background: var(--paper); color: var(--ink); padding: 10px 18px; border-radius: 999px; font-size: 14px;
+  opacity: 0; pointer-events: none; transition: .3s; z-index: 20; white-space: nowrap;
+}
+.toast.on { opacity: 1; transform: translate(-50%, 0); }
+
+@media (max-width: 720px) {
+  .sign { grid-template-columns: 1fr; }
+  .hours { justify-items: start; text-align: left; }
+  .toolbar { justify-content: flex-start; }
+  .reader, .card-out { grid-template-columns: minmax(0, 1fr); }
+  .page { padding: 28px 22px 22px; }
+  .shelf { --row: 210px; padding: 0 8px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  * { transition: none !important; animation: none !important; }
+}
+</style>
+
+<div class="wrap">
+  <header class="sign">
+    <div>
+      <h1>밤의 서점</h1>
+      <p>밤 열 시에 불을 켜고 새벽 네 시에 끕니다. 책 한 권을 뽑아 문장 하나를 읽고, 천천히 따라 쓰고, 한 줄을 남겨 두고 가세요.</p>
+    </div>
+    <div class="hours">
+      <span class="clock" id="clock">--:--</span>
+      <span class="status" id="status"><i></i><span id="statusText">확인 중</span></span>
+      <div class="toolbar">
+        <button class="chip" id="rainBtn" aria-pressed="false">빗소리 켜기</button>
+        <button class="chip" id="randomBtn">아무 책이나 뽑기</button>
+      </div>
+    </div>
+  </header>
+
+  <div class="closed-note" id="closedNote" hidden>
+    <span><strong>지금은 불이 꺼져 있어요.</strong> 서점은 밤 10시에 열어요. 그래도 문을 살짝 열어 둘게요.</span>
+  </div>
+
+  <section aria-labelledby="shelfTitle">
+    <div class="section-head">
+      <h2 id="shelfTitle">시집 서가 · 811</h2>
+      <span>책등을 눌러 꺼내 보세요</span>
+    </div>
+    <div class="shelf" id="shelf"></div>
+  </section>
+
+  <section class="reader" id="reader" aria-live="polite">
+    <article class="page" id="page">
+      <div class="call"><span>밤의 서점 · 시집 서가</span><span id="callNo">811</span></div>
+      <div id="pageBody">
+        <p class="placeholder">아직 펼친 책이 없어요.<br>위 서가에서 "오늘 밤" 표시가 있는 책부터 꺼내 보세요.</p>
+      </div>
+    </article>
+
+    <div class="tools">
+      <div class="tool">
+        <h3>따라 쓰기 <span id="pct">0%</span></h3>
+        <div class="trace" id="trace" aria-hidden="true"></div>
+        <div class="bar"><b id="barFill"></b></div>
+        <textarea id="copyInput" aria-label="문장 따라 쓰기" rows="3" placeholder="책을 꺼내면 여기서 한 글자씩 따라 쓸 수 있어요" disabled></textarea>
+        <span class="done-msg" id="doneMsg" hidden>다 썼어요. 대출 카드에 '필사' 도장을 찍어 드릴게요.</span>
+      </div>
+      <div class="tool">
+        <h3>남기는 한 줄 <span id="noteCount">0/60</span></h3>
+        <input type="text" id="noteInput" maxlength="60" placeholder="이 문장을 읽고 떠오른 것" disabled>
+      </div>
+      <button class="primary" id="makeCard" disabled>대출 카드 만들기</button>
+    </div>
+  </section>
+
+  <section id="cardSection" hidden aria-labelledby="cardTitle">
+    <div class="section-head"><h2 id="cardTitle">대출 카드</h2><span>내 책장에도 꽂아 두었어요</span></div>
+    <div class="card-out">
+      <img id="cardImg" alt="오늘 밤 고른 문장이 적힌 대출 카드">
+      <div class="how">
+        <span><b>저장하려면</b> 휴대폰에서는 카드를 길게 누르고, 컴퓨터에서는 오른쪽 클릭 후 '이미지 저장'을 고르세요.</span>
+        <span>인스타그램 세로 비율(4:5)이라 그대로 올리기 좋아요.</span>
+        <div class="row"><button class="ghost" id="copyText">문장 복사하기</button></div>
+      </div>
+    </div>
+  </section>
+
+  <section aria-labelledby="mineTitle">
+    <div class="section-head"><h2 id="mineTitle">내 책장</h2><span id="mineCount">이 기기에만 보관돼요</span></div>
+    <div class="mine" id="mine"></div>
+  </section>
+
+  <footer>
+    <span>서가의 시는 모두 저작권 보호 기간이 끝난 작품입니다.</span>
+    <span>밤의 서점 · 영업시간 22:00–04:00</span>
+  </footer>
+</div>
+
+<div class="toast" id="toast" role="status"></div>
+
+<script>
+(() => {
+  const BOOKS = [
+    { id: "seosi", poet: "윤동주", title: "서시", call: "811.6 윤25ㅅ", color: "#41506b", h: 196,
+      text: "죽는 날까지 하늘을 우러러\n한 점 부끄럼이 없기를" },
+    { id: "byeol", poet: "윤동주", title: "별 헤는 밤", call: "811.6 윤25ㅂ", color: "#2f4a5c", h: 206,
+      text: "별 하나에 추억과\n별 하나에 사랑과\n별 하나에 쓸쓸함과" },
+    { id: "gaeul", poet: "윤동주", title: "별 헤는 밤", call: "811.6 윤25ㅂ.2", color: "#5b4a3a", h: 178,
+      text: "계절이 지나가는 하늘에는\n가을로 가득 차 있습니다." },
+    { id: "swipge", poet: "윤동주", title: "쉽게 씌어진 시", call: "811.6 윤25ㅅ.2", color: "#6a3b36", h: 188,
+      text: "인생은 살기 어렵다는데\n시가 이렇게 쉽게 씌어지는 것은\n부끄러운 일이다." },
+    { id: "gil", poet: "윤동주", title: "새로운 길", call: "811.6 윤25ㅅ.3", color: "#3e5a4a", h: 170,
+      text: "어제도 가고 오늘도 갈\n나의 길 새로운 길" },
+    { id: "sanyu", poet: "김소월", title: "산유화", call: "811.6 김55ㅅ", color: "#7a5a33", h: 200,
+      text: "산에는 꽃 피네\n꽃이 피네\n갈 봄 여름 없이\n꽃이 피네" },
+    { id: "jindal", poet: "김소월", title: "진달래꽃", call: "811.6 김55ㅈ", color: "#7b3b4e", h: 184,
+      text: "나 보기가 역겨워\n가실 때에는\n말없이 고이 보내 드리우리다" },
+    { id: "eomma", poet: "김소월", title: "엄마야 누나야", call: "811.6 김55ㅇ", color: "#4a5c7a", h: 166,
+      text: "엄마야 누나야 강변 살자\n뜰에는 반짝이는 금모래 빛" },
+    { id: "nim", poet: "한용운", title: "님의 침묵", call: "811.6 한66ㄴ", color: "#33384a", h: 210,
+      text: "우리는 만날 때에 떠날 것을 염려하는 것과 같이\n떠날 때에 다시 만날 것을 믿습니다." },
+    { id: "hosu", poet: "정지용", title: "호수", call: "811.6 정79ㅎ", color: "#36606a", h: 158,
+      text: "얼굴 하나야\n손바닥 둘로\n폭 가리지만,\n보고 싶은 마음\n호수만 하니\n눈 감을 밖에." },
+    { id: "hyangsu", poet: "정지용", title: "향수", call: "811.6 정79ㅎ.2", color: "#5e5236", h: 194,
+      text: "넓은 벌 동쪽 끝으로\n옛이야기 지줄대는 실개천이 회돌아 나가고" },
+    { id: "moran", poet: "김영랑", title: "모란이 피기까지는", call: "811.6 김64ㅁ", color: "#6b3348", h: 202,
+      text: "모란이 피기까지는\n나는 아직 나의 봄을 기다리고 있을테요" },
+    { id: "cheongpo", poet: "이육사", title: "청포도", call: "811.6 이66ㅊ", color: "#3d5a3a", h: 176,
+      text: "내 고장 칠월은\n청포도가 익어 가는 시절" },
+    { id: "gwangya", poet: "이육사", title: "광야", call: "811.6 이66ㄱ", color: "#4c4357", h: 190,
+      text: "지금 눈 나리고\n매화 향기 홀로 아득하니\n내 여기 가난한 노래의 씨를 뿌려라" },
+    { id: "bom", poet: "이상화", title: "빼앗긴 들에도 봄은 오는가", call: "811.6 이52ㅃ", color: "#5a4030", h: 212,
+      text: "지금은 남의 땅\n빼앗긴 들에도 봄은 오는가?" }
+  ];
+
+  const $ = (id) => document.getElementById(id);
+  const store = {
+    get() { try { return JSON.parse(localStorage.getItem("nightshop.v1") || "[]"); } catch { return []; } },
+    set(v) { try { localStorage.setItem("nightshop.v1", JSON.stringify(v)); return true; } catch { return false; } }
+  };
+  const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+  const pad = (n) => String(n).padStart(2, "0");
+
+  let current = null;
+  let copied = false;
+
+  /* 오늘 밤의 책: 날짜로 정해서 모든 손님이 같은 책을 봅니다. 새벽 4시 전은 전날 밤으로 칩니다. */
+  function nightKey(d = new Date()) {
+    const t = new Date(d); if (t.getHours() < 4) t.setDate(t.getDate() - 1);
+    return `${t.getFullYear()}-${pad(t.getMonth() + 1)}-${pad(t.getDate())}`;
+  }
+  function tonightBook() {
+    const k = nightKey(); let h = 0;
+    for (const c of k) h = (h * 31 + c.charCodeAt(0)) >>> 0;
+    return BOOKS[h % BOOKS.length];
+  }
+
+  /* 간판과 시계 */
+  function tick() {
+    const d = new Date(), h = d.getHours();
+    $("clock").textContent = `${d.getFullYear()}.${pad(d.getMonth() + 1)}.${pad(d.getDate())}  ${pad(h)}:${pad(d.getMinutes())}`;
+    const open = h >= 22 || h < 4;
+    $("status").classList.toggle("open", open);
+    $("statusText").textContent = open ? "영업 중 · 새벽 4시까지" : `준비 중 · ${h < 22 ? 22 - h : 0}시간 뒤 열어요`;
+    $("closedNote").hidden = open;
+  }
+
+  /* 서가 */
+  function renderShelf() {
+    const t = tonightBook();
+    $("shelf").innerHTML = BOOKS.map((b, i) => {
+      const w = 34 + ((b.title.length * 7 + i * 3) % 14);
+      const lean = i === 6 ? " lean" : "";
+      const chars = b.title.replace(/ /g, "").length + b.poet.length;
+      const fs = Math.min(14, Math.floor((b.h - 40) / (chars * 1.25)));
+      return `<div class="slot${lean}"><button class="spine${b.id === t.id ? " tonight" : ""}" data-id="${b.id}"
+        style="height:${b.h}px;width:${w}px;background:${b.color};font-size:${fs}px" aria-label="${esc(b.poet)}, ${esc(b.title)} 꺼내기">
+        <span>${esc(b.title)}</span><small>${esc(b.poet)}</small></button></div>`;
+    }).join("");
+  }
+  $("shelf").addEventListener("click", (e) => {
+    const s = e.target.closest(".spine"); if (s) open(s.dataset.id, true);
+  });
+  $("randomBtn").addEventListener("click", () => {
+    const pool = BOOKS.filter((b) => !current || b.id !== current.id);
+    open(pool[Math.floor(Math.random() * pool.length)].id, true);
+  });
+
+  function open(id, scroll) {
+    current = BOOKS.find((b) => b.id === id); copied = false;
+    document.querySelectorAll(".spine").forEach((s) => s.classList.toggle("pulled", s.dataset.id === id));
+    $("callNo").textContent = current.call;
+    $("pageBody").innerHTML = `<p class="poem">${esc(current.text)}</p>
+      <p class="byline"><b>${esc(current.poet)}</b> 「${esc(current.title)}」 중에서</p>`;
+    const ci = $("copyInput"); ci.disabled = false; ci.value = ""; ci.placeholder = "위 문장을 한 글자씩 따라 써 보세요";
+    $("noteInput").disabled = false; $("noteInput").value = ""; $("noteCount").textContent = "0/60";
+    $("makeCard").disabled = false; $("doneMsg").hidden = true;
+    renderTrace();
+    if (scroll) $("reader").scrollIntoView({ behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth", block: "start" });
+  }
+
+  /* 따라 쓰기: 띄어쓰기와 줄바꿈은 너그럽게 봅니다 */
+  const norm = (s) => s.replace(/\s+/g, " ").trim();
+  let composing = false;
+  function renderTrace() {
+    if (!current) { $("trace").textContent = ""; return; }
+    const target = current.text, typed = norm($("copyInput").value);
+    const flat = target.replace(/\n/g, " ");
+    let html = "", ok = 0;
+    for (let i = 0; i < target.length; i++) {
+      const ch = target[i], tc = typed[i];
+      if (tc === undefined) { html += `<span class="p">${esc(ch)}</span>`; continue; }
+      const last = i === typed.length - 1;
+      if (tc === flat[i] || (ch === "\n" && tc === " ")) { html += `<span class="d">${esc(ch)}</span>`; ok++; }
+      else if (last && composing) html += `<span class="p">${esc(ch)}</span>`;
+      else html += `<span class="x">${esc(ch)}</span>`;
+    }
+    $("trace").innerHTML = html;
+    const pct = Math.min(100, Math.round((ok / flat.length) * 100));
+    $("pct").textContent = pct + "%"; $("barFill").style.width = pct + "%";
+    const done = typed === norm(target);
+    if (done && !copied) { copied = true; toast("필사를 마쳤어요"); }
+    $("doneMsg").hidden = !copied;
+  }
+  const ci = $("copyInput");
+  ci.addEventListener("compositionstart", () => { composing = true; });
+  ci.addEventListener("compositionend", () => { composing = false; renderTrace(); });
+  ci.addEventListener("input", renderTrace);
+  ci.addEventListener("paste", (e) => { e.preventDefault(); toast("붙여넣기 말고 손으로 따라 써 주세요"); });
+  $("noteInput").addEventListener("input", (e) => { $("noteCount").textContent = `${e.target.value.length}/60`; });
+
+  /* 대출 카드 (1080×1350) */
+  function wrapLines(ctx, text, maxW) {
+    const out = [];
+    for (const para of text.split("\n")) {
+      let line = "";
+      for (const word of para.split(" ")) {
+        const test = line ? line + " " + word : word;
+        if (ctx.measureText(test).width > maxW && line) { out.push(line); line = word; }
+        else line = test;
+      }
+      out.push(line);
+    }
+    return out;
+  }
+  async function drawCard(b, note, didCopy, when) {
+    try { await document.fonts.load('40px "Gowun Batang"'); await document.fonts.load('40px "Hahmlet"'); await document.fonts.load('20px "Nanum Gothic Coding"'); } catch {}
+    const W = 1080, H = 1350, c = document.createElement("canvas"); c.width = W; c.height = H;
+    const x = c.getContext("2d");
+    x.fillStyle = "#121827"; x.fillRect(0, 0, W, H);
+    const g = x.createRadialGradient(W * .8, 0, 0, W * .8, 0, 700); g.addColorStop(0, "rgba(240,199,122,.22)"); g.addColorStop(1, "rgba(240,199,122,0)");
+    x.fillStyle = g; x.fillRect(0, 0, W, H);
+    // 카드
+    const cx = 90, cy = 150, cw = W - 180, ch = H - 280;
+    x.fillStyle = "#eee4cc"; x.fillRect(cx, cy, cw, ch);
+    x.strokeStyle = "rgba(43,37,32,.18)"; x.lineWidth = 2;
+    for (let y = cy + 200; y < cy + ch - 60; y += 64) { x.beginPath(); x.moveTo(cx + 50, y); x.lineTo(cx + cw - 50, y); x.stroke(); }
+    x.strokeStyle = "#b4432e"; x.lineWidth = 3; x.beginPath(); x.moveTo(cx + 50, cy + 150); x.lineTo(cx + cw - 50, cy + 150); x.stroke();
+    // 상단
+    x.fillStyle = "#f0c77a"; x.font = '800 54px "Hahmlet", serif'; x.textBaseline = "alphabetic";
+    x.fillText("밤의 서점", 90, 105);
+    x.fillStyle = "#8f97ad"; x.font = '24px "Nanum Gothic Coding", monospace'; x.textAlign = "right";
+    x.fillText(`${when.date}  ${when.time}`, W - 90, 100); x.textAlign = "left";
+    x.fillStyle = "#2b2520"; x.font = '700 34px "Gowun Batang", serif'; x.fillText("대출 카드", cx + 50, cy + 80);
+    x.fillStyle = "#7a6c5b"; x.font = '24px "Nanum Gothic Coding", monospace'; x.textAlign = "right";
+    x.fillText(b.call, cx + cw - 50, cy + 80); x.fillText("반납 기한 없음", cx + cw - 50, cy + 120); x.textAlign = "left";
+    // 문장
+    x.fillStyle = "#2b2520"; x.font = '52px "Gowun Batang", serif';
+    const lines = wrapLines(x, b.text, cw - 110);
+    let y = cy + 260; const lh = 76;
+    const startY = lines.length > 6 ? y : y + 30;
+    lines.forEach((l, i) => x.fillText(l, cx + 55, startY + i * lh));
+    y = startY + lines.length * lh + 24;
+    x.fillStyle = "#6b5d4e"; x.font = '34px "Gowun Batang", serif';
+    x.fillText(`— ${b.poet} 「${b.title}」`, cx + 55, y); y += 90;
+    if (note) {
+      x.fillStyle = "#7a6c5b"; x.font = '22px "Nanum Gothic Coding", monospace'; x.fillText("손님이 남긴 한 줄", cx + 55, y); y += 48;
+      x.fillStyle = "#3a5070"; x.font = '32px "Gowun Batang", serif';
+      wrapLines(x, note, cw - 110).slice(0, 2).forEach((l, i) => x.fillText(l, cx + 55, y + i * 50));
+    }
+    // 도장
+    if (didCopy) {
+      x.save(); x.translate(cx + cw - 170, cy + ch - 150); x.rotate(-0.18);
+      x.strokeStyle = "rgba(180,67,46,.85)"; x.fillStyle = "rgba(180,67,46,.85)"; x.lineWidth = 6;
+      x.beginPath(); x.arc(0, 0, 92, 0, Math.PI * 2); x.stroke();
+      x.lineWidth = 2; x.beginPath(); x.arc(0, 0, 78, 0, Math.PI * 2); x.stroke();
+      x.textAlign = "center"; x.font = '800 44px "Hahmlet", serif'; x.fillText("필사", 0, 4);
+      x.font = '20px "Nanum Gothic Coding", monospace'; x.fillText(when.date.slice(2), 0, 42);
+      x.restore();
+    }
+    x.fillStyle = "#5d6680"; x.font = '22px "Gowun Dodum", sans-serif';
+    x.fillText("밤 10시부터 새벽 4시까지 불이 켜져 있어요", 90, H - 70);
+    return c.toDataURL("image/png");
+  }
+  function stamp() {
+    const d = new Date();
+    return { date: `${d.getFullYear()}.${pad(d.getMonth() + 1)}.${pad(d.getDate())}`, time: `${d.getHours() < 12 ? "새벽" : "밤"} ${pad(d.getHours())}:${pad(d.getMinutes())}` };
+  }
+  async function showCard(entry) {
+    const b = BOOKS.find((x) => x.id === entry.id); if (!b) return;
+    $("cardImg").src = await drawCard(b, entry.note, entry.copied, entry.when);
+    $("cardSection").hidden = false;
+    $("cardSection").scrollIntoView({ behavior: "smooth", block: "start" });
+  }
+  $("makeCard").addEventListener("click", async () => {
+    if (!current) return;
+    const entry = { id: current.id, note: $("noteInput").value.trim(), copied, when: stamp(), at: Date.now() };
+    const list = store.get(); list.unshift(entry);
+    const saved = store.set(list.slice(0, 60));
+    await showCard(entry); renderMine();
+    toast(saved ? "대출 카드를 내 책장에 꽂았어요" : "카드를 만들었어요 (이 브라우저에서는 보관이 안 돼요)");
+  });
+  $("copyText").addEventListener("click", async () => {
+    const list = store.get(); const e = list[0];
+    const b = current || (e && BOOKS.find((x) => x.id === e.id)); if (!b) return;
+    const text = `${b.text}\n— ${b.poet} 「${b.title}」\n\n밤의 서점에서`;
+    try { await navigator.clipboard.writeText(text); toast("문장을 복사했어요"); }
+    catch { toast("복사가 막혀 있어요. 문장을 직접 선택해 주세요"); }
+  });
+
+  /* 내 책장 */
+  function renderMine() {
+    const list = store.get();
+    $("mineCount").textContent = list.length ? `카드 ${list.length}장 · 이 기기에만 보관돼요` : "이 기기에만 보관돼요";
+    if (!list.length) {
+      $("mine").innerHTML = `<div class="empty">아직 빌려 간 책이 없어요. 책을 꺼내고 '대출 카드 만들기'를 누르면 여기에 꽂혀요.</div>`;
+      return;
+    }
+    $("mine").innerHTML = list.map((e, i) => {
+      const b = BOOKS.find((x) => x.id === e.id); if (!b) return "";
+      return `<button class="slip" data-i="${i}">
+        <span class="q">${esc(b.text.replace(/\n/g, " "))}</span>
+        ${e.note ? `<span class="n">${esc(e.note)}</span>` : ""}
+        <span class="m"><span>${esc(b.poet)} 「${esc(b.title)}」</span><span>${esc(e.when.date.slice(5))}${e.copied ? " · 필사" : ""}</span></span>
+      </button>`;
+    }).join("");
+  }
+  $("mine").addEventListener("click", (ev) => {
+    const s = ev.target.closest(".slip"); if (!s) return;
+    const e = store.get()[+s.dataset.i]; if (e) showCard(e);
+  });
+
+  /* 빗소리: 브라운 노이즈를 낮게 걸러 창밖 비처럼 */
+  let audio = null;
+  $("rainBtn").addEventListener("click", () => {
+    const btn = $("rainBtn");
+    try {
+      if (!audio) {
+        const ctx = new (window.AudioContext || window.webkitAudioContext)();
+        const len = ctx.sampleRate * 4, buf = ctx.createBuffer(1, len, ctx.sampleRate), d = buf.getChannelData(0);
+        let last = 0;
+        for (let i = 0; i < len; i++) { const w = Math.random() * 2 - 1; last = (last + 0.02 * w) / 1.02; d[i] = last * 3.2 + w * 0.04; }
+        const src = ctx.createBufferSource(); src.buffer = buf; src.loop = true;
+        const lp = ctx.createBiquadFilter(); lp.type = "lowpass"; lp.frequency.value = 1400;
+        const gain = ctx.createGain(); gain.gain.value = 0;
+        src.connect(lp).connect(gain).connect(ctx.destination); src.start();
+        audio = { ctx, gain, on: false };
+      }
+      audio.on = !audio.on;
+      if (audio.ctx.state === "suspended") audio.ctx.resume();
+      audio.gain.gain.linearRampToValueAtTime(audio.on ? 0.5 : 0, audio.ctx.currentTime + 0.8);
+      btn.setAttribute("aria-pressed", String(audio.on));
+      btn.textContent = audio.on ? "빗소리 끄기" : "빗소리 켜기";
+    } catch { toast("이 브라우저에서는 소리를 낼 수 없어요"); }
+  });
+
+  let tt;
+  function toast(msg) {
+    const t = $("toast"); t.textContent = msg; t.classList.add("on");
+    clearTimeout(tt); tt = setTimeout(() => t.classList.remove("on"), 2200);
+  }
+
+  tick(); setInterval(tick, 30000);
+  renderShelf(); renderMine();
+  open(tonightBook().id, false);
+})();
+</script>
