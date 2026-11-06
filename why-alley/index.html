@@ -1607,11 +1607,11 @@ JSON 하나로만 답하라:
   /* 신년운세 천막: 띠 × 별자리 × MBTI × 연애 상태 조합으로 정해지는 2027 연애운 */
   const ZODIAC = ["쥐", "소", "호랑이", "토끼", "용", "뱀", "말", "양", "원숭이", "닭", "개", "돼지"];
   const SIGNS = [["염소자리", 1, 19], ["물병자리", 2, 18], ["물고기자리", 3, 20], ["양자리", 4, 19], ["황소자리", 5, 20], ["쌍둥이자리", 6, 21], ["게자리", 7, 22], ["사자자리", 8, 22], ["처녀자리", 9, 22], ["천칭자리", 10, 23], ["전갈자리", 11, 22], ["사수자리", 12, 21], ["염소자리", 12, 31]];
-  const STATUS = ["솔로", "썸 타는 중", "연애 중"];
+  const STATUS = ["솔로", "썸 타는 중", "연애 중", "기혼"];
   function zodiacOf(y, m, d) { const yy = (m < 2 || (m === 2 && d < 4)) ? y - 1 : y; return ((yy - 4) % 12 + 12) % 12; }   // 입춘(2월 4일 무렵) 기준
   function signOf(m, d) { for (const [n, mm, dd] of SIGNS) if (m < mm || (m === mm && d <= dd)) return n; return "염소자리"; }
   const nyCache = local.get("whyalley.ny2", {});
-  let nyForm = Object.assign({ birth: "", status: card.rel === "연애 중" || card.rel === "결혼했어요" ? "연애 중" : card.rel === "썸 타는 중" ? "썸 타는 중" : "솔로" }, local.get("whyalley.nyform", {}));
+  let nyForm = Object.assign({ birth: "", status: card.rel === "결혼했어요" ? "기혼" : card.rel === "연애 중" ? "연애 중" : card.rel === "썸 타는 중" ? "썸 타는 중" : "솔로" }, local.get("whyalley.nyform", {}));
   let nyGoal = local.get("whyalley.nygoal", "");
   let nyUnlocked = local.get("whyalley.nyopen", false);
   function nyKey(z, s, mb, st) { return [z, s, mb || "모름", st].join("|"); }
@@ -1630,7 +1630,7 @@ JSON 하나로만 답하라:
     };
     [birth, mbti, st].forEach((x) => x.addEventListener("input", calc)); calc();
     body.append(
-      h("div", { class: "row2" }, h("div", { class: "field" }, h("label", { for: "nyBirth", text: "생년월일" }), birth), h("div", { class: "field" }, h("label", { for: "nyStatus", text: "지금 연애 상태" }), st)),
+      h("div", { class: "row2" }, h("div", { class: "field" }, h("label", { for: "nyBirth", text: "생년월일" }), birth), h("div", { class: "field" }, h("label", { for: "nyStatus", text: "연애·결혼 상태" }), st)),
       h("div", { class: "field" }, h("label", { for: "nyMbti", text: "나의 MBTI" }), mbti), info, go, out);
     const show = (key, who) => renderNewYear(out, nyCache[key], who);
     const first = calc(); if (first && nyCache[nyKey(first.z, first.s, first.mb, first.st)]) show(nyKey(first.z, first.s, first.mb, first.st), first);
@@ -1651,10 +1651,10 @@ JSON 하나로만 답하라:
 - 띠: ${ZODIAC[c.z]}띠
 - 별자리: ${c.s}
 - MBTI: ${c.mb || "모름"}
-- 연애 상태: ${c.st}
+- 연애·결혼 상태: ${c.st}
 
 JSON 하나로만 답하라:
-{"title": "2027년 한 해를 요약하는 한 줄 제목, 20자 이내", "summary": "할매 말투 총운 3~4문장", "fields": {"love": "연애운 1~2문장 (연애 상태에 맞게)", "work": "직장·학업운 1~2문장", "money": "금전운 1~2문장 (흐름과 습관만)", "people": "인간관계운 1~2문장", "health": "건강 생활 습관 한 줄"}, "keywords": ["올해 키워드 3개, 각 6자 이내"], "lucky_color": "행운의 색 하나", "lucky_number": 1에서 99 정수, "lucky_place": "행운의 장소 하나, 15자 이내", "months": ["1월부터 12월까지 12개, 각 달의 흐름을 연애·일·돈·사람 중 그 달에 중요한 것 위주로 1~2문장"], "do": ["올해 해볼 것 3개, 분야를 섞어서, 각 30자 이내"], "dont": ["올해 피할 것 2개, 각 30자 이내"], "goals": ["올해의 목표 후보 3개, 각 25자 이내"]}`, { signal: ctl.signal, modelTier: "default" });
+{"title": "2027년 한 해를 요약하는 한 줄 제목, 20자 이내", "summary": "할매 말투 총운 3~4문장", "fields": {"love": "연애운 1~2문장 (상태에 맞게. 기혼이면 연애 대신 부부 관계 이야기로)", "work": "직장·학업운 1~2문장", "money": "금전운 1~2문장 (흐름과 습관만)", "people": "인간관계운 1~2문장", "health": "건강 생활 습관 한 줄"}, "keywords": ["올해 키워드 3개, 각 6자 이내"], "lucky_color": "행운의 색 하나", "lucky_number": 1에서 99 정수, "lucky_place": "행운의 장소 하나, 15자 이내", "months": ["1월부터 12월까지 12개, 각 달의 흐름을 연애·일·돈·사람 중 그 달에 중요한 것 위주로 1~2문장"], "do": ["올해 해볼 것 3개, 분야를 섞어서, 각 30자 이내"], "dont": ["올해 피할 것 2개, 각 30자 이내"], "goals": ["올해의 목표 후보 3개, 각 25자 이내"]}`, { signal: ctl.signal, modelTier: "default" });
         const months = Array.isArray(r.months) ? r.months.slice(0, 12).map((x) => S(typeof x === "string" ? x : x && x.text, 200)) : [];
         const f = r.fields || {};
         const clean = { title: S(r.title, 40), summary: S(r.summary, 500), fields: { love: S(f.love, 160), work: S(f.work, 160), money: S(f.money, 160), people: S(f.people, 160), health: S(f.health, 100) }, keywords: (r.keywords || []).slice(0, 3).map((k) => S(k, 14)), lucky_color: S(r.lucky_color, 20), lucky_number: Math.max(1, Math.min(99, Math.round(Number(r.lucky_number) || 7))), lucky_place: S(r.lucky_place, 30), months, do: (r.do || []).slice(0, 3).map((x) => S(x, 60)), dont: (r.dont || []).slice(0, 2).map((x) => S(x, 60)), goals: (r.goals || []).slice(0, 3).map((x) => S(x, 50)) };
@@ -1669,7 +1669,7 @@ JSON 하나로만 답하라:
     out.replaceChildren();
     out.append(h("p", { class: "fine", text: `${ZODIAC[who.z]}띠 · ${who.s} · ${who.mb || "MBTI 모름"} · ${who.st}` }), h("p", { class: "headline", text: r.title }), h("p", { class: "prose", text: r.summary }),
       h("div", { class: "chips" }, ...r.keywords.map((k) => h("span", { class: "chip", text: "#" + k }))),
-      h("div", { class: "box" }, h("h4", { text: "분야별 운세" }), h("div", { class: "months" }, ...[["연애", "love"], ["일·공부", "work"], ["돈", "money"], ["사람", "people"], ["건강", "health"]].map(([l, k]) => h("div", { class: "month" }, h("b", { text: l }), h("span", { text: r.fields[k] }))))),
+      h("div", { class: "box" }, h("h4", { text: "분야별 운세" }), h("div", { class: "months" }, ...[[who.st === "기혼" ? "부부" : "연애", "love"], ["일·공부", "work"], ["돈", "money"], ["사람", "people"], ["건강", "health"]].map(([l, k]) => h("div", { class: "month" }, h("b", { text: l }), h("span", { text: r.fields[k] }))))),
       h("div", { class: "box" }, h("h4", { text: "올해의 행운" }), h("p", { class: "prose", text: `행운의 색 ${r.lucky_color} · 행운의 숫자 ${r.lucky_number} · 행운의 장소 ${r.lucky_place}` })));
     const monthList = h("div", { class: "months" }, ...r.months.map((t, i) => h("div", { class: "month" + (i >= 3 && !nyUnlocked ? " locked" : "") }, h("b", { text: `${i + 1}월` }), h("span", { text: t }))));
     out.append(h("div", { class: "box" }, h("h4", { text: "달마다 흐름" }), monthList));
@@ -1693,7 +1693,7 @@ JSON 하나로만 답하라:
     out.append(detail);
     const cardBtn = h("button", { class: "ghost", text: "공유 카드 만들기" }); const cardOut = h("div", { style: "display:grid;gap:8px" });
     cardBtn.addEventListener("click", async () => { cardBtn.disabled = true; const img = h("img", { class: "certimg", alt: `2027 신년운세: ${r.title}` }); cardOut.replaceChildren(img, h("p", { class: "fine", text: "길게 누르거나 오른쪽 클릭으로 저장하세요." })); img.src = await drawNyCard(r, who); cardBtn.disabled = false; recordIntent("ny_card"); });
-    out.append(cardBtn, cardOut, h("p", { class: "fine", text: "재미로 보는 운세예요. 금전운은 투자 조언이 아니고, 건강운은 진단이 아니에요. 같은 띠·별자리·MBTI·연애 상태라면 같은 결과가 나와요." }));
+    out.append(cardBtn, cardOut, h("p", { class: "fine", text: "재미로 보는 운세예요. 금전운은 투자 조언이 아니고, 건강운은 진단이 아니에요. 같은 띠·별자리·MBTI·연애·결혼 상태라면 같은 결과가 나와요." }));
   }
   async function drawNyCard(r, who) {
     try { await Promise.all(['64px "Black Han Sans"', '30px "IBM Plex Sans KR"', '700 30px "IBM Plex Sans KR"'].map((f) => document.fonts.load(f))); } catch {}
