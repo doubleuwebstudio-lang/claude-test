@@ -51,6 +51,10 @@ button { cursor: pointer; background: none; border: 0; }
 .top > * { pointer-events: auto; }
 .signpill { display: flex; align-items: center; gap: 12px; padding: 8px 16px 8px 18px; min-width: 0; }
 .signpill h1 { margin: 0; font-family: var(--f-sign); font-weight: 400; font-size: 20px; color: var(--neon-p); white-space: nowrap; text-shadow: 0 0 12px rgba(255,92,158,.6); }
+.backbtn { display: flex; align-items: center; gap: 6px; margin: -4px 4px -4px -8px; padding: 6px 12px 6px 8px; border-radius: 999px; background: rgba(255,255,255,.08); font-size: 13.5px; font-weight: 600; white-space: nowrap; }
+.backbtn:hover { background: rgba(255,255,255,.14); }
+.backbtn svg { width: 18px; height: 18px; stroke: var(--fg); fill: none; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+@media (max-width: 400px) { .inside .signpill h1 { display: none; } }
 .signpill .sep { width: 1px; height: 16px; background: rgba(255,255,255,.14); }
 .who { display: flex; align-items: center; gap: 7px; font-size: 13px; white-space: nowrap; font-variant-numeric: tabular-nums; }
 .who i { width: 7px; height: 7px; border-radius: 50%; background: var(--neon-g); box-shadow: 0 0 8px var(--neon-g); }
@@ -217,7 +221,7 @@ select:focus, input:focus, textarea:focus { outline: none; border-color: var(--a
 <div class="tags" id="tags"><div class="tag say" id="say" hidden></div></div>
 
 <div class="top">
-  <div class="signpill glass"><h1>왜그래 골목</h1><span class="sep"></span><span class="who"><i></i><span id="whoText">골목 불 켜는 중</span></span></div>
+  <div class="signpill glass"><button class="backbtn" id="exitBtn" hidden aria-label="골목으로 나가기"><svg viewBox="0 0 24 24"><path d="M10 5l-7 7 7 7M3 12h13a5 5 0 0 1 5 5v2"/></svg><span>나가기</span></button><h1>왜그래 골목</h1><span class="sep"></span><span class="who"><i></i><span id="whoText">골목 불 켜는 중</span></span></div>
   <div class="rightpill glass">
     <button class="iconbtn" id="aboutBtn" aria-label="골목 안내">
       <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 11v6M12 7.5v.5"/></svg>
@@ -608,7 +612,7 @@ select:focus, input:focus, textarea:focus { outline: none; border-color: var(--a
     const bulb = new THREE.Mesh(new THREE.SphereGeometry(.1, 12, 8), basic({ color: 0xfff3dc })); bulb.position.set(0, RH2 - .15, 0); G.add(bulb);
     const l2 = new THREE.PointLight(new THREE.Color(opt.color), .9, 8, 1.8); l2.position.set(0, 1.8, -D / 2 + 1); G.add(l2);
     const S = { key, ox, W, D, G, door: dp, solids: [], spots: [], keeper: null, greet: opt.greet };
-    S.spots.push({ sp: key, kind: "exit", x: ox, z: D / 2 - .7, r: 1.1, label: "골목으로 나가기", color: opt.color });
+    S.spots.push({ sp: key, kind: "exit", x: ox, z: D / 2 - .7, r: 1.7, label: "골목으로 나가기", color: opt.color });
     SPACES[key] = S;
     opt.fill(G, S, W, D);
     BUILD = prev;
@@ -840,10 +844,11 @@ select:focus, input:focus, textarea:focus { outline: none; border-color: var(--a
   });
 
   /* ───────── 문 열고 들어가기 / 나가기 ───────── */
-  let moving = false, savedCam = null, sayUntil = 0;
+  let moving = false, savedCam = null, sayUntil = 0, enteredAt = 0;
   function fade(on, cb) { const f = $("fade"); f.style.opacity = on ? 1 : 0; setTimeout(cb || (() => {}), reduced ? 0 : 320); }
   function applySpace() {
     alleyG.visible = space === "alley";
+    $("exitBtn").hidden = space === "alley"; document.body.classList.toggle("inside", space !== "alley");
     for (const k in SPACES) { const S = SPACES[k]; if (!S) continue; S.G.visible = space === k; if (S.keeper) S.keeper.g.visible = space === k; }
     near = undefined;
   }
@@ -856,6 +861,7 @@ select:focus, input:focus, textarea:focus { outline: none; border-color: var(--a
       savedCam = { camDist, pitch }; camDist = 4.4; pitch = .36;
       camPos.set(me.x, 2.4, S.D / 2 + 1.5); S.doorOpen = 1.2;
       sendPresence(true); sayUntil = Date.now() + 4800; $("say").textContent = S.greet;
+      enteredAt = performance.now();
       fade(false, () => { moving = false; });
     }), reduced ? 0 : 380);
   }
@@ -896,7 +902,9 @@ select:focus, input:focus, textarea:focus { outline: none; border-color: var(--a
   }
   function closeSheet() { if (ctl) { ctl.abort(); ctl = null; } $("sheet").hidden = true; $("sheetBack").hidden = true; sheetOpen = false; near = undefined; }
   $("sheetBack").addEventListener("click", closeSheet);
-  addEventListener("keydown", (e) => { if (e.key === "Escape" && sheetOpen) closeSheet(); });
+  $("exitBtn").addEventListener("click", () => { if (sheetOpen) closeSheet(); exitShop(); });
+  addEventListener("keydown", (e) => { if (e.key === "Escape" && !e.defaultPrevented && !sheetOpen && space !== "alley") exitShop(); });
+  addEventListener("keydown", (e) => { if (e.key === "Escape" && sheetOpen) { e.preventDefault(); closeSheet(); } });
   const thinking = (msg) => h("div", { class: "thinking" }, h("span", { class: "dots" }, h("i"), h("i"), h("i")), h("span", { text: msg }));
   function safetyBox() {
     return h("div", { class: "safety" },
@@ -1377,6 +1385,7 @@ JSON 하나로만 답하라:
     }
     if (S) {
       const dd = Math.hypot(me.x - S.ox, me.z - S.D / 2);
+      if (!moving && !sheetOpen && me.moving && me.z > S.D / 2 - .55 && Math.abs(me.x - S.ox) < .7 && performance.now() - enteredAt > 1200) exitShop();
       S.doorOpen = Math.max(0, (S.doorOpen || 0) - dt); S.door.visible = camera.position.z < S.D / 2 - .05;
       S.door.rotation.y += ((dd < 1.9 || S.doorOpen > 0 ? -1.2 : 0) - S.door.rotation.y) * Math.min(1, dt * 5);
       if (S.keeper) {
