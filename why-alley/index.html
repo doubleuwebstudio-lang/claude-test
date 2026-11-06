@@ -1395,7 +1395,11 @@ ${worry}` : ""}`;
       work: ["이 일정은 어려울 것 같습니다", "제 의견도 들어 주셨으면 해요", "업무 분담을 다시 정하고 싶어요", "그때 도와주셔서 감사했어요"],
       friend: ["빌려 간 돈 언제 갚을 거야?", "요즘 좀 서운했어", "약속 자꾸 미루면 힘들어", "너랑 다시 친해지고 싶어"],
       family: ["제 인생은 제가 정할게요", "그 말이 상처였어요", "요즘 무슨 고민 있니?", "고맙다는 말을 못 했어요"] } },
-    tarot: { label: "할매한테 물어볼 질문", ph: "예: 이 사람이랑 앞으로 어떻게 될까요?", chips: ["이 관계 앞으로 어떻게 될까요?", "먼저 연락해도 될까요?", "이 사람 마음이 식은 걸까요?", "헤어진 그 사람, 다시 만날 수 있을까요?"] }
+    tarot: { label: "할매한테 물어볼 질문", ph: "예: 이 사람이랑 앞으로 어떻게 될까요?", chips: {
+      love: ["이 관계 앞으로 어떻게 될까요?", "먼저 연락해도 될까요?", "이 사람 마음이 식은 걸까요?", "헤어진 그 사람, 다시 만날 수 있을까요?"],
+      work: ["올해 이 사람과 일이 잘 풀릴까요?", "이 사람과 사이가 나아질까요?", "이 프로젝트 잘 끝날까요?", "이직하면 잘 풀릴까요?"],
+      friend: ["이 친구랑 계속 잘 지낼 수 있을까요?", "서운한 걸 말해도 괜찮을까요?", "먼저 연락해도 될까요?", "멀어진 친구와 다시 가까워질까요?"],
+      family: ["올해 이 사람과 사이가 좋아질까요?", "서로 마음이 통하게 될까요?", "이번 명절 잘 넘어갈 수 있을까요?", "서운했던 일, 풀 수 있을까요?"] } }
   };
   function relSelect(id, value, onChange) {
     const sel = h("select", { id }, ...RELS.map((r) => { const o = h("option", { value: r, text: r }); if (r === value) o.selected = true; return o; }));
@@ -1606,7 +1610,9 @@ ${cardText(Object.assign({}, card, { rel }), worry, "손님이 그 사람에게 
     const go = h("button", { class: "primary", text: "할매, 봐 주세요", disabled: "" });
     const info = h("p", { class: "prose", text: "질문을 마음에 품고 끌리는 카드 3장을 골라. 순서대로 과거, 현재, 미래야." });
     const ready = () => { go.disabled = picked.length !== 3 || wb.get().length < 4; };
-    const wb = worryBox("tarot", ready);
+    let rel = (results.tarot && results.tarot.rel) || card.rel;
+    const wb = worryBox("tarot", ready, groupOf(rel));
+    const relEl = relSelect("rTarot", rel, (v) => { rel = v; wb.setGroup(groupOf(v)); });
     const fan = h("div", { class: "fan" }, ...deck.map((ci, k) => {
       const b = h("button", { class: "tback", "aria-label": `${k + 1}번째 카드`, "aria-pressed": "false" });
       b.addEventListener("click", () => {
@@ -1617,11 +1623,11 @@ ${cardText(Object.assign({}, card, { rel }), worry, "손님이 그 사람에게 
       });
       return b;
     }));
-    body.append(wb.el, info, fan, go, out);
+    body.append(relEl, wb.el, info, fan, go, out);
     go.addEventListener("click", async () => {
       if (!sample) { out.replaceChildren(h("p", { class: "err", text: errCopy({ code: "unavailable" }) })); return; }
       const worry = wb.get(); if (worry.length < 4 || picked.length !== 3) return;
-      go.disabled = true; fan.hidden = true; info.hidden = true; wb.el.hidden = true;
+      go.disabled = true; fan.hidden = true; info.hidden = true; wb.el.hidden = true; relEl.hidden = true;
       const picks = picked.slice();
       out.replaceChildren(h("div", { class: "quote", text: `물어본 것: ${worry}` }), h("div", { class: "spread" }, ...picks.map((i, k) => tcard(i, ["과거", "현재", "미래"][k]))), thinking("할매가 카드를 노려보는 중이에요"));
       ctl = new AbortController();
@@ -1630,7 +1636,7 @@ ${cardText(Object.assign({}, card, { rel }), worry, "손님이 그 사람에게 
 
 [가게] 확신 타로. 주인은 '확신 할매'다. 50년 봤다고 우기며 근거 없이 확신에 차서 말하지만 속은 따뜻하다. 반말, 살짝 사투리, 웃기게. 겁주지 않는다. 메이저 아르카나의 전통적인 의미를 바탕으로 손님의 질문에 맞춰 풀이한다. 미래를 정말 맞히는 척 단정하지 말고, 할매다운 확신은 말투로만 보여 준다.
 
-${cardText(card, worry, "할매에게 물어본 질문")}
+${cardText(Object.assign({}, card, { rel }), worry, "할매에게 물어본 질문")}
 
 뽑은 카드(모두 정방향): 과거=${ARCANA[picks[0]]}, 현재=${ARCANA[picks[1]]}, 미래=${ARCANA[picks[2]]}
 
@@ -1638,12 +1644,12 @@ JSON 하나로만 답하라:
 {"safety": true 또는 false, "cards": [{"position": "과거", "name": "카드 이름", "reading": "할매 말투 풀이 2문장"}, {"position": "현재", ...}, {"position": "미래", ...}], "verdict": "질문에 대한 할매의 확신에 찬 결론 한 줄, 35자 이내", "advice": "오늘 해볼 일 한 가지, 1~2문장", "wink": "재미로 보는 거라는 걸 할매 말투로 한 줄"}`, { signal: ctl.signal, modelTier: "default" });
         const cards = (Array.isArray(r.cards) ? r.cards : []).slice(0, 3).map((c, k) => ({ position: ["과거", "현재", "미래"][k], name: ARCANA[picks[k]], reading: S(c && c.reading, 300) }));
         if (cards.length !== 3 || !S(r.verdict, 1)) throw { code: "invalid_json" };
-        results.tarot = { worry, picks, safety: !!r.safety, cards, verdict: S(r.verdict, 80), advice: S(r.advice, 300), wink: S(r.wink, 120) };
+        results.tarot = { worry, rel, picks, safety: !!r.safety, cards, verdict: S(r.verdict, 80), advice: S(r.advice, 300), wink: S(r.wink, 120) };
         results.cert = null; saveAll();
         out.replaceChildren(h("div", { class: "quote", text: `물어본 것: ${worry}` })); const res = h("div", { style: "display:grid;gap:12px" }); out.append(res); renderTarot(res, results.tarot); go.hidden = true;
         body.append(h("button", { class: "ghost", text: "다른 질문으로 다시 뽑기", onclick: () => { results.tarot = null; saveAll(); openShop("tarot"); } }));
         if (!results.tarot.safety) emitEv({ k: "tarot", c: picks[1] });
-      } catch (e) { const m = errCopy(e); out.replaceChildren(m ? h("p", { class: "err", text: m }) : ""); fan.hidden = false; info.hidden = false; wb.el.hidden = false; ready(); }
+      } catch (e) { const m = errCopy(e); out.replaceChildren(m ? h("p", { class: "err", text: m }) : ""); fan.hidden = false; info.hidden = false; wb.el.hidden = false; relEl.hidden = false; ready(); }
       finally { ctl = null; }
     });
   }
@@ -1890,7 +1896,7 @@ JSON 하나로만 답하라:
     const out = [];
     if (results.mbti) out.push(`- MBTI 통역소에 맡긴 그 사람(${results.mbti.rel || card.rel})의 행동: "${results.mbti.worry}"\n  통역: ${results.mbti.headline} / ${results.mbti.translation}`);
     if (results.mirror) out.push(`- 입장바꿔방에서 그 사람(${results.mirror.rel || card.rel})에게 연습한 못 한 말: "${results.mirror.worry}"\n  거울 속 그 사람의 반응: ${results.mirror.turns.filter((t) => t.role === "assistant").slice(-3).map((t) => t.content).join(" / ")}`);
-    if (results.tarot) out.push(`- 확신 타로에 물어본 질문: "${results.tarot.worry}"\n  카드: ${results.tarot.cards.map((c) => c.name).join(", ")} → ${results.tarot.verdict} / ${results.tarot.advice}`);
+    if (results.tarot) out.push(`- 확신 타로에 그 사람(${results.tarot.rel || card.rel})에 대해 물어본 질문: "${results.tarot.worry}"\n  카드: ${results.tarot.cards.map((c) => c.name).join(", ")} → ${results.tarot.verdict} / ${results.tarot.advice}`);
     return out.join("\n");
   }
   function buildCert(body) {
