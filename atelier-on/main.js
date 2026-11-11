@@ -186,7 +186,7 @@
   footer.className = "site-footer";
   footer.innerHTML = '<div class="wrap foot"><div><a class="logo" href="index.html">' + LOGO + '<span class="logo-word">ATELIER ON</span></a>' +
     "<p>아파트와 주거 공간을 중심으로 인테리어를 제안하는 스튜디오입니다.</p></div>" +
-    '<nav aria-label="하단 메뉴">' + navLinks("") + "</nav>" +
+    '<nav aria-label="하단 메뉴">' + navLinks("") + '<a href="contact.html#faq">자주 묻는 질문</a></nav>' +
     '<div class="foot-note"><p>이 사이트는 홈페이지 제작 포트폴리오용 데모입니다. 소개된 시공 사례는 모두 가상 프로젝트이며, 사업자 정보는 표시하지 않습니다. 사진은 Pexels(Max Vakhtbovych)의 무료 이미지입니다.</p><p>© ATELIER ON 데모</p></div></div>';
   document.body.append(footer);
 
