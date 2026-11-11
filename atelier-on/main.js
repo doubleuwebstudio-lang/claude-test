@@ -210,4 +210,133 @@
   document.querySelectorAll("[data-img]").forEach(function (el) {
     el.outerHTML = photo(el.getAttribute("data-img"), el.getAttribute("data-alt"), { pos: el.getAttribute("data-pos"), eager: el.hasAttribute("data-eager") });
   });
+
+  /* ---- 자주 묻는 질문 (메인·상담 문의가 같은 데이터를 씀) ---- */
+  var FAQ = [
+    ["인테리어 비용은 얼마나 드나요?", "평형, 공사 범위, 마감재에 따라 달라집니다. 상담 때 원하는 범위를 듣고, 현장 확인과 평면도를 바탕으로 항목별 견적을 드립니다."],
+    ["공사 기간은 얼마나 걸리나요?", "주방·욕실 같은 부분 인테리어는 보통 2~4주, 집 전체 리모델링은 6~8주 정도입니다. 공사 범위와 관리사무실의 공사 가능 시간에 따라 일정을 정합니다."],
+    ["견적은 무엇을 기준으로 내나요?", "관리사무실에서 받을 수 있는 세대 평면도(건축도면)와 현장 실측을 기준으로 냅니다. 사진만으로는 벽과 배관 위치를 알 수 없어 정확한 견적을 드리기 어렵습니다."],
+    ["입주 전에 공사를 끝낼 수 있나요?", "입주 날짜와 관리사무실의 공사 가능 기간을 먼저 확인하고, 그 안에 끝나도록 일정을 잡습니다."],
+    ["살면서 공사할 수 있나요?", "부분 인테리어는 공간을 나눠 진행할 수 있습니다. 전체 리모델링은 짐을 옮기고 집을 비운 상태에서 하는 것이 안전합니다."],
+    ["상담은 어떻게 시작하나요?", "상담 문의 페이지에 공사 지역, 평형, 원하는 공사 범위를 남겨 주세요. 연락드려 통화로 내용을 확인한 뒤 현장 확인 날짜를 정합니다."]
+  ];
+  document.querySelectorAll("[data-faq]").forEach(function (el) {
+    var n = +el.getAttribute("data-faq") || FAQ.length;
+    el.innerHTML = FAQ.slice(0, n).map(function (q) {
+      return '<details class="qa"><summary>' + esc(q[0]) + "</summary><p>" + esc(q[1]) + "</p></details>";
+    }).join("");
+  });
+
+  /* ---- 평면도로 공간 고르기 (메인) ---- */
+  var SPACES = {
+    living:  { name: "거실", rooms: ["living"], photos: [["6933855", "30평대 거실"], ["6890403", "20평대 거실"]], projects: ["p01", "p02", "p03"],
+               works: ["바닥재", "벽 마감", "간접조명", "TV 벽", "발코니 확장"],
+               desc: "가족이 가장 오래 머무는 곳이라 바닥과 조명을 바꾸는 것만으로도 집의 인상이 크게 달라집니다." },
+    kitchen: { name: "주방", rooms: ["kitchen"], photos: [["6933853", "30평대 주방"], ["7005291", "40평대 주방"]], projects: ["p01", "p02", "p03"],
+               works: ["상하부장", "상판", "싱크·후드", "아일랜드", "동선"],
+               desc: "자주 쓰는 물건의 위치와 요리하는 순서에 맞춰 수납과 동선을 다시 짭니다." },
+    dining:  { name: "식탁", rooms: ["dining"], photos: [["6933854", "30평대 식탁"], ["7005300", "40평대 식탁"]], projects: ["p01", "p03"],
+               works: ["조명 위치", "식탁 옆 수납장", "주방과의 동선"],
+               desc: "식탁 위 조명과 주변 수납을 함께 정하면 식사와 작업을 같이 하기 편해집니다." },
+    bed:     { name: "안방·침실", rooms: ["bed1", "bed2", "bed3"], photos: [["6890398", "20평대 침실"], ["6890412", "20평대 침실 벽면"]], projects: ["p02"],
+               works: ["붙박이장", "조명", "도배", "바닥"],
+               desc: "붙박이장으로 수납을 벽 안에 넣으면 방이 넓어 보이고 정리가 쉬워집니다." },
+    bath:    { name: "욕실", rooms: ["bath"], photos: [["6890401", "20평대 욕실 세면대"], ["6890407", "20평대 욕실 샤워 공간"]], projects: ["p02"],
+               works: ["타일", "방수", "세면대·수납장", "욕조 또는 샤워부스"],
+               desc: "타일을 바꿀 때 방수를 새로 하는지 꼭 확인해야 합니다. 욕조와 샤워부스 중 무엇을 쓸지도 함께 정합니다." },
+    entry:   { name: "현관", rooms: ["entry"], photos: [["7005286", "40평대 현관"], ["7005294", "40평대 현관 붙박이장"]], projects: ["p03"],
+               works: ["중문", "신발장", "바닥 타일"],
+               desc: "중문을 달면 소음과 찬바람이 줄고, 신발장을 천장까지 올리면 수납이 크게 늘어납니다." }
+  };
+  var FULL = { name: "전체 리모델링", photos: [["6933852", "30평대 거실과 주방"], ["7005297", "40평대 거실"]], projects: ["p01", "p02", "p03"],
+               works: ["바닥", "벽", "주방", "욕실", "조명", "수납", "창호", "배관"],
+               desc: "바닥, 벽, 주방, 욕실, 조명, 수납까지 집 전체를 하나의 계획으로 진행합니다. 지은 지 오래된 아파트처럼 배관·창호·욕실까지 손봐야 할 때 알맞습니다." };
+  var ROOM_SPACE = {};
+  Object.keys(SPACES).forEach(function (k) { SPACES[k].rooms.forEach(function (r) { ROOM_SPACE[r] = k; }); });
+  function project(id) { return PROJECTS.filter(function (p) { return p.id === id; })[0]; }
+
+  document.querySelectorAll("[data-picker]").forEach(function (root) {
+    var plan = PROJECTS[0], state = { mode: "part", sel: ["kitchen"], cur: "kitchen" };
+    var o = plan.outer;
+    var rooms = plan.rooms.map(function (rm) {
+      var r = rm.r, sp = ROOM_SPACE[rm.id];
+      return '<g class="room" role="button" tabindex="0" data-space="' + sp + '" aria-label="' + esc(rm.label) + '">' +
+        '<rect x="' + r[0] + '" y="' + r[1] + '" width="' + r[2] + '" height="' + r[3] + '"/>' +
+        '<text x="' + (r[0] + r[2] / 2) + '" y="' + (r[1] + r[3] / 2) + '">' + esc(rm.label) + "</text></g>";
+    }).join("");
+    root.innerHTML =
+      '<div class="picker-modes" role="radiogroup" aria-label="공사 방식">' +
+        '<button type="button" role="radio" data-mode="part">부분 인테리어</button>' +
+        '<button type="button" role="radio" data-mode="full">전체 리모델링</button>' +
+      "</div>" +
+      '<div class="picker-body">' +
+        '<div class="picker-plan">' +
+          '<svg class="plan" viewBox="0 0 ' + (o[0] + o[2] + 10) + " " + (o[1] + o[3] + 10) + '" role="group" aria-label="30평대 평면 예시. 공간을 눌러 고르세요">' +
+            '<defs><pattern id="pick-hatch" width="8" height="8" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="8" height="8" fill="#C9B08C"/><path d="M0 0v8" stroke="#8C7050" stroke-width="2"/></pattern></defs>' +
+            rooms + '<rect class="wall" x="' + o[0] + '" y="' + o[1] + '" width="' + o[2] + '" height="' + o[3] + '"/></svg>' +
+          '<div class="picker-chips" role="group" aria-label="공간 목록">' +
+            Object.keys(SPACES).map(function (k) { return '<button type="button" data-space="' + k + '">' + SPACES[k].name + "</button>"; }).join("") +
+          "</div>" +
+          '<p class="picker-sel" aria-live="polite"></p>' +
+          '<p class="picker-note">30평대 평면 예시입니다. 실제 공사 범위는 현장 확인 후 정합니다.</p>' +
+        "</div>" +
+        '<div class="picker-info"></div>' +
+      "</div>";
+
+    var info = root.querySelector(".picker-info"), selLine = root.querySelector(".picker-sel");
+    function names(list) { return list.map(function (k) { return SPACES[k].name; }); }
+    function render() {
+      var full = state.mode === "full";
+      root.querySelectorAll(".picker-modes button").forEach(function (b) { b.setAttribute("aria-checked", b.dataset.mode === state.mode); });
+      root.querySelectorAll(".room").forEach(function (g) {
+        var on = full || state.sel.indexOf(g.dataset.space) > -1;
+        g.classList.toggle("sel", on);
+        g.classList.toggle("cur", g.dataset.space === state.cur);
+        g.setAttribute("aria-pressed", on);
+      });
+      root.querySelectorAll(".picker-chips button").forEach(function (b) {
+        b.setAttribute("aria-pressed", full || state.sel.indexOf(b.dataset.space) > -1);
+        b.classList.toggle("cur", b.dataset.space === state.cur);
+      });
+      selLine.textContent = full ? "집 전체가 공사 범위입니다." :
+        state.sel.length ? "선택한 공간: " + names(state.sel).join(", ") : "바꾸고 싶은 공간을 눌러 골라 보세요.";
+      var d = state.cur ? SPACES[state.cur] : FULL;
+      if (full && !state.cur) d = FULL;
+      var links = d.projects.map(function (id) { var p = project(id); return '<a class="link" href="' + p.page + '">' + p.size + "</a>"; }).join("");
+      var cta = full ? "전체 리모델링 상담하기" : (state.sel.length ? "선택한 공간으로 상담하기" : "상담 문의하기");
+      info.innerHTML =
+        '<h3 class="picker-name">' + d.name + "</h3>" +
+        '<div class="picker-photos">' + d.photos.map(function (ph) { return photo(ph[0], ph[1]); }).join("") + "</div>" +
+        "<p>" + d.desc + "</p>" +
+        '<dl class="picker-works"><dt>많이 하는 공사</dt><dd>' + d.works.map(function (w) { return "<span>" + w + "</span>"; }).join("") + "</dd></dl>" +
+        '<p class="picker-links"><span>이 공간이 나오는 사례</span>' + links + "</p>" +
+        '<a class="btn picker-cta" href="contact.html">' + cta + "</a>";
+      info.querySelector(".picker-cta").addEventListener("click", function () {
+        try {
+          sessionStorage.setItem("atelier-scope", JSON.stringify({ mode: state.mode, spaces: full ? [] : names(state.sel) }));
+        } catch (e) { /* 저장이 막혀 있으면 미리 채우기 없이 이동 */ }
+      });
+    }
+    function pick(space) {
+      if (state.mode === "full") { state.cur = space; render(); return; }
+      var i = state.sel.indexOf(space);
+      if (i > -1 && state.cur === space) state.sel.splice(i, 1); else if (i < 0) state.sel.push(space);
+      state.cur = space;
+      render();
+    }
+    root.querySelectorAll(".room").forEach(function (g) {
+      g.addEventListener("click", function () { pick(g.dataset.space); });
+      g.addEventListener("keydown", function (e) { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); pick(g.dataset.space); } });
+    });
+    root.querySelectorAll(".picker-chips button").forEach(function (b) { b.addEventListener("click", function () { pick(b.dataset.space); }); });
+    root.querySelectorAll(".picker-modes button").forEach(function (b) {
+      b.addEventListener("click", function () {
+        state.mode = b.dataset.mode;
+        state.cur = state.mode === "full" ? null : (state.sel[0] || "kitchen");
+        if (state.mode === "part" && !state.sel.length) state.sel = ["kitchen"];
+        render();
+      });
+    });
+    render();
+  });
 })();

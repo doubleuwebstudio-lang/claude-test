@@ -175,6 +175,50 @@ main:focus{outline:none}
   .scope-key{justify-content:flex-start;align-items:flex-start;margin-top:40px}
 }
 
+/* ---------- 평면도로 공간 고르기 (메인) ---------- */
+.picker{display:grid;gap:40px}
+.picker-modes{display:flex;justify-content:center;gap:0}
+.picker-modes button{min-height:48px;padding:0 28px;border:1px solid var(--ink);background:transparent;color:var(--ink);font:500 14px/1 var(--sans);letter-spacing:var(--track-s);cursor:pointer}
+.picker-modes button+button{border-left:0}
+.picker-modes button[aria-checked="true"]{background:var(--ink);color:var(--paper)}
+.picker-body{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);gap:clamp(40px, 6vw, 96px);align-items:start}
+.picker-plan{display:grid;gap:20px}
+.picker .plan .room{cursor:pointer;outline:none}
+.picker .plan .room text{font-size:9.5px}
+.picker .plan .room rect{transition:fill .2s,stroke .2s}
+.picker .plan .room:hover rect{fill:var(--paper-2)}
+.picker .plan .room.sel rect{fill:url(#pick-hatch)}
+.picker .plan .room.sel text{paint-order:stroke;stroke:#C9B08C;stroke-width:5px;stroke-linejoin:round}
+.picker .plan .room.cur rect{stroke:var(--oak);stroke-width:3}
+.picker .plan .room:focus-visible rect{stroke:var(--oak);stroke-width:4}
+.picker-chips{display:flex;flex-wrap:wrap;gap:8px}
+.picker-chips button{min-height:44px;padding:0 18px;border:1px solid var(--line);background:var(--field);color:var(--ink);font:500 14px/1 var(--sans);letter-spacing:.06em;cursor:pointer}
+.picker-chips button[aria-pressed="true"]{border-color:#8C7050;background:#E6DAC6}
+.picker-chips button.cur{outline:1px solid var(--oak);outline-offset:2px}
+.picker-sel{font-size:17px}
+.picker-note{font:400 13px/1.6 var(--sans);color:var(--stone)}
+.picker-info{display:grid;gap:20px;padding-top:4px}
+.picker-name{font-size:22px;letter-spacing:.16em}
+.picker-photos{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.picker-photos .ph{--ar:4/5}
+.picker-info > p{color:var(--stone)}
+.picker-works{margin:0;display:grid;gap:8px}
+.picker-works dt{font:500 12.5px/1.6 var(--sans);letter-spacing:var(--track-s);color:var(--stone)}
+.picker-works dd{margin:0;display:flex;flex-wrap:wrap;gap:6px 0;font:400 15px/1.6 var(--sans)}
+.picker-works dd span+span::before{content:"|";margin:0 .8em;color:var(--line)}
+.picker-links{display:flex;flex-wrap:wrap;align-items:baseline;gap:6px 18px;color:var(--stone)}
+.picker-links span{font:500 12.5px/1.6 var(--sans);letter-spacing:var(--track-s)}
+.picker-cta{justify-self:start;margin-top:8px}
+@media (max-width:900px){
+  .picker-body{grid-template-columns:1fr}
+}
+@media (max-width:768px){
+  .picker-modes button{flex:1;padding:0 12px}
+  .picker .plan .room text{font-size:14px}
+  .picker-photos{gap:10px}
+  .picker-cta{justify-self:stretch}
+}
+
 /* ---------- 상담 안내 ---------- */
 .cta{display:grid;justify-items:center;text-align:center;gap:16px}
 .cta .sec-title{margin-bottom:16px}
