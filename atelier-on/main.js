@@ -101,7 +101,9 @@
       return '<g class="room' + on + '" style="--i:' + i + '">' + inner + "</g>";
     }).join("");
     var len = 2 * (o[2] + o[3]);
-    return '<svg class="plan ' + (opt.cls || "") + '" viewBox="0 0 ' + vbW + " " + vbH + '" role="img" aria-label="' + esc(opt.label || p.size + " 평면 개념도") + '">' +
+    var a11y = opt.hidden ? ' aria-hidden="true" focusable="false"' :
+      ' role="' + (opt.links ? "group" : "img") + '" aria-label="' + esc(opt.label || p.size + " 평면 개념도") + '"';
+    return '<svg class="plan ' + (opt.cls || "") + '" viewBox="0 0 ' + vbW + " " + vbH + '"' + a11y + '>' +
       (opt.fill ? '<defs><pattern id="' + hatch + '" width="8" height="8" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="8" height="8" fill="#C9B08C"/><path d="M0 0v8" stroke="#8C7050" stroke-width="2"/></pattern></defs>' : "") +
       rooms + '<rect class="wall" x="' + o[0] + '" y="' + o[1] + '" width="' + o[2] + '" height="' + o[3] + '" style="--len:' + len + '"/></svg>';
   }
@@ -116,11 +118,12 @@
   window.ATELIER.photo = photo;
   window.ATELIER.credit = CREDIT;
 
-  function card(p) {
+  function card(p, level) {
+    var h = "h" + (level || 3);
     return '<a class="card" href="detail.html?p=' + p.id + '">' +
-      photo(p.cover, p.title + " 대표 사진") +
-      '<div class="card-body"><h3 class="card-title">' + esc(p.title) + "</h3>" +
-      planSVG(p, { cls: "card-plan", label: p.size + " 평면" }) +
+      photo(p.cover, "") +
+      '<div class="card-body"><' + h + ' class="card-title">' + esc(p.title) + "</" + h + ">" +
+      planSVG(p, { cls: "card-plan", hidden: true }) +
       '<dl class="card-meta"><dt>평형</dt><dd>' + p.size + "</dd><dt>공사 범위</dt><dd>" + p.scope + "</dd><dt>스타일</dt><dd>" + p.style + "</dd></dl>" +
       '<span class="tag">가상 프로젝트</span></div></a>';
   }
@@ -142,6 +145,14 @@
     '<svg width="22" height="22" viewBox="0 0 22 22" aria-hidden="true"><path class="m1" d="M2 6h18M2 16h18" stroke="currentColor" stroke-width="1.6"/></svg></button></div>' +
     '<nav id="mobile-menu" class="mobile-menu" aria-label="모바일 메뉴">' + navLinks(page) + "</nav>";
   document.body.prepend(header);
+  var main = document.querySelector("main");
+  if (main) {
+    main.id = main.id || "main";
+    main.setAttribute("tabindex", "-1");
+    var skip = document.createElement("a");
+    skip.className = "skip"; skip.href = "#" + main.id; skip.textContent = "본문 바로가기";
+    document.body.prepend(skip);
+  }
 
   var btn = header.querySelector(".menu-btn"), menu = header.querySelector(".mobile-menu");
   function setMenu(open) {
@@ -166,7 +177,10 @@
   document.body.append(footer);
 
   /* ---- 프로젝트 목록 ---- */
-  document.querySelectorAll("[data-cards]").forEach(function (el) { el.innerHTML = PROJECTS.map(card).join(""); });
+  document.querySelectorAll("[data-cards]").forEach(function (el) {
+    var level = +el.getAttribute("data-cards") || 3;
+    el.innerHTML = PROJECTS.map(function (p) { return card(p, level); }).join("");
+  });
 
   /* ---- 서비스 범위 평면도 ---- */
   var base = PROJECTS[0];

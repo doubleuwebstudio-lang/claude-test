@@ -42,12 +42,25 @@ def grade(a):
     a = L + (a - L) * SATURATION
     return np.clip(BLACK + a * (WHITE - BLACK), 0, 1)
 
+def trim_edges(a, limit=10, diff=0.12):
+    """원본 가장자리에 붙은 어두운·밝은 띠(몇 픽셀)를 잘라 냅니다."""
+    L = a.mean(2)
+    t = b = l = r = 0
+    while t < limit and abs(L[t].mean() - L[limit + 2].mean()) > diff: t += 1
+    while b < limit and abs(L[-1 - b].mean() - L[-limit - 3].mean()) > diff: b += 1
+    while l < limit and abs(L[:, l].mean() - L[:, limit + 2].mean()) > diff: l += 1
+    while r < limit and abs(L[:, -1 - r].mean() - L[:, -limit - 3].mean()) > diff: r += 1
+    return a[t:a.shape[0] - b, l:a.shape[1] - r], (t, b, l, r)
+
 if __name__ == "__main__":
     here = os.path.dirname(os.path.abspath(__file__))
     src = os.path.join(here, "..", "images", "original")
     for f in sorted(glob.glob(os.path.join(src, "*.jpg"))):
         im = Image.open(f).convert("RGB")
-        out = grade(np.asarray(im).astype(np.float32) / 255)
+        arr, cut = trim_edges(np.asarray(im).astype(np.float32) / 255)
+        if any(cut):
+            print("  가장자리 띠 제거 (위, 아래, 왼쪽, 오른쪽 px):", cut)
+        out = grade(arr)
         Image.fromarray((out * 255 + 0.5).astype(np.uint8)).save(
             os.path.join(src, "..", os.path.basename(f)), quality=84, optimize=True, progressive=True)
         print("graded", os.path.basename(f))
