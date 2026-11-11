@@ -5,7 +5,7 @@
   /* ---- 프로젝트 데이터 (기획서 v2.0 표 기준; 모두 가상 프로젝트) ---- */
   var PROJECTS = [
     {
-      id: "p01", size: "30평대", scope: "전체 리모델링", style: "모던 내추럴",
+      id: "p01", cover: "living", size: "30평대", scope: "전체 리모델링", style: "모던 내추럴",
       title: "30평대 아파트 전체 리모델링",
       oneLine: "화이트와 우드로 마감한 모던 내추럴 스타일",
       intro: [
@@ -31,7 +31,7 @@
       ]
     },
     {
-      id: "p02", size: "20평대", scope: "전체 인테리어", style: "화이트 우드",
+      id: "p02", cover: "kitchen", size: "20평대", scope: "전체 인테리어", style: "화이트 우드",
       title: "20평대 아파트 전체 인테리어",
       oneLine: "화이트 벽과 밝은 우드 바닥으로 넓어 보이게 한 집",
       intro: [
@@ -56,7 +56,7 @@
       ]
     },
     {
-      id: "p03", size: "40평대", scope: "전체 리모델링", style: "웜 모던",
+      id: "p03", cover: "detail", size: "40평대", scope: "전체 리모델링", style: "웜 모던",
       title: "40평대 아파트 전체 리모델링",
       oneLine: "베이지와 짙은 우드로 맞춘 웜 모던 스타일",
       intro: [
@@ -87,13 +87,16 @@
   function esc(s) { return String(s).replace(/[&<>"]/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]; }); }
 
   /* ---- 평면도 SVG ---- */
+  var planSeq = 0;
   function planSVG(p, opt) {
     opt = opt || {};
+    var hatch = "hatch-" + (++planSeq);
     var o = p.outer, vbW = o[0] + o[2] + 10, vbH = o[1] + o[3] + 10;
     var rooms = p.rooms.map(function (rm, i) {
       var r = rm.r, on = opt.fill && opt.fill.indexOf(rm.id) > -1 ? " on" : "";
+      var fill = on ? "fill:url(#" + hatch + ");" : "";
       var len = 2 * (r[2] + r[3]);
-      var inner = '<rect x="' + r[0] + '" y="' + r[1] + '" width="' + r[2] + '" height="' + r[3] + '" style="--len:' + len + '"/>' +
+      var inner = '<rect x="' + r[0] + '" y="' + r[1] + '" width="' + r[2] + '" height="' + r[3] + '" style="' + fill + '--len:' + len + '"/>' +
         '<text x="' + (r[0] + r[2] / 2) + '" y="' + (r[1] + r[3] / 2) + '">' + esc(rm.label) + "</text>";
       var linked = opt.links && p.gallery.some(function (g) { return g.room === rm.id; });
       if (linked) return '<a class="room' + on + '" href="#photo-' + rm.id + '" data-room="' + rm.id + '" style="--i:' + i + '" aria-label="' + esc(rm.label) + ' 사진 보기">' + inner + "</a>";
@@ -101,6 +104,7 @@
     }).join("");
     var len = 2 * (o[2] + o[3]);
     return '<svg class="plan ' + (opt.cls || "") + '" viewBox="0 0 ' + vbW + " " + vbH + '" role="img" aria-label="' + esc(opt.label || p.size + " 평면 개념도") + '">' +
+      (opt.fill ? '<defs><pattern id="' + hatch + '" width="8" height="8" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="8" height="8" fill="#C9B08C"/><path d="M0 0v8" stroke="#8C7050" stroke-width="2"/></pattern></defs>' : "") +
       rooms + '<rect class="wall" x="' + o[0] + '" y="' + o[1] + '" width="' + o[2] + '" height="' + o[3] + '" style="--len:' + len + '"/></svg>';
   }
   window.ATELIER.planSVG = planSVG;
@@ -113,7 +117,7 @@
 
   function card(p) {
     return '<a class="card" href="detail.html?p=' + p.id + '">' +
-      photo(p.tone, "living", p.size + " 대표 사진 자리") +
+      photo(p.tone, p.cover, p.size + " 대표 사진 자리") +
       '<div class="card-body"><h3 class="card-title">' + esc(p.title) + "</h3>" +
       planSVG(p, { cls: "card-plan", label: p.size + " 평면" }) +
       '<dl class="card-meta"><dt>평형</dt><dd>' + p.size + "</dd><dt>공사 범위</dt><dd>" + p.scope + "</dd><dt>스타일</dt><dd>" + p.style + "</dd></dl>" +
@@ -145,6 +149,8 @@
     btn.querySelector("path").setAttribute("d", open ? "M4 4l14 14M18 4L4 18" : "M2 6h18M2 16h18");
     menu.classList.toggle("open", open);
     document.body.style.overflow = open ? "hidden" : "";
+    document.querySelectorAll("body > main, body > footer").forEach(function (el) { el.inert = open; });
+    if (open) menu.querySelector("a").focus();
   }
   btn.addEventListener("click", function () { setMenu(btn.getAttribute("aria-expanded") !== "true"); });
   document.addEventListener("keydown", function (e) { if (e.key === "Escape" && menu.classList.contains("open")) { setMenu(false); btn.focus(); } });
