@@ -7,7 +7,7 @@
     {
       id: "p01", size: "30평대", scope: "전체 리모델링", style: "모던 내추럴",
       title: "30평대 아파트 전체 리모델링",
-      oneLine: "밝은 화이트에 우드를 더해 편안하게 정리한 가족의 집",
+      oneLine: "화이트와 우드로 마감한 모던 내추럴 스타일",
       intro: [
         "밝은 화이트 톤을 기본으로 따뜻한 우드 소재를 더해 편안한 분위기의 집을 구성했습니다.",
         "거실과 주방이 자연스럽게 이어지도록 공간을 정리했습니다."
@@ -24,16 +24,16 @@
         { id: "entry", label: "현관", r: [240, 150, 70, 60] }
       ],
       gallery: [
-        { room: "living", scene: "living", name: "거실", note: "창가 쪽으로 소파를 두어 낮 동안 밝게 머무는 거실" },
-        { room: "kitchen", scene: "kitchen", name: "주방", note: "거실과 이어지는 일자형 주방과 우드 상부장" },
-        { room: "bed1", scene: "bed", name: "안방", note: "벽 색을 한 톤 낮춰 쉬는 느낌을 살린 안방" },
-        { room: "entry", scene: "detail", name: "현관 수납", note: "우드 루버로 마감한 현관 붙박이 수납장" }
+        { room: "living", scene: "living", name: "거실", note: "거실 전경과 창가 쪽 소파 배치" },
+        { room: "kitchen", scene: "kitchen", name: "주방", note: "거실과 이어지는 일자형 주방" },
+        { room: "bed1", scene: "bed", name: "안방", note: "침대 뒤 벽면과 조명" },
+        { room: "entry", scene: "detail", name: "현관 수납", note: "우드 루버로 마감한 현관 수납장" }
       ]
     },
     {
       id: "p02", size: "20평대", scope: "전체 인테리어", style: "화이트 우드",
       title: "20평대 아파트 전체 인테리어",
-      oneLine: "작은 평형을 넓게 쓰도록 밝게 비운 화이트 우드의 집",
+      oneLine: "화이트 벽과 밝은 우드 바닥으로 넓어 보이게 한 집",
       intro: [
         "화이트 벽과 밝은 우드 바닥으로 공간이 넓어 보이도록 구성했습니다.",
         "방마다 붙박이 수납을 더해 생활용품이 눈에 덜 띄게 정리했습니다."
@@ -49,19 +49,19 @@
         { id: "entry", label: "현관", r: [210, 170, 60, 40] }
       ],
       gallery: [
-        { room: "living", scene: "living", name: "거실", note: "가구 수를 줄여 바닥 면적이 넓어 보이는 거실" },
-        { room: "kitchen", scene: "kitchen", name: "주방", note: "화이트 하부장과 밝은 우드 상판" },
-        { room: "bed1", scene: "bed", name: "안방", note: "침대 옆 벽면을 붙박이장으로 정리한 안방" },
-        { room: "bath", scene: "bath", name: "욕실", note: "밝은 타일과 매립 수납으로 마감한 욕실" }
+        { room: "living", scene: "living", name: "거실", note: "거실 전경" },
+        { room: "kitchen", scene: "kitchen", name: "주방", note: "화이트 하부장과 우드 상판" },
+        { room: "bed1", scene: "bed", name: "안방", note: "침대 옆 붙박이장" },
+        { room: "bath", scene: "bath", name: "욕실", note: "밝은 타일과 매립 수납장" }
       ]
     },
     {
       id: "p03", size: "40평대", scope: "전체 리모델링", style: "웜 모던",
       title: "40평대 아파트 전체 리모델링",
-      oneLine: "베이지와 짙은 우드로 차분하게 맞춘 넓은 집",
+      oneLine: "베이지와 짙은 우드로 맞춘 웜 모던 스타일",
       intro: [
         "베이지와 짙은 우드를 사용해 차분하고 따뜻한 분위기를 만들었습니다.",
-        "넓은 거실은 가족이 함께 머무는 공간으로, 각 방은 조용히 쉬는 공간으로 나누었습니다."
+        "거실은 넓게 열어 두고, 안방에는 드레스룸을 붙여 수납을 모았습니다."
       ],
       tone: { wall: "#EAE2D6", floor: "#8F6B4C", obj: "#D6C9B6" },
       outer: [10, 10, 300, 200],
@@ -75,10 +75,10 @@
         { id: "bath", label: "욕실", r: [240, 150, 70, 60] }
       ],
       gallery: [
-        { room: "living", scene: "living", name: "거실", note: "가족이 함께 머무는 넓은 거실" },
-        { room: "kitchen", scene: "kitchen", name: "주방", note: "짙은 우드 하부장과 베이지 벽의 주방" },
-        { room: "bed1", scene: "bed", name: "안방", note: "간접 조명으로 차분하게 맞춘 안방" },
-        { room: "dress", scene: "detail", name: "드레스룸", note: "안방과 이어지는 우드 드레스룸" }
+        { room: "living", scene: "living", name: "거실", note: "거실 전경" },
+        { room: "kitchen", scene: "kitchen", name: "주방", note: "짙은 우드 하부장과 베이지 벽" },
+        { room: "bed1", scene: "bed", name: "안방", note: "간접 조명을 넣은 안방" },
+        { room: "dress", scene: "detail", name: "드레스룸", note: "안방과 이어지는 드레스룸" }
       ]
     }
   ];
