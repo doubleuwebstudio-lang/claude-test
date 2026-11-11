@@ -93,23 +93,17 @@
     opt = opt || {};
     var hatch = "hatch-" + (++planSeq);
     var o = p.outer, vbW = o[0] + o[2] + 10, vbH = o[1] + o[3] + 10;
-    var rooms = p.rooms.map(function (rm, i) {
-      var r = rm.r, on = opt.fill && opt.fill.indexOf(rm.id) > -1 ? " on" : "";
-      var fill = on ? "fill:url(#" + hatch + ");" : "";
-      var len = 2 * (r[2] + r[3]);
-      var inner = '<rect x="' + r[0] + '" y="' + r[1] + '" width="' + r[2] + '" height="' + r[3] + '" style="' + fill + '--len:' + len + '"/>' +
-        '<text x="' + (r[0] + r[2] / 2) + '" y="' + (r[1] + r[3] / 2) + '">' + esc(rm.label) + "</text>";
-      var linked = opt.links && p.gallery.some(function (g) { return g.room === rm.id; });
-      if (linked) return '<a class="room' + on + '" href="#photo-' + rm.id + '" data-room="' + rm.id + '" style="--i:' + i + '" aria-label="' + esc(rm.label) + ' 사진 보기">' + inner + "</a>";
-      return '<g class="room' + on + '" style="--i:' + i + '">' + inner + "</g>";
+    var rooms = p.rooms.map(function (rm) {
+      var r = rm.r, on = opt.fill && opt.fill.indexOf(rm.id) > -1;
+      return '<g class="room' + (on ? " on" : "") + '"><rect x="' + r[0] + '" y="' + r[1] + '" width="' + r[2] + '" height="' + r[3] + '"' +
+        (on ? ' style="fill:url(#' + hatch + ')"' : "") + "/>" +
+        '<text x="' + (r[0] + r[2] / 2) + '" y="' + (r[1] + r[3] / 2) + '">' + esc(rm.label) + "</text></g>";
     }).join("");
-    var len = 2 * (o[2] + o[3]);
-    var a11y = opt.hidden ? ' aria-hidden="true" focusable="false"' :
-      ' role="' + (opt.links ? "group" : "img") + '" aria-label="' + esc(opt.label || p.size + " 평면 개념도") + '"';
-    return '<svg class="plan ' + (opt.cls || "") + '" viewBox="0 0 ' + vbW + " " + vbH + '"' + a11y + '>' +
+    return '<svg class="plan" viewBox="0 0 ' + vbW + " " + vbH + '" role="img" aria-label="' + esc(opt.label || p.size + " 평면 개념도") + '">' +
       (opt.fill ? '<defs><pattern id="' + hatch + '" width="8" height="8" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="8" height="8" fill="#C9B08C"/><path d="M0 0v8" stroke="#8C7050" stroke-width="2"/></pattern></defs>' : "") +
-      rooms + '<rect class="wall" x="' + o[0] + '" y="' + o[1] + '" width="' + o[2] + '" height="' + o[3] + '" style="--len:' + len + '"/></svg>';
+      rooms + '<rect class="wall" x="' + o[0] + '" y="' + o[1] + '" width="' + o[2] + '" height="' + o[3] + '"/></svg>';
   }
+
   window.ATELIER.planSVG = planSVG;
 
   var CREDIT = "사진: Pexels, Max Vakhtbovych";
@@ -127,7 +121,6 @@
       photo(p.cover, "") +
       '<div class="card-body"><' + h + ' class="card-title">' + esc(p.title) + "</" + h + ">" +
       '<p class="card-desc">' + esc(p.oneLine) + "</p>" +
-      planSVG(p, { cls: "card-plan", hidden: true }) +
       '<dl class="card-meta"><dt>평형</dt><dd>' + p.size + "</dd><dt>공사 범위</dt><dd>" + p.scope + "</dd><dt>스타일</dt><dd>" + p.style + "</dd></dl>" +
       '<span class="tag">가상 프로젝트</span></div></a>';
   }

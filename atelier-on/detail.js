@@ -30,8 +30,6 @@
         '<div><dt>공사 범위</dt><dd>' + p.scope + '</dd></div><div><dt>스타일</dt><dd>' + p.style + '</dd></div>' +
       '</dl>' +
       '<div class="story-text"><h2 class="t-h2">' + p.oneLine + '</h2>' + p.intro.map(function (t) { return "<p>" + t + "</p>"; }).join("") + '</div>' +
-      '<figure class="plan-box">' + A.planSVG(p, { links: true, cls: "draw" }) +
-        '<figcaption>평면 개념도입니다. 밑줄 친 공간을 누르면 그 공간 사진으로 이동합니다.</figcaption></figure>' +
     '</div></section>' +
     '<section class="wrap flow" aria-label="공간별 사진">' +
       fig(G[0], "wide") +
@@ -51,20 +49,4 @@
       '<a class="btn" href="contact.html">상담 문의하기</a>' +
     '</div></section>';
 
-  // 평면도 ↔ 사진 연결: 사진 위에 올리면 평면도의 방이, 방 위에 올리면 사진이 표시됩니다.
-  var rooms = document.querySelectorAll(".plan a.room"), figs = document.querySelectorAll(".flow figure");
-  function hl(room, on) {
-    rooms.forEach(function (r) { r.classList.toggle("hl", on && r.dataset.room === room); });
-    figs.forEach(function (f) { f.classList.toggle("hl", on && f.dataset.room === room); });
-  }
-  rooms.forEach(function (r) {
-    r.addEventListener("mouseenter", function () { hl(r.dataset.room, true); });
-    r.addEventListener("mouseleave", function () { hl(r.dataset.room, false); });
-    r.addEventListener("focus", function () { hl(r.dataset.room, true); });
-    r.addEventListener("blur", function () { hl(r.dataset.room, false); });
-  });
-  figs.forEach(function (f) {
-    f.addEventListener("mouseenter", function () { hl(f.dataset.room, true); });
-    f.addEventListener("mouseleave", function () { hl(f.dataset.room, false); });
-  });
 })();
