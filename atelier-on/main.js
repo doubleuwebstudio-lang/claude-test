@@ -5,40 +5,39 @@
   /* ---- 프로젝트 데이터 (기획서 v2.0 표 기준; 모두 가상 프로젝트) ---- */
   var PROJECTS = [
     {
-      id: "p01", cover: "living", size: "30평대", scope: "전체 리모델링", style: "모던 내추럴",
+      id: "p01", cover: "6933852", size: "30평대", scope: "전체 리모델링", style: "모던 내추럴",
       title: "30평대 아파트 전체 리모델링",
       oneLine: "화이트와 우드로 마감한 모던 내추럴 스타일",
       intro: [
         "밝은 화이트 톤을 기본으로 따뜻한 우드 소재를 더해 편안한 분위기의 집을 구성했습니다.",
         "거실과 주방이 자연스럽게 이어지도록 공간을 정리했습니다."
       ],
-      tone: { wall: "#F3F0EA", floor: "#C9A67E", obj: "#E2D9CC" },
       outer: [10, 10, 300, 200],
       rooms: [
         { id: "bed1", label: "안방", r: [10, 10, 100, 110] },
         { id: "bed2", label: "침실", r: [10, 120, 100, 90] },
         { id: "living", label: "거실", r: [110, 10, 130, 120] },
-        { id: "kitchen", label: "주방", r: [110, 130, 130, 80] },
+        { id: "kitchen", label: "주방", r: [110, 130, 70, 80] },
+        { id: "dining", label: "식탁", r: [180, 130, 60, 80] },
         { id: "bath", label: "욕실", r: [240, 10, 70, 60] },
         { id: "bed3", label: "침실", r: [240, 70, 70, 80] },
         { id: "entry", label: "현관", r: [240, 150, 70, 60] }
       ],
       gallery: [
-        { room: "living", scene: "living", name: "거실", note: "거실 전경과 창가 쪽 소파 배치" },
-        { room: "kitchen", scene: "kitchen", name: "주방", note: "거실과 이어지는 일자형 주방" },
-        { room: "bed1", scene: "bed", name: "안방", note: "침대 뒤 벽면과 조명" },
-        { room: "entry", scene: "detail", name: "현관 수납", note: "우드 루버로 마감한 현관 수납장" }
+        { room: "living", img: "6933855", name: "거실", note: "창 쪽으로 소파를 두고 맞은편 벽에 TV 수납장을 단 거실" },
+        { room: "kitchen", img: "6933853", name: "주방", note: "거실과 이어지는 아일랜드 주방" },
+        { room: "dining", img: "6933854", name: "식탁", note: "주방 옆에 둔 6인 식탁" },
+        { room: "living", img: "6933860", name: "거실 우드 벽", note: "우드 슬랫으로 마감한 거실 벽" }
       ]
     },
     {
-      id: "p02", cover: "kitchen", size: "20평대", scope: "전체 인테리어", style: "화이트 우드",
+      id: "p02", cover: "6890394", size: "20평대", scope: "전체 인테리어", style: "화이트 우드",
       title: "20평대 아파트 전체 인테리어",
-      oneLine: "화이트 벽과 밝은 우드 바닥으로 넓어 보이게 한 집",
+      oneLine: "흰 벽과 밝은 우드 가구로 넓어 보이게 한 집",
       intro: [
-        "화이트 벽과 밝은 우드 바닥으로 공간이 넓어 보이도록 구성했습니다.",
-        "방마다 붙박이 수납을 더해 생활용품이 눈에 덜 띄게 정리했습니다."
+        "흰 벽과 밝은 우드 가구로 공간이 넓어 보이도록 구성했습니다.",
+        "창가와 벽면에 붙박이 수납을 더해 생활용품이 눈에 덜 띄게 정리했습니다."
       ],
-      tone: { wall: "#F6F5F1", floor: "#DCC3A0", obj: "#ECE6DC" },
       outer: [10, 10, 260, 200],
       rooms: [
         { id: "bed1", label: "안방", r: [10, 10, 100, 110] },
@@ -49,21 +48,20 @@
         { id: "entry", label: "현관", r: [210, 170, 60, 40] }
       ],
       gallery: [
-        { room: "living", scene: "living", name: "거실", note: "거실 전경" },
-        { room: "kitchen", scene: "kitchen", name: "주방", note: "화이트 하부장과 우드 상판" },
-        { room: "bed1", scene: "bed", name: "안방", note: "침대 옆 붙박이장" },
-        { room: "bath", scene: "bath", name: "욕실", note: "밝은 타일과 매립 수납장" }
+        { room: "living", img: "6890403", name: "거실", note: "창가에 붙박이 선반을 짜 넣은 거실" },
+        { room: "kitchen", img: "6890396", name: "주방", note: "흰 상하부장과 타일 벽의 주방" },
+        { room: "bed1", img: "6890398", name: "안방", note: "흰 침구와 우드 가구로 맞춘 침실" },
+        { room: "bath", img: "6890401", name: "욕실", note: "우드 상판 세면대와 조명 거울" }
       ]
     },
     {
-      id: "p03", cover: "detail", size: "40평대", scope: "전체 리모델링", style: "웜 모던",
+      id: "p03", cover: "7005297", size: "40평대", scope: "전체 리모델링", style: "웜 모던",
       title: "40평대 아파트 전체 리모델링",
-      oneLine: "베이지와 짙은 우드로 맞춘 웜 모던 스타일",
+      oneLine: "베이지와 그레이 톤으로 맞춘 웜 모던 스타일",
       intro: [
-        "베이지와 짙은 우드를 사용해 차분하고 따뜻한 분위기를 만들었습니다.",
-        "거실은 넓게 열어 두고, 안방에는 드레스룸을 붙여 수납을 모았습니다."
+        "베이지와 그레이 톤을 사용해 차분하고 따뜻한 분위기를 만들었습니다.",
+        "현관과 드레스룸에 붙박이 수납을 넉넉히 두어 넓은 집을 정돈해 쓸 수 있게 했습니다."
       ],
-      tone: { wall: "#EAE2D6", floor: "#8F6B4C", obj: "#D6C9B6" },
       outer: [10, 10, 300, 200],
       rooms: [
         { id: "bed1", label: "안방", r: [10, 10, 110, 120] },
@@ -71,14 +69,14 @@
         { id: "living", label: "거실", r: [120, 10, 120, 130] },
         { id: "kitchen", label: "주방", r: [120, 140, 120, 70] },
         { id: "bed2", label: "침실", r: [240, 10, 70, 80] },
-        { id: "bed3", label: "침실", r: [240, 90, 70, 60] },
+        { id: "entry", label: "현관", r: [240, 90, 70, 60] },
         { id: "bath", label: "욕실", r: [240, 150, 70, 60] }
       ],
       gallery: [
-        { room: "living", scene: "living", name: "거실", note: "거실 전경" },
-        { room: "kitchen", scene: "kitchen", name: "주방", note: "짙은 우드 하부장과 베이지 벽" },
-        { room: "bed1", scene: "bed", name: "안방", note: "간접 조명을 넣은 안방" },
-        { room: "dress", scene: "detail", name: "드레스룸", note: "안방과 이어지는 드레스룸" }
+        { room: "kitchen", img: "7005291", name: "주방", note: "그레이 유리 상부장과 베이지 하부장" },
+        { room: "kitchen", img: "7005300", name: "식탁", note: "주방 아일랜드와 이어지는 식탁" },
+        { room: "entry", img: "7005286", name: "현관", note: "낮은 수납장과 둥근 거울을 둔 현관" },
+        { room: "dress", img: "7005285", name: "드레스룸", note: "선반과 서랍으로 나눈 드레스룸 수납" }
       ]
     }
   ];
@@ -109,15 +107,18 @@
   }
   window.ATELIER.planSVG = planSVG;
 
-  function photo(tone, scene, note, extra) {
-    return '<div class="ph" data-scene="' + scene + '" style="--wall:' + tone.wall + ";--floor:" + tone.floor + ";--obj:" + tone.obj + (extra || "") + '">' +
-      '<span class="ph-light"></span><span class="ph-obj"></span><span class="ph-note">' + esc(note) + "</span></div>";
+  var CREDIT = "사진: Pexels, Max Vakhtbovych";
+  function photo(id, alt, opt) {
+    opt = opt || {};
+    return '<div class="ph"' + (opt.pos ? ' style="--pos:' + opt.pos + '"' : "") + '><img src="images/' + id + '.jpg" alt="' + esc(alt) + '"' +
+      (opt.eager ? ' fetchpriority="high"' : ' loading="lazy"') + ' decoding="async"></div>';
   }
   window.ATELIER.photo = photo;
+  window.ATELIER.credit = CREDIT;
 
   function card(p) {
     return '<a class="card" href="detail.html?p=' + p.id + '">' +
-      photo(p.tone, p.cover, p.size + " 대표 사진 자리") +
+      photo(p.cover, p.title + " 대표 사진") +
       '<div class="card-body"><h3 class="card-title">' + esc(p.title) + "</h3>" +
       planSVG(p, { cls: "card-plan", label: p.size + " 평면" }) +
       '<dl class="card-meta"><dt>평형</dt><dd>' + p.size + "</dd><dt>공사 범위</dt><dd>" + p.scope + "</dd><dt>스타일</dt><dd>" + p.style + "</dd></dl>" +
@@ -161,7 +162,7 @@
   footer.innerHTML = '<div class="wrap foot"><div><a class="logo" href="index.html">' + LOGO + '<span class="logo-word">ATELIER ON</span></a>' +
     "<p>아파트와 주거 공간을 중심으로 인테리어를 제안하는 스튜디오입니다.</p></div>" +
     '<nav aria-label="하단 메뉴">' + navLinks("") + "</nav>" +
-    '<div class="foot-note"><p>이 사이트는 홈페이지 제작 포트폴리오용 데모입니다. 소개된 시공 사례는 모두 가상 프로젝트이며, 사업자 정보는 표시하지 않습니다.</p><p>© ATELIER ON 데모</p></div></div>';
+    '<div class="foot-note"><p>이 사이트는 홈페이지 제작 포트폴리오용 데모입니다. 소개된 시공 사례는 모두 가상 프로젝트이며, 사업자 정보는 표시하지 않습니다. 사진은 Pexels(Max Vakhtbovych)의 무료 이미지입니다.</p><p>© ATELIER ON 데모</p></div></div>';
   document.body.append(footer);
 
   /* ---- 프로젝트 목록 ---- */
@@ -177,9 +178,8 @@
     });
   });
 
-  /* ---- 사진 자리 (정적 마크업용) ---- */
-  document.querySelectorAll("[data-photo]").forEach(function (el) {
-    var t = PROJECTS[+el.getAttribute("data-tone") || 0].tone;
-    el.outerHTML = photo(t, el.getAttribute("data-photo"), el.getAttribute("data-note"), el.getAttribute("data-extra") || "");
+  /* ---- 정적 마크업의 사진 ---- */
+  document.querySelectorAll("[data-img]").forEach(function (el) {
+    el.outerHTML = photo(el.getAttribute("data-img"), el.getAttribute("data-alt"), { pos: el.getAttribute("data-pos"), eager: el.hasAttribute("data-eager") });
   });
 })();

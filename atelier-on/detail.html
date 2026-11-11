@@ -20,8 +20,11 @@
   var p = list.filter(function (x) { return x.id === id; })[0] || list[0];
   document.title = p.title + " | 아틀리에 온";
 
+  var seen = {};
   var gallery = p.gallery.map(function (g) {
-    return '<figure id="photo-' + g.room + '" data-room="' + g.room + '">' + A.photo(p.tone, g.scene, g.name + " 사진 자리") +
+    var id = seen[g.room] ? "" : ' id="photo-' + g.room + '"';
+    seen[g.room] = true;
+    return '<figure' + id + ' data-room="' + g.room + '">' + A.photo(g.img, g.name + ": " + g.note) +
       '<figcaption><b>' + g.name + '</b>' + g.note + '</figcaption></figure>';
   }).join("");
 
@@ -31,7 +34,7 @@
       '<div class="detail-title"><h1 class="t-h1">' + p.title + '</h1><span class="tag">가상 프로젝트</span></div>' +
       '<p class="lead">' + p.oneLine + '</p>' +
     '</div>' +
-    '<div class="wrap detail-hero">' + A.photo(p.tone, "living", "대표 사진 자리: " + p.size + " 거실 전경") + '</div>' +
+    '<div class="wrap detail-hero">' + A.photo(p.cover, p.title + " 대표 사진", { eager: true }) + '</div>' +
     '<div class="wrap"><dl class="facts">' +
       '<div><dt>공간</dt><dd>아파트</dd></div><div><dt>평형</dt><dd>' + p.size + '</dd></div>' +
       '<div><dt>공사 범위</dt><dd>' + p.scope + '</dd></div><div><dt>스타일</dt><dd>' + p.style + '</dd></div>' +
@@ -41,7 +44,7 @@
       '<figure class="plan-box">' + A.planSVG(p, { links: true, cls: "draw" }) +
         '<figcaption>평면 개념도입니다. 공간 이름을 누르면 해당 사진으로 이동합니다.</figcaption></figure>' +
     '</div></section>' +
-    '<section class="wrap" aria-label="공간별 사진"><div class="gallery">' + gallery + '</div></section>' +
+    '<section class="wrap" aria-label="공간별 사진"><div class="gallery">' + gallery + '</div><p class="credit">' + A.credit + '</p></section>' +
     '<section class="section"><div class="wrap cta">' +
       '<h2 class="t-h2">비슷한 인테리어를 계획 중이신가요?</h2>' +
       '<p>' + p.size + ' 아파트의 ' + p.scope + '에 대해 궁금한 점을 남겨 주세요.</p>' +
