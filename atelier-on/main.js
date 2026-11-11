@@ -7,7 +7,7 @@
     {
       id: "p01", cover: "6933852", size: "30평대", scope: "전체 리모델링", style: "모던 내추럴",
       title: "30평대 아파트 전체 리모델링",
-      oneLine: "화이트와 우드로 마감한 모던 내추럴 스타일",
+      oneLine: "거실과 주방을 하나로 이은 밝은 집",
       intro: [
         "밝은 화이트 톤을 기본으로 따뜻한 우드 소재를 더해 편안한 분위기의 집을 구성했습니다.",
         "거실과 주방이 자연스럽게 이어지도록 공간을 정리했습니다."
@@ -24,10 +24,10 @@
         { id: "entry", label: "현관", r: [240, 150, 70, 60] }
       ],
       gallery: [
-        { room: "living", img: "6933855", name: "거실", note: "창 쪽으로 소파를 두고 맞은편 벽에 TV 수납장을 단 거실" },
-        { room: "dining", img: "6933854", name: "식탁", note: "주방 옆에 둔 6인 식탁", pos: "45% 50%" },
-        { room: "living", img: "6933860", name: "거실 우드 벽", note: "우드 슬랫으로 마감한 거실 벽", pos: "40% 50%" },
-        { room: "kitchen", img: "6933853", name: "주방", note: "거실과 이어지는 아일랜드 주방" }
+        { room: "living", img: "6933855", name: "거실", note: "창 쪽에 소파, 맞은편 벽에 TV 수납장" },
+        { room: "dining", img: "6933854", name: "식탁", note: "주방 바로 옆 자리", pos: "45% 50%" },
+        { room: "living", img: "6933860", name: "거실 벽", note: "우드 슬랫 마감", pos: "40% 50%" },
+        { room: "kitchen", img: "6933853", name: "주방", note: "거실 쪽으로 열린 아일랜드" }
       ]
     },
     {
@@ -48,16 +48,16 @@
         { id: "entry", label: "현관", r: [210, 170, 60, 40] }
       ],
       gallery: [
-        { room: "living", img: "6890403", name: "거실", note: "창가에 붙박이 선반을 짜 넣은 거실" },
-        { room: "kitchen", img: "6890396", name: "주방", note: "흰 상하부장과 타일 벽의 주방", pos: "45% 50%" },
+        { room: "living", img: "6890403", name: "거실", note: "창가에 짜 넣은 붙박이 선반" },
+        { room: "kitchen", img: "6890396", name: "주방", note: "흰 상하부장과 타일 벽", pos: "45% 50%" },
         { room: "bath", img: "6890401", name: "욕실", note: "우드 상판 세면대와 조명 거울", pos: "35% 50%" },
-        { room: "bed1", img: "6890398", name: "안방", note: "흰 침구와 우드 가구로 맞춘 침실" }
+        { room: "bed1", img: "6890398", name: "안방", note: "흰 침구와 우드 가구" }
       ]
     },
     {
       id: "p03", cover: "7005297", size: "40평대", scope: "전체 리모델링", style: "웜 모던",
       title: "40평대 아파트 전체 리모델링",
-      oneLine: "베이지와 그레이 톤으로 맞춘 웜 모던 스타일",
+      oneLine: "수납을 넉넉히 둔 베이지 톤의 넓은 집",
       intro: [
         "베이지와 그레이 톤을 사용해 차분하고 따뜻한 분위기를 만들었습니다.",
         "현관과 드레스룸에 붙박이 수납을 넉넉히 두어 넓은 집을 정돈해 쓸 수 있게 했습니다."
@@ -74,9 +74,9 @@
       ],
       gallery: [
         { room: "kitchen", img: "7005291", name: "주방", note: "그레이 유리 상부장과 베이지 하부장" },
-        { room: "entry", img: "7005286", name: "현관", note: "낮은 수납장과 둥근 거울을 둔 현관", pos: "35% 50%" },
-        { room: "dress", img: "7005285", name: "드레스룸", note: "선반과 서랍으로 나눈 드레스룸 수납" },
-        { room: "kitchen", img: "7005300", name: "식탁", note: "주방 아일랜드와 이어지는 식탁" }
+        { room: "entry", img: "7005286", name: "현관", note: "낮은 수납장과 둥근 거울", pos: "35% 50%" },
+        { room: "dress", img: "7005285", name: "드레스룸", note: "선반과 서랍으로 나눈 수납" },
+        { room: "kitchen", img: "7005300", name: "식탁", note: "아일랜드와 나란히 둔 긴 테이블" }
       ]
     }
   ];
