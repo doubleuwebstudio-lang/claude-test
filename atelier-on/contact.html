@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>상담 문의 | 아틀리에 온</title>
+<meta name="description" content="아틀리에 온 인테리어 상담 문의 (데모: 문의 내용은 전송되지 않습니다)">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body data-page="contact">
+<main class="section" style="padding-top:clamp(64px,7vw,110px)">
+  <div class="wrap contact">
+    <div class="contact-aside">
+      <h1 class="t-h1">인테리어 상담 문의</h1>
+      <p class="lead">계획하고 계신 인테리어에 대해 간단히 알려주세요. 정해지지 않은 항목은 비워 두셔도 됩니다.</p>
+      <p class="notice"><b>데모 사이트 안내</b><br>이 양식은 화면 확인용입니다. 입력한 내용은 어디에도 전송되거나 저장되지 않습니다.</p>
+    </div>
+
+    <form class="form" id="form" novalidate>
+      <div class="two">
+        <div class="field"><label for="name">이름<span class="req" aria-hidden="true">*</span></label>
+          <input class="input" id="name" name="name" autocomplete="name" required aria-required="true"></div>
+        <div class="field"><label for="tel">연락처<span class="req" aria-hidden="true">*</span></label>
+          <input class="input" id="tel" name="tel" type="tel" inputmode="tel" autocomplete="tel" placeholder="010-0000-0000" required aria-required="true"></div>
+      </div>
+      <div class="field"><label for="area">공사 지역<span class="req" aria-hidden="true">*</span></label>
+        <input class="input" id="area" name="area" placeholder="예: 서울 마포구" required aria-required="true"></div>
+      <div class="two">
+        <div class="field"><label for="size">아파트 평형</label>
+          <select class="input" id="size" name="size"><option value="">선택해 주세요</option><option>20평 미만</option><option>20평대</option><option>30평대</option><option>40평대</option><option>50평 이상</option><option>잘 모르겠음</option></select></div>
+        <div class="field"><label for="when">공사 예정 시기</label>
+          <select class="input" id="when" name="when"><option value="">선택해 주세요</option><option>1개월 이내</option><option>1~3개월 후</option><option>3~6개월 후</option><option>6개월 이후</option><option>아직 정하지 않음</option></select></div>
+      </div>
+      <div class="field"><label for="msg">문의 내용<span class="req" aria-hidden="true">*</span></label>
+        <textarea class="input" id="msg" name="msg" required aria-required="true" placeholder="예: 30평대 아파트 주방과 욕실만 바꾸고 싶어요."></textarea></div>
+
+      <div class="consent field" id="consent-field">
+        <details><summary>개인정보 수집·이용 안내 보기</summary>
+          <dl><dt>수집 항목</dt><dd>이름, 연락처, 공사 지역, 문의 내용</dd><dt>이용 목적</dt><dd>상담 문의 확인 및 답변</dd><dt>보관 기간</dt><dd>상담 종료 후 실제 운영 정책에 따름</dd></dl>
+        </details>
+        <label class="check"><input type="checkbox" id="agree" required aria-required="true">개인정보 수집·이용에 동의합니다.<span class="req" aria-hidden="true">*</span></label>
+      </div>
+
+      <p class="small"><span class="req" style="color:var(--oak)">*</span> 표시는 필수 항목입니다.</p>
+      <button class="btn" type="submit">상담 문의 보내기</button>
+      <div id="result" role="status" aria-live="polite"></div>
+    </form>
+  </div>
+</main>
+<script src="main.js"></script>
+<script>
+(function () {
+  var form = document.getElementById("form"), out = document.getElementById("result");
+  var MSG = { name: "이름을 입력해 주세요.", tel: "연락받을 번호를 입력해 주세요.", area: "공사할 지역을 입력해 주세요.", msg: "문의 내용을 입력해 주세요.", agree: "개인정보 수집·이용에 동의해 주세요." };
+  function mark(el, bad) {
+    var f = el.closest(".field"), m = f.querySelector(".err-msg");
+    f.classList.toggle("err", bad); el.setAttribute("aria-invalid", bad);
+    if (bad && !m) { m = document.createElement("p"); m.className = "err-msg"; m.id = el.id + "-err"; m.textContent = MSG[el.id]; f.append(m); el.setAttribute("aria-describedby", m.id); }
+    if (!bad && m) { m.remove(); el.removeAttribute("aria-describedby"); }
+  }
+  form.addEventListener("input", function (e) { if (e.target.getAttribute("aria-invalid") === "true") mark(e.target, e.target.type === "checkbox" ? !e.target.checked : !e.target.value.trim()); });
+  form.addEventListener("submit", function (e) {
+    e.preventDefault();
+    var first = null;
+    ["name", "tel", "area", "msg", "agree"].forEach(function (id) {
+      var el = document.getElementById(id), bad = el.type === "checkbox" ? !el.checked : !el.value.trim();
+      mark(el, bad); if (bad && !first) first = el;
+    });
+    out.innerHTML = "";
+    if (first) { first.focus(); return; }
+    out.innerHTML = '<p class="result">입력 확인이 끝났습니다. 데모 사이트라 문의는 전송되지 않았고, 입력한 내용도 저장되지 않았습니다.</p>';
+  });
+})();
+</script>
+</body>
+</html>

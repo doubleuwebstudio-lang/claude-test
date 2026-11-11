@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>시공 사례 상세 | 아틀리에 온</title>
+<meta name="description" content="아틀리에 온 시공 사례 상세 (가상 프로젝트)">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body data-page="projects">
+<main id="detail"></main>
+<script src="main.js"></script>
+<script>
+(function () {
+  var A = window.ATELIER, list = A.projects;
+  var id = new URLSearchParams(location.search).get("p");
+  var p = list.filter(function (x) { return x.id === id; })[0] || list[0];
+  document.title = p.title + " | 아틀리에 온";
+
+  var gallery = p.gallery.map(function (g) {
+    return '<figure id="photo-' + g.room + '" data-room="' + g.room + '">' + A.photo(p.tone, g.scene, g.name + " 사진 자리") +
+      '<figcaption><b>' + g.name + '</b>' + g.note + '</figcaption></figure>';
+  }).join("");
+
+  document.getElementById("detail").innerHTML =
+    '<div class="wrap page-head">' +
+      '<nav class="crumb" aria-label="현재 위치"><a href="projects.html">시공 사례</a><span aria-hidden="true">/</span><span aria-current="page">' + p.size + '</span></nav>' +
+      '<div class="detail-title"><h1 class="t-h1">' + p.title + '</h1><span class="tag">가상 프로젝트</span></div>' +
+      '<p class="lead">' + p.oneLine + '</p>' +
+    '</div>' +
+    '<div class="wrap detail-hero">' + A.photo(p.tone, "living", "대표 사진 자리: " + p.size + " 거실 전경") + '</div>' +
+    '<div class="wrap"><dl class="facts">' +
+      '<div><dt>공간</dt><dd>아파트</dd></div><div><dt>평형</dt><dd>' + p.size + '</dd></div>' +
+      '<div><dt>공사 범위</dt><dd>' + p.scope + '</dd></div><div><dt>스타일</dt><dd>' + p.style + '</dd></div>' +
+    '</dl></div>' +
+    '<section class="section"><div class="wrap story">' +
+      '<div class="story-text"><h2 class="t-h2">공간 소개</h2>' + p.intro.map(function (t) { return "<p>" + t + "</p>"; }).join("") + '</div>' +
+      '<figure class="plan-box" style="margin:0">' + A.planSVG(p, { links: true, cls: "draw" }) +
+        '<figcaption>평면 개념도입니다. 공간 이름을 누르면 해당 사진으로 이동합니다.</figcaption></figure>' +
+    '</div></section>' +
+    '<section class="wrap" aria-label="공간별 사진"><div class="gallery">' + gallery + '</div></section>' +
+    '<section class="section"><div class="wrap cta">' +
+      '<h2 class="t-h2">비슷한 인테리어를 계획 중이신가요?</h2>' +
+      '<p>' + p.size + ' 아파트의 ' + p.scope + '에 대해 궁금한 점을 남겨 주세요.</p>' +
+      '<a class="btn" href="contact.html">상담 문의하기</a>' +
+      '<p class="back"><a class="link" href="projects.html">← 전체 시공 사례</a></p>' +
+    '</div></section>';
+
+  // 평면도 ↔ 사진 연결: 사진 위에 올리면 평면도의 방이, 방 위에 올리면 사진이 표시됩니다.
+  var rooms = document.querySelectorAll(".plan a.room"), figs = document.querySelectorAll(".gallery figure");
+  function hl(room, on) {
+    rooms.forEach(function (r) { r.classList.toggle("hl", on && r.dataset.room === room); });
+    figs.forEach(function (f) { f.classList.toggle("hl", on && f.dataset.room === room); });
+  }
+  rooms.forEach(function (r) {
+    r.addEventListener("mouseenter", function () { hl(r.dataset.room, true); });
+    r.addEventListener("mouseleave", function () { hl(r.dataset.room, false); });
+    r.addEventListener("focus", function () { hl(r.dataset.room, true); });
+    r.addEventListener("blur", function () { hl(r.dataset.room, false); });
+  });
+  figs.forEach(function (f) {
+    f.addEventListener("mouseenter", function () { hl(f.dataset.room, true); });
+    f.addEventListener("mouseleave", function () { hl(f.dataset.room, false); });
+  });
+})();
+</script>
+</body>
+</html>
