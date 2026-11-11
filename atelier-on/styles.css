@@ -109,10 +109,11 @@ h1,h2,h3{font-family:var(--serif);font-weight:400;letter-spacing:-.015em;line-he
 .card:hover .card-title{color:var(--oak)}
 .card .ph img{transition:transform .7s cubic-bezier(.2,.7,.2,1)}
 @media (prefers-reduced-motion:no-preference){ .card:hover .ph img{transform:scale(1.035)} }
-.card-meta{font-size:15px;color:var(--stone);margin:0;display:flex;flex-wrap:wrap;gap:2px 14px}
+.card-desc{grid-column:1;font-size:15px;color:#4d4842;margin:2px 0 4px}
+.card-meta{font-size:14px;color:var(--stone);margin:0;display:flex;flex-wrap:wrap;gap:2px 14px}
 .card-meta dt{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
 .card-meta dd{margin:0}
-.plan.card-plan{grid-row:1 / span 3;grid-column:2;width:72px;height:auto;align-self:start;opacity:.85}
+.plan.card-plan{grid-row:1 / span 4;grid-column:2;width:72px;height:auto;align-self:start;opacity:.85}
 .tag{display:inline-block;justify-self:start;font-size:13px;line-height:1.4;color:var(--oak);margin-top:4px}
 @media (max-width:1024px){ .cards{grid-template-columns:repeat(2,1fr)} }
 @media (max-width:768px){ .cards{grid-template-columns:1fr;gap:32px} .card .ph{--ar:4/3} }
@@ -165,40 +166,65 @@ h1,h2,h3{font-family:var(--serif);font-weight:400;letter-spacing:-.015em;line-he
 .detail-title{display:flex;flex-wrap:wrap;align-items:center;gap:12px 16px}
 .detail-title .tag{margin:0}
 .detail-hero .ph{--ar:16/9}
-.facts{display:grid;grid-template-columns:repeat(4,1fr);border-bottom:1px solid var(--line);margin:0}
-.facts div{padding:28px 0 28px 24px;border-left:1px solid var(--line)}
-.facts div:first-child{padding-left:0;border-left:0}
+.story{display:grid;grid-template-columns:200px minmax(0,640px) minmax(260px,380px);justify-content:space-between;gap:48px;align-items:start}
+.facts{margin:0;display:grid;gap:22px;padding-top:8px}
 .facts dt{font-size:14px;color:var(--stone)}
-.facts dd{margin:4px 0 0;font-family:var(--serif);font-size:22px}
-.story{display:grid;grid-template-columns:minmax(0,720px) minmax(260px,400px);justify-content:space-between;gap:48px;align-items:start}
+.facts dd{margin:2px 0 0;font-family:var(--serif);font-size:21px}
 .story-text{display:grid;gap:20px}
 .story-text p{font-size:18px;line-height:1.85}
 .plan-box{display:grid;gap:12px;margin:0}
 .plan-box figcaption{font-size:14px;color:var(--stone)}
-.gallery{display:grid;grid-template-columns:1fr 1fr;gap:40px var(--gap)}
-.gallery figure{margin:0;scroll-margin-top:calc(var(--header) + 24px)}
-.gallery .ph{--ar:4/3}
-.gallery figcaption{padding-top:12px;font-size:15px;color:var(--stone)}
-.gallery figcaption b{color:var(--charcoal);font-weight:500;margin-right:8px}
-.gallery figure.hl .ph{outline:3px solid var(--oak);outline-offset:6px}
-.back{margin-top:56px;text-align:center}
-@media (max-width:768px){
-  .detail-hero .ph{--ar:4/3}
-  .detail-hero{width:100%}
-  .facts{grid-template-columns:1fr}
-  .facts div{display:flex;justify-content:space-between;padding:16px 0;border-left:0;border-top:1px solid var(--line)}
-  .facts dd{margin:0;font-size:19px}
-  .story{grid-template-columns:1fr}
-  .gallery{grid-template-columns:1fr;gap:32px}
-  .back{text-align:left}
-}
+
 @media (prefers-reduced-motion:no-preference){
   .plan.draw .wall,.plan.draw .room rect{stroke-dasharray:var(--len,800);stroke-dashoffset:var(--len,800);animation:draw 1.4s cubic-bezier(.6,0,.2,1) forwards}
-  .plan.draw .room:nth-child(n) rect{animation-delay:calc(var(--i) * 90ms + .3s)}
+  .plan.draw .room rect{animation-delay:calc(var(--i) * 90ms + .3s)}
   .plan.draw .room text{opacity:0;animation:fade .4s ease forwards;animation-delay:1.3s}
 }
 @keyframes draw{to{stroke-dashoffset:0}}
 @keyframes fade{to{opacity:1}}
+
+/* 상세 사진 흐름: 전체 폭 → 설명 → 반반 → 전체 폭 */
+.flow{display:grid;gap:64px}
+.flow figure{margin:0;scroll-margin-top:calc(var(--header) + 24px)}
+.flow .wide .ph{--ar:16/9}
+.flow .half .ph{--ar:4/5}
+.pair{display:grid;grid-template-columns:1fr 1fr;gap:var(--gap)}
+.flow figcaption{padding-top:12px;font-size:15px;color:var(--stone)}
+.flow figcaption b{color:var(--charcoal);font-weight:500;margin-right:8px}
+.flow figure.hl .ph{outline:3px solid var(--oak);outline-offset:6px}
+.flow-text{margin-left:248px;max-width:640px;font-size:18px;line-height:1.85}
+.flow .credit{margin-top:-40px}
+
+/* 이전·다음 사례 */
+.pn{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:24px;margin-top:var(--sec);padding:32px 0;border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
+.pn-prev,.pn-next{display:grid;gap:4px;text-decoration:none}
+.pn-next{text-align:right}
+.pn span{font-size:14px;color:var(--stone)}
+.pn b{font-family:var(--serif);font-weight:400;font-size:20px}
+.pn-prev:hover b,.pn-next:hover b{color:var(--oak)}
+
+@media (max-width:1100px){
+  .story{grid-template-columns:180px minmax(0,1fr)}
+  .plan-box{grid-column:2;max-width:420px}
+  .flow-text{margin-left:228px}
+}
+@media (max-width:768px){
+  .detail-hero .ph{--ar:4/3}
+  .story{grid-template-columns:1fr;gap:32px}
+  .story-text{order:-1}
+  .facts{gap:0;padding:0}
+  .facts div{display:flex;justify-content:space-between;align-items:baseline;padding:14px 0;border-top:1px solid var(--line)}
+  .facts dd{margin:0;font-size:19px}
+  .plan-box{grid-column:auto}
+  .flow{gap:40px}
+  .flow .wide .ph,.flow .half .ph{--ar:4/3}
+  .pair{grid-template-columns:1fr;gap:40px}
+  .flow-text{margin-left:0}
+  .flow .credit{margin-top:-24px}
+  .pn{grid-template-columns:1fr 1fr;gap:20px 16px}
+  .pn-all{grid-row:2;grid-column:1 / -1;justify-self:center}
+  .pn b{font-size:17px}
+}
 
 /* process */
 .steps{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(5,1fr);counter-reset:s;border-top:1px solid var(--charcoal)}
@@ -283,19 +309,12 @@ select.input{appearance:none;background:#fff url("data:image/svg+xml,%3Csvg xmln
   .bleed-text{margin-top:-48px;padding:28px 20px 0 0;max-width:calc(100% - 48px)}
 }
 
-/* 마지막 상담 안내: 진한 띠 */
-.section.dark{background:var(--walnut);color:var(--paper)}
-.dark .cta p{color:#CFC8BD}
-.dark .btn{background:var(--paper);color:var(--walnut);border-color:var(--paper)}
-.dark .btn:hover{background:var(--beige);border-color:var(--beige)}
-.dark :focus-visible{outline-color:var(--beige)}
-
-/* 상세 갤러리: 전체 폭 → 반반 → 전체 폭 */
-@media (min-width:769px){
-  .gallery figure:nth-child(3n+1){grid-column:1 / -1}
-  .gallery figure:nth-child(3n+1) .ph{--ar:16/9}
-  .gallery figure:not(:nth-child(3n+1)) .ph{--ar:4/5}
-}
+/* 진한 띠: 서비스 안내 (월넛) */
+.section.deep{background:var(--walnut);color:var(--paper)}
+.deep .lead,.deep .scope-key{color:#D9D1C5}
+.deep .service{color:var(--charcoal)}
+.deep .scope-key i{border-color:var(--paper)}
+.deep :focus-visible{outline-color:var(--beige)}
 
 /* 본문 바로가기 */
 .skip{position:absolute;left:16px;top:-60px;z-index:50;padding:12px 18px;background:var(--charcoal);color:var(--paper);text-decoration:none;border-radius:999px;font-size:15px}
