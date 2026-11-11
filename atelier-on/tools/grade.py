@@ -10,11 +10,11 @@ import glob, os
 import numpy as np
 from PIL import Image
 
-WALL_WHITE = np.array([1.025, 1.0, 0.955])  # 목표 벽 색 비율 (R:G:B), 약간 따뜻한 흰색
+WALL_WHITE = np.array([1.03, 1.0, 0.94])  # 목표 벽 색 비율 (R:G:B), 약간 따뜻한 흰색
 WB_STRENGTH = 0.85      # 화이트밸런스 보정 강도
-TARGET_MEAN = 0.62      # 목표 평균 밝기
-BLACK, WHITE = 0.035, 0.975  # 출력 검은 점(살짝 띄움)·흰 점
-SATURATION = 0.9
+TARGET_MEAN = 0.58      # 목표 평균 밝기
+BLACK, WHITE = 0.06, 0.96  # 출력 검은 점(살짝 띄움)·흰 점
+SATURATION = 0.8
 
 def grade(a):
     L = a @ np.array([0.2126, 0.7152, 0.0722])

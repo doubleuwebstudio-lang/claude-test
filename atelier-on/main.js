@@ -151,6 +151,14 @@
     '<svg width="22" height="22" viewBox="0 0 22 22" aria-hidden="true"><path class="m1" d="M2 6h18M2 16h18" stroke="currentColor" stroke-width="1.6"/></svg></button></div>' +
     '<nav id="mobile-menu" class="mobile-menu" aria-label="모바일 메뉴">' + navLinks(page) + "</nav>";
   document.body.prepend(header);
+  if (marker && marker.hasAttribute("data-hero")) {
+    header.classList.add("over");
+    var mm = header.querySelector(".mobile-menu");
+    var onScroll = function () { header.classList.toggle("solid", window.scrollY > 24 || mm.classList.contains("open")); };
+    window.addEventListener("scroll", onScroll, { passive: true });
+    header.querySelector(".menu-btn").addEventListener("click", function () { setTimeout(onScroll, 0); });
+    onScroll();
+  }
   var main = document.querySelector("main");
   if (main) {
     main.id = main.id || "main";
