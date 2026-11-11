@@ -29,6 +29,7 @@
 }
 
 *,*::before,*::after{box-sizing:border-box}
+[hidden]{display:none!important}
 html{-webkit-text-size-adjust:100%;scroll-padding-top:calc(var(--header) + 16px)}
 body{margin:0;background:var(--paper);color:var(--ink);font:400 17px/1.9 var(--serif);word-break:keep-all;overflow-wrap:break-word}
 img,svg{display:block;max-width:100%}
@@ -197,6 +198,15 @@ main:focus{outline:none}
 .picker-chips button.cur{outline:1px solid var(--oak);outline-offset:2px}
 .picker-sel{font-size:17px}
 .picker-note{font:400 13px/1.6 var(--sans);color:var(--stone)}
+.picker-steps{display:grid;gap:20px}
+.picker-steps-title{font-size:17px;letter-spacing:.16em}
+.picker-steps ol{list-style:none;margin:0;padding:0;counter-reset:st;border-top:1px solid var(--line)}
+.picker-steps li{counter-increment:st;display:grid;grid-template-columns:52px 120px 1fr;align-items:baseline;gap:8px 16px;padding:16px 0;border-bottom:1px solid var(--line)}
+.picker-steps li::before{content:counter(st,decimal-leading-zero);font:400 18px/1 var(--serif);color:var(--oak);letter-spacing:.06em}
+.picker-steps b{font-weight:400;font-size:17px;letter-spacing:.06em}
+.picker-steps span{font:400 14px/1.7 var(--sans);color:var(--stone)}
+.picker-works dd.period{font-size:15px;color:var(--ink)}
+@media (max-width:768px){ .picker-steps li{grid-template-columns:44px 1fr} .picker-steps span{grid-column:2} }
 .picker-info{display:grid;gap:20px;padding-top:4px}
 .picker-name{font-size:22px;letter-spacing:.16em}
 .picker-photos{display:grid;grid-template-columns:1fr 1fr;gap:16px}

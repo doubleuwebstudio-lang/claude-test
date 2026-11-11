@@ -250,7 +250,19 @@
   };
   var FULL = { name: "전체 리모델링", photos: [["6933852", "30평대 거실과 주방"], ["7005297", "40평대 거실"]], projects: ["p01", "p02", "p03"],
                works: ["바닥", "벽", "주방", "욕실", "조명", "수납", "창호", "배관"],
+               period: "6~8주 (공사 범위와 관리사무실 공사 가능 시간에 따라 달라집니다)",
                desc: "바닥, 벽, 주방, 욕실, 조명, 수납까지 집 전체를 하나의 계획으로 진행합니다. 지은 지 오래된 아파트처럼 배관·창호·욕실까지 손봐야 할 때 알맞습니다." };
+  var STEPS = [
+    ["철거", "기존 마감재와 가구를 걷어 냅니다."],
+    ["설비·방수", "배관을 정리하고 욕실·주방 바닥에 방수를 합니다."],
+    ["창호", "샤시를 교체합니다."],
+    ["목공", "벽체, 천장, 문틀과 몰딩을 만듭니다."],
+    ["전기·조명", "배선을 정리하고 조명 위치를 잡습니다."],
+    ["타일", "욕실, 주방 벽, 현관 바닥에 타일을 붙입니다."],
+    ["도배·바닥", "벽지와 바닥재를 시공합니다."],
+    ["가구·주방", "주방 가구와 붙박이장을 설치합니다."],
+    ["마감·청소", "조명기구와 손잡이를 달고 입주 청소를 합니다."]
+  ];
   var ROOM_SPACE = {};
   Object.keys(SPACES).forEach(function (k) { SPACES[k].rooms.forEach(function (r) { ROOM_SPACE[r] = k; }); });
   function project(id) { return PROJECTS.filter(function (p) { return p.id === id; })[0]; }
@@ -280,13 +292,21 @@
           '<p class="picker-sel" aria-live="polite"></p>' +
           '<p class="picker-note">30평대 평면 예시입니다. 실제 공사 범위는 현장 확인 후 정합니다.</p>' +
         "</div>" +
+        '<div class="picker-steps" hidden>' +
+          '<h3 class="picker-steps-title">공사 순서</h3>' +
+          '<ol>' + STEPS.map(function (s) { return "<li><b>" + s[0] + "</b><span>" + s[1] + "</span></li>"; }).join("") + "</ol>" +
+          '<p class="picker-note">일반적인 공사 순서 예시입니다. 업체와 현장에 따라 순서가 조금 달라질 수 있습니다.</p>' +
+        "</div>" +
         '<div class="picker-info"></div>' +
       "</div>";
 
     var info = root.querySelector(".picker-info"), selLine = root.querySelector(".picker-sel");
+    var planBox = root.querySelector(".picker-plan"), stepsBox = root.querySelector(".picker-steps");
     function names(list) { return list.map(function (k) { return SPACES[k].name; }); }
     function render() {
       var full = state.mode === "full";
+      planBox.hidden = full;
+      stepsBox.hidden = !full;
       root.querySelectorAll(".picker-modes button").forEach(function (b) { b.setAttribute("aria-checked", b.dataset.mode === state.mode); });
       root.querySelectorAll(".room").forEach(function (g) {
         var on = full || state.sel.indexOf(g.dataset.space) > -1;
@@ -300,16 +320,16 @@
       });
       selLine.textContent = full ? "집 전체가 공사 범위입니다." :
         state.sel.length ? "선택한 공간: " + names(state.sel).join(", ") : "바꾸고 싶은 공간을 눌러 골라 보세요.";
-      var d = state.cur ? SPACES[state.cur] : FULL;
-      if (full && !state.cur) d = FULL;
+      var d = full ? FULL : SPACES[state.cur];
       var links = d.projects.map(function (id) { var p = project(id); return '<a class="link" href="' + p.page + '">' + p.size + "</a>"; }).join("");
       var cta = full ? "전체 리모델링 상담하기" : (state.sel.length ? "선택한 공간으로 상담하기" : "상담 문의하기");
       info.innerHTML =
         '<h3 class="picker-name">' + d.name + "</h3>" +
         '<div class="picker-photos">' + d.photos.map(function (ph) { return photo(ph[0], ph[1]); }).join("") + "</div>" +
         "<p>" + d.desc + "</p>" +
-        '<dl class="picker-works"><dt>많이 하는 공사</dt><dd>' + d.works.map(function (w) { return "<span>" + w + "</span>"; }).join("") + "</dd></dl>" +
-        '<p class="picker-links"><span>이 공간이 나오는 사례</span>' + links + "</p>" +
+        '<dl class="picker-works"><dt>' + (full ? "포함되는 공사" : "많이 하는 공사") + '</dt><dd>' + d.works.map(function (w) { return "<span>" + w + "</span>"; }).join("") + "</dd>" +
+          (full ? '<dt>예시 기간</dt><dd class="period">' + d.period + "</dd>" : "") + "</dl>" +
+        '<p class="picker-links"><span>' + (full ? "집 전체를 바꾼 사례" : "이 공간이 나오는 사례") + "</span>" + links + "</p>" +
         '<a class="btn picker-cta" href="contact.html">' + cta + "</a>";
       info.querySelector(".picker-cta").addEventListener("click", function () {
         try {
@@ -318,7 +338,6 @@
       });
     }
     function pick(space) {
-      if (state.mode === "full") { state.cur = space; render(); return; }
       var i = state.sel.indexOf(space);
       if (i > -1 && state.cur === space) state.sel.splice(i, 1); else if (i < 0) state.sel.push(space);
       state.cur = space;
@@ -332,8 +351,8 @@
     root.querySelectorAll(".picker-modes button").forEach(function (b) {
       b.addEventListener("click", function () {
         state.mode = b.dataset.mode;
-        state.cur = state.mode === "full" ? null : (state.sel[0] || "kitchen");
-        if (state.mode === "part" && !state.sel.length) state.sel = ["kitchen"];
+        if (!state.sel.length) state.sel = ["kitchen"];
+        if (state.sel.indexOf(state.cur) < 0) state.cur = state.sel[0];
         render();
       });
     });
