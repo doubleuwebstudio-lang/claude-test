@@ -1,29 +1,7 @@
-<!doctype html>
-<html lang="ko">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>시공 사례 상세 | 아틀리에 온</title>
-<meta name="description" content="아틀리에 온 시공 사례 상세 (가상 프로젝트)">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Gowun+Batang&family=IBM+Plex+Sans+KR:wght@300;400;500;600&display=swap" rel="stylesheet">
-<link rel="icon" href="favicon.svg" type="image/svg+xml">
-<meta name="theme-color" content="#FAF9F6">
-<meta property="og:type" content="website">
-<meta property="og:site_name" content="아틀리에 온 (포트폴리오 데모)">
-<meta property="og:title" content="시공 사례 상세 | 아틀리에 온">
-<meta property="og:description" content="아파트·주거 인테리어 스튜디오 홈페이지 포트폴리오 데모입니다. 시공 사례는 가상 프로젝트입니다.">
-<meta property="og:image" content="images/6933852.jpg">
-<link rel="stylesheet" href="styles.css">
-</head>
-<body data-page="projects">
-<main id="detail"></main>
-<script src="main.js"></script>
-<script>
+/* ATELIER ON — 시공 사례 상세 페이지 (공통 템플릿). 페이지의 body data-project 값으로 프로젝트를 고릅니다. */
 (function () {
   var A = window.ATELIER, list = A.projects;
-  var id = new URLSearchParams(location.search).get("p");
+  var id = document.body.getAttribute("data-project");
   var p = list.filter(function (x) { return x.id === id; })[0] || list[0];
   document.title = p.title + " | 아틀리에 온";
 
@@ -62,9 +40,9 @@
       '<p class="credit">' + A.credit + '</p>' +
     '</section>' +
     '<nav class="wrap pn" aria-label="다른 시공 사례">' +
-      '<a class="pn-prev" href="detail.html?p=' + prev.id + '"><span>이전 사례</span><b>' + prev.title + '</b></a>' +
+      '<a class="pn-prev" href="' + prev.page + '"><span>이전 사례</span><b>' + prev.title + '</b></a>' +
       '<a class="pn-all link" href="projects.html">전체 시공 사례</a>' +
-      '<a class="pn-next" href="detail.html?p=' + next.id + '"><span>다음 사례</span><b>' + next.title + '</b></a>' +
+      '<a class="pn-next" href="' + next.page + '"><span>다음 사례</span><b>' + next.title + '</b></a>' +
     '</nav>' +
     '<section class="section"><div class="wrap cta">' +
       '<h2 class="t-h2">비슷한 인테리어를 계획 중이신가요?</h2>' +
@@ -89,6 +67,3 @@
     f.addEventListener("mouseleave", function () { hl(f.dataset.room, false); });
   });
 })();
-</script>
-</body>
-</html>

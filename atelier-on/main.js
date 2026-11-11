@@ -5,7 +5,7 @@
   /* ---- 프로젝트 데이터 (기획서 v2.0 표 기준; 모두 가상 프로젝트) ---- */
   var PROJECTS = [
     {
-      id: "p01", cover: "6933852", size: "30평대", scope: "전체 리모델링", style: "모던 내추럴",
+      id: "p01", page: "project-30.html", cover: "6933852", size: "30평대", scope: "전체 리모델링", style: "모던 내추럴",
       title: "30평대 아파트 전체 리모델링",
       oneLine: "거실과 주방을 하나로 이은 밝은 집",
       intro: [
@@ -32,7 +32,7 @@
       ]
     },
     {
-      id: "p02", cover: "6890394", size: "20평대", scope: "전체 인테리어", style: "화이트 우드",
+      id: "p02", page: "project-20.html", cover: "6890394", size: "20평대", scope: "전체 인테리어", style: "화이트 우드",
       title: "20평대 아파트 전체 인테리어",
       oneLine: "흰 벽과 밝은 우드 가구로 넓어 보이게 한 집",
       intro: [
@@ -57,7 +57,7 @@
       ]
     },
     {
-      id: "p03", cover: "7005297", size: "40평대", scope: "전체 리모델링", style: "웜 모던",
+      id: "p03", page: "project-40.html", cover: "7005297", size: "40평대", scope: "전체 리모델링", style: "웜 모던",
       title: "40평대 아파트 전체 리모델링",
       oneLine: "수납을 넉넉히 둔 베이지 톤의 넓은 집",
       intro: [
@@ -123,7 +123,7 @@
 
   function card(p, level) {
     var h = "h" + (level || 3);
-    return '<a class="card" href="detail.html?p=' + p.id + '">' +
+    return '<a class="card" href="' + p.page + '">' +
       photo(p.cover, "") +
       '<div class="card-body"><' + h + ' class="card-title">' + esc(p.title) + "</" + h + ">" +
       '<p class="card-desc">' + esc(p.oneLine) + "</p>" +
@@ -139,7 +139,9 @@
     return NAV.map(function (n) { return '<a href="' + n[0] + '"' + (n[2] === page ? ' aria-current="page"' : "") + ">" + n[1] + "</a>"; }).join("");
   }
 
-  var page = document.body.getAttribute("data-page");
+  var marker = document.body.hasAttribute("data-page") ? document.body : document.querySelector("[data-page]");
+  var page = marker ? marker.getAttribute("data-page") : "";
+  if (!document.documentElement.lang) document.documentElement.lang = "ko";
   var header = document.createElement("header");
   header.className = "site-header";
   header.innerHTML = '<div class="wrap header-inner"><a class="logo" href="index.html" aria-label="아틀리에 온 홈">' + LOGO +
