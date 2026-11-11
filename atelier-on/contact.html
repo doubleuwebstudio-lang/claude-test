@@ -22,16 +22,18 @@
   <div class="wrap contact">
     <div class="contact-aside">
       <h1 class="t-h1">인테리어 상담 문의</h1>
-      <p class="lead">계획하고 계신 인테리어에 대해 간단히 알려주세요. 아파트 평형과 공사 예정 시기는 정해지지 않았다면 비워 두셔도 됩니다.</p>
+      <p class="lead">계획하고 계신 인테리어에 대해 간단히 알려주세요. * 표시가 없는 항목은 정해지지 않았다면 비워 두셔도 됩니다.</p>
       <p class="notice"><b>데모 사이트 안내</b><br>이 양식은 화면 확인용입니다. 입력한 내용은 어디에도 전송되거나 저장되지 않습니다.</p>
       <div class="next">
         <h2 class="t-h3">문의 후 진행 순서</h2>
         <ol>
-          <li>남겨 주신 내용을 확인하고 연락드립니다.</li>
+          <li>남겨 주신 내용을 확인하고 전화로 연락드립니다.</li>
           <li>통화로 원하는 공간과 공사 범위, 일정을 여쭙니다.</li>
-          <li>필요하면 현장 확인 날짜를 정합니다.</li>
+          <li>현장을 확인하고 평면도와 함께 실측합니다.</li>
+          <li>디자인을 제안하고 항목별 견적을 드립니다.</li>
+          <li>계약 후 공사 일정을 확정합니다.</li>
         </ol>
-        <a class="link" href="about.html#process">전체 진행 과정 보기</a>
+        <p class="next-links"><a class="link" href="about.html#process">전체 진행 과정</a><a class="link" href="about.html#faq">자주 묻는 질문</a></p>
       </div>
     </div>
 
@@ -50,12 +52,19 @@
         <div class="field"><label for="when">공사 예정 시기</label>
           <select class="input" id="when" name="when"><option value="">선택해 주세요</option><option>1개월 이내</option><option>1~3개월 후</option><option>3~6개월 후</option><option>6개월 이후</option><option>아직 정하지 않음</option></select></div>
       </div>
+      <div class="two">
+        <div class="field"><label for="budget">예산 범위</label>
+          <select class="input" id="budget" name="budget"><option value="">선택해 주세요</option><option>2천만 원 미만</option><option>2천만~4천만 원</option><option>4천만~6천만 원</option><option>6천만 원 이상</option><option>아직 정하지 않음</option></select></div>
+        <div class="field"><label for="plan">평면도(건축도면)</label>
+          <select class="input" id="plan" name="plan" aria-describedby="plan-hint"><option value="">선택해 주세요</option><option>있음</option><option>없음</option><option>잘 모르겠음</option></select>
+          <p class="hint" id="plan-hint">관리사무실에서 받을 수 있습니다. 있으면 견적이 빨라집니다.</p></div>
+      </div>
       <div class="field"><label for="msg">문의 내용<span class="req" aria-hidden="true">*</span></label>
         <textarea class="input" id="msg" name="msg" required aria-required="true" placeholder="예: 30평대 아파트 주방과 욕실만 바꾸고 싶어요."></textarea></div>
 
       <div class="consent field" id="consent-field">
         <details><summary>개인정보 수집·이용 안내 보기</summary>
-          <dl><dt>수집 항목</dt><dd>이름, 연락처, 공사 지역, 문의 내용</dd><dt>이용 목적</dt><dd>상담 문의 확인 및 답변</dd><dt>보관 기간</dt><dd>상담 종료 후 실제 운영 정책에 따름</dd></dl>
+          <dl><dt>필수 항목</dt><dd>이름, 연락처, 공사 지역, 문의 내용</dd><dt>선택 항목</dt><dd>아파트 평형, 공사 예정 시기, 예산 범위, 평면도 보유 여부</dd><dt>이용 목적</dt><dd>상담 문의 확인 및 답변</dd><dt>보관 기간</dt><dd>상담 종료 후 실제 운영 정책에 따름</dd></dl>
         </details>
         <label class="check"><input type="checkbox" id="agree" required aria-required="true"><span>개인정보 수집·이용에 동의합니다.<span class="req" aria-hidden="true">*</span></span></label>
       </div>
