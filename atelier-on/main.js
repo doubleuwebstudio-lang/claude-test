@@ -25,9 +25,9 @@
       ],
       gallery: [
         { room: "living", img: "6933855", name: "거실", note: "창 쪽으로 소파를 두고 맞은편 벽에 TV 수납장을 단 거실" },
-        { room: "kitchen", img: "6933853", name: "주방", note: "거실과 이어지는 아일랜드 주방" },
-        { room: "dining", img: "6933854", name: "식탁", note: "주방 옆에 둔 6인 식탁" },
-        { room: "living", img: "6933860", name: "거실 우드 벽", note: "우드 슬랫으로 마감한 거실 벽" }
+        { room: "dining", img: "6933854", name: "식탁", note: "주방 옆에 둔 6인 식탁", pos: "45% 50%" },
+        { room: "living", img: "6933860", name: "거실 우드 벽", note: "우드 슬랫으로 마감한 거실 벽", pos: "40% 50%" },
+        { room: "kitchen", img: "6933853", name: "주방", note: "거실과 이어지는 아일랜드 주방" }
       ]
     },
     {
@@ -49,9 +49,9 @@
       ],
       gallery: [
         { room: "living", img: "6890403", name: "거실", note: "창가에 붙박이 선반을 짜 넣은 거실" },
-        { room: "kitchen", img: "6890396", name: "주방", note: "흰 상하부장과 타일 벽의 주방" },
-        { room: "bed1", img: "6890398", name: "안방", note: "흰 침구와 우드 가구로 맞춘 침실" },
-        { room: "bath", img: "6890401", name: "욕실", note: "우드 상판 세면대와 조명 거울" }
+        { room: "kitchen", img: "6890396", name: "주방", note: "흰 상하부장과 타일 벽의 주방", pos: "45% 50%" },
+        { room: "bath", img: "6890401", name: "욕실", note: "우드 상판 세면대와 조명 거울", pos: "35% 50%" },
+        { room: "bed1", img: "6890398", name: "안방", note: "흰 침구와 우드 가구로 맞춘 침실" }
       ]
     },
     {
@@ -74,9 +74,9 @@
       ],
       gallery: [
         { room: "kitchen", img: "7005291", name: "주방", note: "그레이 유리 상부장과 베이지 하부장" },
-        { room: "kitchen", img: "7005300", name: "식탁", note: "주방 아일랜드와 이어지는 식탁" },
-        { room: "entry", img: "7005286", name: "현관", note: "낮은 수납장과 둥근 거울을 둔 현관" },
-        { room: "dress", img: "7005285", name: "드레스룸", note: "선반과 서랍으로 나눈 드레스룸 수납" }
+        { room: "entry", img: "7005286", name: "현관", note: "낮은 수납장과 둥근 거울을 둔 현관", pos: "35% 50%" },
+        { room: "dress", img: "7005285", name: "드레스룸", note: "선반과 서랍으로 나눈 드레스룸 수납" },
+        { room: "kitchen", img: "7005300", name: "식탁", note: "주방 아일랜드와 이어지는 식탁" }
       ]
     }
   ];

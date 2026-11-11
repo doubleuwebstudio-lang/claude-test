@@ -248,3 +248,41 @@ select.input{appearance:none;background:#fff url("data:image/svg+xml,%3Csvg xmln
 .next .link{justify-self:start;margin-top:4px}
 #process{scroll-margin-top:calc(var(--header) + 24px)}
 .plan .room.on text{paint-order:stroke;stroke:#C9B08C;stroke-width:5px;stroke-linejoin:round}
+
+/* ---------- 섹션 리듬 ---------- */
+/* 홈 시공 사례: 큰 사진 1장 + 작은 사진 2장 */
+@media (min-width:1025px){
+  .cards.feature{grid-template-columns:3fr 2fr;gap:40px var(--gap)}
+  .cards.feature .card:first-child{grid-row:span 2;display:flex;flex-direction:column}
+  .cards.feature .card:first-child .ph{flex:1;aspect-ratio:auto;min-height:460px}
+  .cards.feature .card:first-child .card-title{font-size:24px}
+  .cards.feature .card:not(:first-child) .ph{--ar:16/10}
+}
+@media (min-width:769px) and (max-width:1024px){
+  .cards.feature .card:first-child{grid-column:1 / -1}
+  .cards.feature .card:first-child .ph{--ar:16/9}
+}
+
+/* 홈 업체 소개: 화면 전체 사진 + 겹치는 글 상자 */
+.bleed{padding-bottom:var(--sec)}
+.bleed .ph{--ar:21/9;max-height:720px;width:100%}
+.bleed-text{position:relative;margin-top:-160px;max-width:600px;background:var(--paper);padding:48px 56px 48px 0;display:grid;gap:18px;justify-items:start}
+.bleed-text::before{content:"";position:absolute;inset:0 0 0 -100vw;background:var(--paper);z-index:-1}
+@media (max-width:768px){
+  .bleed .ph{--ar:4/3}
+  .bleed-text{margin-top:-48px;padding:28px 20px 0 0}
+}
+
+/* 마지막 상담 안내: 진한 띠 */
+.section.dark{background:var(--charcoal);color:var(--paper)}
+.dark .cta p{color:#CFC8BD}
+.dark .btn{background:var(--paper);color:var(--charcoal);border-color:var(--paper)}
+.dark .btn:hover{background:var(--beige);border-color:var(--beige)}
+.dark :focus-visible{outline-color:var(--beige)}
+
+/* 상세 갤러리: 전체 폭 → 반반 → 전체 폭 */
+@media (min-width:769px){
+  .gallery figure:nth-child(3n+1){grid-column:1 / -1}
+  .gallery figure:nth-child(3n+1) .ph{--ar:16/9}
+  .gallery figure:not(:nth-child(3n+1)) .ph{--ar:4/5}
+}

@@ -24,7 +24,7 @@
   var gallery = p.gallery.map(function (g) {
     var id = seen[g.room] ? "" : ' id="photo-' + g.room + '"';
     seen[g.room] = true;
-    return '<figure' + id + ' data-room="' + g.room + '">' + A.photo(g.img, g.name + ": " + g.note) +
+    return '<figure' + id + ' data-room="' + g.room + '">' + A.photo(g.img, g.name + ": " + g.note, { pos: g.pos }) +
       '<figcaption><b>' + g.name + '</b>' + g.note + '</figcaption></figure>';
   }).join("");
 
