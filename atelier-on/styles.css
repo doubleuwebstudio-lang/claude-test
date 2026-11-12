@@ -43,7 +43,7 @@ p,figcaption,li{text-wrap:pretty}
 @media (prefers-reduced-motion:no-preference){ html{scroll-behavior:smooth} }
 
 /* ---------- 글자 단계 ---------- */
-.sec-title{font-size:clamp(30px, 3.6vw, 56px);line-height:1.3;letter-spacing:-.005em;text-align:center;margin-bottom:64px}
+.sec-title{font-size:clamp(26px, 2.6vw, 40px);line-height:1.3;letter-spacing:-.005em;text-align:center;margin-bottom:64px}
 .t-h1{font-size:clamp(24px, 2.2vw, 30px);letter-spacing:.04em}
 .t-h2{font-size:clamp(22px, 2vw, 27px);letter-spacing:.02em}
 .t-h3{font-size:19px;letter-spacing:.04em}
@@ -293,16 +293,13 @@ main:focus{outline:none}
   .plan.draw .room text,.plan.draw .ap-balcony,.plan.draw .ap-open{opacity:0;animation:fade .5s ease 1s forwards}
   /* 첫 화면 순서: 벽 → 사진 */
   @media (min-width:901px){
-    /* 사진: 우드 슬랫처럼 세로 띠가 차례로 걷히며 드러남 */
-    .home-hero-photo .hero-slats{position:absolute;inset:0;z-index:2;display:grid;grid-template-columns:repeat(6,1fr);pointer-events:none}
-    .hero-slats i{background:var(--paper);transform-origin:50% 0;animation:slat .9s cubic-bezier(.7,0,.2,1) forwards}
-    .hero-slats i:nth-child(1){animation-delay:1.5s}.hero-slats i:nth-child(2){animation-delay:1.62s}.hero-slats i:nth-child(3){animation-delay:1.74s}
-    .hero-slats i:nth-child(4){animation-delay:1.86s}.hero-slats i:nth-child(5){animation-delay:1.98s}.hero-slats i:nth-child(6){animation-delay:2.1s}
+    /* 사진: 도면이 다 그려진 뒤, 도면 쪽(왼쪽)부터 걷히며 드러남 */
+    .home-hero-photo{clip-path:inset(0 100% 0 0);animation:wipe 1.4s cubic-bezier(.7,0,.2,1) 1.5s forwards}
     .home-hero-photo .hero-shot.on img{transform:scale(1.06);animation:settle 2s cubic-bezier(.2,.7,.2,1) 1.5s forwards}
     .home-hero-photo .hero-shot-name{opacity:0;animation:fade .5s ease 3s forwards}
   }
 }
-@keyframes slat{to{transform:scaleY(0)}}
+@keyframes wipe{to{clip-path:inset(0)}}
 
 @keyframes settle{to{transform:none}}
 @keyframes draw{to{stroke-dashoffset:0}}
@@ -514,11 +511,11 @@ select.input{appearance:none;background:var(--field) url("data:image/svg+xml,%3C
 .title-motion .sec-title,.title-motion .t-h2{position:relative}
 .title-motion .sec-title .tt,.title-motion .t-h2 .tt{display:inline-block;overflow:hidden;vertical-align:top;padding-bottom:.08em}
 .title-motion .sec-title .tt>span,.title-motion .t-h2 .tt>span{display:inline-block;transform:translateY(110%);transition:transform .9s cubic-bezier(.2,.75,.2,1) .35s}
-.title-motion .sec-title::after,.title-motion .t-h2::after{content:"";display:block;width:44px;height:1px;margin:12px auto 0;background:var(--oak);transform:scaleX(0);transition:transform .5s cubic-bezier(.5,0,.2,1)}
-.title-motion .row-head .sec-title::after,.title-motion .faq-side .sec-title::after,.title-motion .t-h2::after{margin-left:0;transform-origin:0 50%}
-.title-motion .cta .sec-title::after,.title-motion .sec-head .t-h2::after{margin-left:auto;transform-origin:50% 50%}
+.title-motion .sec-title::after,.title-motion .t-h2::after{content:"";display:block;width:64px;height:9px;margin:14px auto 0;border-left:1px solid var(--dim, var(--oak));border-right:1px solid var(--dim, var(--oak));background:linear-gradient(var(--dim, var(--oak)),var(--dim, var(--oak))) 0 50%/100% 1px no-repeat;clip-path:inset(0 100% 0 0);transition:clip-path .8s cubic-bezier(.5,0,.2,1)}
+.title-motion .row-head .sec-title::after,.title-motion .faq-side .sec-title::after,.title-motion .t-h2::after,.title-motion .estimate-side .sec-title::after{margin-left:0}
+.title-motion .cta .sec-title::after,.title-motion .sec-head .t-h2::after{margin-left:auto}
 .title-motion .in .tt>span{transform:none}
-.title-motion .in::after{transform:scaleX(1)}
+.title-motion .in::after{clip-path:inset(0)}
 
 /* ---------- 홈: 약속 한 줄 ---------- */
 .promise{padding-block:clamp(40px, 5vw, 72px) clamp(112px, 11vw, 168px);text-align:center}
@@ -590,7 +587,8 @@ select.input{appearance:none;background:var(--field) url("data:image/svg+xml,%3C
 .stack-under::after{content:"";position:absolute;inset:0;pointer-events:none;background:rgb(30,24,18);opacity:calc(var(--cover) * .35)}
 @media (prefers-reduced-motion:reduce){ .stack-under{transform:none} .stack-under::after{display:none} }
 .dark-zone .promise-sub,.dark-zone .estimate-side p,.dark-zone .estimate-steps span{color:#CBBFAE;transition:color .9s}
-.dark-zone .promise-rule,.dark-zone .sec-title::after{background:#D3B48C}
+.dark-zone .promise-rule{background:#D3B48C}
+.dark-zone{--dim:#D3B48C}
 .dark-zone .estimate-steps li::before{color:#D3B48C}
 .dark-zone .quote{color:var(--paper);background:transparent;border:1px solid rgba(211,180,140,.4)}
 .dark-zone .quote-head{border-bottom-color:#D3B48C}
@@ -823,3 +821,31 @@ select.input{appearance:none;background:var(--field) url("data:image/svg+xml,%3C
   .quick-row:first-of-type{padding-left:0;border-left:0}
 }
 @media (max-width:768px){ .faq-split{row-gap:28px} }
+
+/* ---------- 도면 말투 통일 ---------- */
+/* 첫 화면 평면도: 굵은 벽 대신 가는 선 */
+.home-hero-plan .plan .ap-walls .in{stroke-width:1.3}
+.home-hero-plan .plan .ap-walls .out{stroke-width:2.4}
+.home-hero-plan .plan .ap-walls line,.home-hero-plan .plan .ap-walls rect{stroke:#3A3836}
+.home-hero-plan .plan .ap-marks .leaf{stroke-width:.9}
+
+/* 다크 존 위쪽 가장자리: 도면 경계선 (가는 금색 선 + 눈금) */
+.dark-zone::before{content:"";position:absolute;top:clamp(24px, 3vw, 40px);left:max(20px, calc((100% - 1440px) / 2 + 40px));right:max(20px, calc((100% - 1440px) / 2 + 40px));height:7px;opacity:.55;
+  border-left:1px solid #D3B48C;border-right:1px solid #D3B48C;
+  background:linear-gradient(#D3B48C,#D3B48C) 0 100%/100% 1px no-repeat,repeating-linear-gradient(90deg,#D3B48C 0 1px,transparent 1px 96px) 0 100%/100% 4px no-repeat}
+
+/* 시공 사례 카드: 사진 테두리가 선으로 먼저 그려지고 사진이 채워짐 */
+.draw-motion .hs-card .ph,.draw-motion .cards .card .ph{background:transparent}
+.draw-motion .hs-card .ph::after,.draw-motion .cards .card .ph::after{content:"";position:absolute;inset:0;pointer-events:none;
+  background:linear-gradient(var(--ink),var(--ink)) 0 0/0 1px no-repeat,linear-gradient(var(--ink),var(--ink)) 100% 0/1px 0 no-repeat,linear-gradient(var(--ink),var(--ink)) 100% 100%/0 1px no-repeat,linear-gradient(var(--ink),var(--ink)) 0 100%/1px 0 no-repeat;
+  transition:background-size .5s cubic-bezier(.5,0,.2,1),opacity .6s ease 1.3s}
+.draw-motion .hs-card .ph img,.draw-motion .cards .card .ph img{clip-path:inset(0 100% 0 0);transition:clip-path 1s cubic-bezier(.7,0,.2,1) .55s,transform 1s cubic-bezier(.2,.7,.2,1)}
+.draw-motion .in .ph::after{background-size:100% 1px,1px 100%,100% 1px,1px 100%;opacity:0}
+.draw-motion .in .ph img{clip-path:inset(0)}
+
+/* 견적서: 화면에 들어오면 표의 선이 한 줄씩 그어지고 글자가 따라 나타남 */
+.draw-motion .quote th,.draw-motion .quote td{border-bottom-color:transparent !important;background:linear-gradient(var(--qline, var(--line)),var(--qline, var(--line))) 0 100%/0 1px no-repeat;transition:background-size .5s cubic-bezier(.5,0,.2,1) calc(var(--r, 0) * 90ms),color .5s ease calc(var(--r, 0) * 90ms + 200ms)}
+.draw-motion .quote:not(.in) th,.draw-motion .quote:not(.in) td{color:transparent !important}
+.draw-motion .quote.in th,.draw-motion .quote.in td{background-size:100% 1px}
+.draw-motion .quote .quote-total td{background:none}
+.dark-zone .quote{--qline:rgba(211,180,140,.28)}

@@ -324,7 +324,7 @@
     box.innerHTML = Object.keys(HERO_VIEWS).map(function (k) {
       var h = HERO_VIEWS[k];
       return '<div class="hero-shot' + (k === START ? " on" : "") + '" data-shot="' + k + '">' + photo(h.img, h.alt, { pos: h.pos, eager: k === START }) + "</div>";
-    }).join("") + '<div class="hero-slats" aria-hidden="true">' + "<i></i><i></i><i></i><i></i><i></i><i></i>" + "</div>" +
+    }).join("") +
       '<p class="hero-shot-name" aria-live="polite">' + HERO_VIEWS[START].name + "</p>";
     var label = box.querySelector(".hero-shot-name");
     var current = START;
@@ -577,6 +577,22 @@
     });
     render();
   });
+
+  /* ---- 도면처럼 그려지는 요소: 시공 사례 카드 테두리, 견적서 표 선 (한 번만) ---- */
+  (function () {
+    var calm = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (calm || !("IntersectionObserver" in window)) return;
+    setTimeout(function () {   // 가로 넘김 카드가 만들어진 뒤에 찾음
+      var els = document.querySelectorAll(".hs-card, .cards .card, .quote");
+      if (!els.length) return;
+      document.documentElement.classList.add("draw-motion");
+      document.querySelectorAll(".quote tr").forEach(function (tr, i) { tr.style.setProperty("--r", i); });
+      var io = new IntersectionObserver(function (en) {
+        en.forEach(function (e) { if (e.isIntersecting) { e.target.classList.add("in"); io.unobserve(e.target); } });
+      }, { threshold: 0.25 });
+      els.forEach(function (e) { io.observe(e); });
+    }, 0);
+  })();
 
   /* ---- 섹션 제목: 화면에 들어오면 선이 그려지고 글자가 올라옴 (한 번만) ---- */
   (function () {
