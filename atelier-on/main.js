@@ -410,4 +410,47 @@
     });
     render();
   });
+
+  /* ---- 홈 섹션 넘김 (PC, 휠): 섹션 끝에 닿으면 다음 섹션 시작점으로 이동, 긴 섹션은 안에서 그대로 스크롤 ---- */
+  (function () {
+    if (page !== "home") return;
+    var desk = window.matchMedia("(min-width: 901px) and (min-height: 700px) and (pointer: fine)");
+    var calm = window.matchMedia("(prefers-reduced-motion: reduce)");
+    var busy = false;
+    function headerH() { var h = document.querySelector(".site-header"); return h ? h.getBoundingClientRect().height : 0; }
+    function stops() {
+      var hh = headerH();
+      var list = [].slice.call(document.querySelectorAll("main > section")).map(function (s) { return Math.round(s.getBoundingClientRect().top + scrollY - hh); });
+      var max = document.documentElement.scrollHeight - innerHeight;
+      list[0] = 0;
+      list.push(max);
+      return list.map(function (v) { return Math.min(v, max); })
+        .filter(function (v, k, arr) { return k === 0 || v > arr[k - 1] + 4; });
+    }
+    function go(y) {
+      busy = true;
+      window.scrollTo({ top: y, behavior: "smooth" });
+      setTimeout(function () { busy = false; }, 750);
+    }
+    window.addEventListener("wheel", function (e) {
+      if (!desk.matches || calm.matches || e.ctrlKey) return;
+      if (busy) { e.preventDefault(); return; }
+      if (Math.abs(e.deltaY) < 4) return;
+      var S = stops(), y = scrollY, view = innerHeight - headerH(), i = 0;
+      while (i < S.length - 1 && S[i + 1] <= y + 4) i++;
+      if (e.deltaY > 0) {
+        if (i >= S.length - 1) return;
+        var next = S[i + 1];
+        if (y + view < next - 8) return;          // 아직 이 섹션 안: 그대로 스크롤
+        e.preventDefault(); go(next);
+      } else {
+        if (y > S[i] + 8) {                        // 섹션 중간: 시작점이 멀면 그대로, 가까우면 시작점으로
+          if (y - S[i] > view) return;
+          e.preventDefault(); go(S[i]); return;
+        }
+        if (i === 0) return;
+        e.preventDefault(); go(Math.max(S[i - 1], S[i] - view));
+      }
+    }, { passive: false });
+  })();
 })();
