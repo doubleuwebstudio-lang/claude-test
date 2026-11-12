@@ -199,6 +199,12 @@ main:focus{outline:none}
 .picker-modes button[aria-checked="true"]{background:var(--ink);color:var(--paper)}
 .picker-body{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);gap:clamp(40px, 6vw, 96px);align-items:start}
 .picker-plan{display:grid;gap:20px}
+.prep{margin-top:12px;padding-top:24px;border-top:1px solid var(--line);display:grid;gap:14px}
+.prep-title{font:500 13.5px/1.6 var(--sans);letter-spacing:var(--track-s);color:var(--oak)}
+.prep-list{list-style:none;margin:0;padding:0;display:grid;gap:10px}
+.prep-list li{display:grid;grid-template-columns:22px 1fr;align-items:baseline;font-size:16px;line-height:1.6}
+.prep-list li::before{content:"";width:12px;height:12px;border:1px solid var(--stone);transform:translateY(1px)}
+.prep-note{font:400 13px/1.6 var(--sans);color:var(--stone)}
 .picker-cards{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
 .picker-cards .space-card:first-child{grid-column:span 2}
 .picker-cards .space-card:first-child .ph{--ar:2.07/1}

@@ -389,19 +389,19 @@
 
   /* ---- 평면도로 공간 고르기 (메인) ---- */
   var SPACES = {
-    living:  { name: "거실", rooms: ["living"], photos: [["6933855", "30평대 거실"], ["6890403", "20평대 거실"]], projects: ["p01", "p02", "p03"],
+    living:  { name: "거실", prep: ["관리사무실에서 받은 세대 평면도", "지금 거실 사진 (창 쪽, TV 벽 쪽)", "원하는 분위기의 사진 2~3장"], rooms: ["living"], photos: [["6933855", "30평대 거실"], ["6890403", "20평대 거실"]], projects: ["p01", "p02", "p03"],
                works: ["바닥재", "벽 마감", "간접조명", "TV 벽", "발코니 확장"],
                desc: "가족이 가장 오래 머무는 곳이라 바닥과 조명을 바꾸는 것만으로도 집의 인상이 크게 달라집니다." },
-    kitchen: { name: "주방·식탁", rooms: ["kitchen"], photos: [["7005291", "40평대 주방"], ["6890396", "20평대 주방"]], projects: ["p04", "p01", "p02", "p03"],
+    kitchen: { name: "주방·식탁", prep: ["관리사무실에서 받은 세대 평면도", "지금 주방 사진 (상하부장, 싱크대 쪽)", "새로 넣고 싶은 가전 목록 (식기세척기, 오븐 등)"], rooms: ["kitchen"], photos: [["7005291", "40평대 주방"], ["6890396", "20평대 주방"]], projects: ["p04", "p01", "p02", "p03"],
                works: ["상하부장", "상판", "싱크·후드", "아일랜드", "식탁 조명", "동선"],
                desc: "자주 쓰는 물건의 위치와 요리하는 순서에 맞춰 수납과 동선을 다시 짜고, 식탁 위 조명과 옆 수납까지 함께 정합니다." },
-    bed:     { name: "안방·침실", rooms: ["bed1", "bed2", "bed3"], photos: [["6890398", "20평대 침실"], ["6890412", "20평대 침실 벽면"]], projects: ["p02"],
+    bed:     { name: "안방·침실", prep: ["관리사무실에서 받은 세대 평면도", "지금 방 사진", "넣어야 할 짐의 양 (옷, 이불, 책 등)"], rooms: ["bed1", "bed2", "bed3"], photos: [["6890398", "20평대 침실"], ["6890412", "20평대 침실 벽면"]], projects: ["p02"],
                works: ["붙박이장", "조명", "도배", "바닥"],
                desc: "붙박이장으로 수납을 벽 안에 넣으면 방이 넓어 보이고 정리가 쉬워집니다." },
-    bath:    { name: "욕실", rooms: ["bath"], photos: [["7046000", "주방·욕실 부분 인테리어 사례의 욕실"], ["6890407", "20평대 욕실 샤워 공간"]], projects: ["p04", "p02"],
+    bath:    { name: "욕실", prep: ["관리사무실에서 받은 세대 평면도", "지금 욕실 사진 (바닥·벽 타일이 보이게)", "욕조와 샤워부스 중 원하는 방식"], rooms: ["bath"], photos: [["7046000", "주방·욕실 부분 인테리어 사례의 욕실"], ["6890407", "20평대 욕실 샤워 공간"]], projects: ["p04", "p02"],
                works: ["타일", "방수", "세면대·수납장", "욕조 또는 샤워부스"],
                desc: "타일을 바꿀 때 방수를 새로 하는지 꼭 확인해야 합니다. 욕조와 샤워부스 중 무엇을 쓸지도 함께 정합니다." },
-    entry:   { name: "현관", rooms: ["entry"], photos: [["7005286", "40평대 현관"], ["7005294", "40평대 현관 붙박이장"]], projects: ["p03"],
+    entry:   { name: "현관", prep: ["관리사무실에서 받은 세대 평면도", "지금 현관 사진", "신발·겉옷을 얼마나 수납해야 하는지"], rooms: ["entry"], photos: [["7005286", "40평대 현관"], ["7005294", "40평대 현관 붙박이장"]], projects: ["p03"],
                works: ["중문", "신발장", "바닥 타일"],
                desc: "중문을 달면 소음과 찬바람이 줄고, 신발장을 천장까지 올리면 수납이 크게 늘어납니다." }
   };
@@ -438,6 +438,8 @@
             }).join("") +
           "</div>" +
           '<p class="picker-sel sr-only" aria-live="polite"></p>' +
+          '<div class="prep"><h3 class="prep-title"></h3><ul class="prep-list"></ul>' +
+            '<p class="prep-note">준비가 어려우시면 그대로 문의하셔도 됩니다. 통화하면서 함께 정리해 드립니다.</p></div>' +
         "</div>" +
         '<div class="picker-steps" hidden>' +
           '<h3 class="picker-steps-title">공사 순서</h3>' +
@@ -461,6 +463,10 @@
       selLine.textContent = full ? "집 전체가 공사 범위입니다." :
         "선택한 공간: " + names(state.sel).join(", ");
       var d = full ? FULL : SPACES[state.cur];
+      if (!full) {
+        root.querySelector(".prep-title").textContent = d.name + " 상담 전에 준비하면 좋은 것";
+        root.querySelector(".prep-list").innerHTML = d.prep.map(function (t) { return "<li>" + esc(t) + "</li>"; }).join("");
+      }
       var links = d.projects.map(function (id) { var p = project(id); return '<a class="link" href="' + p.page + '">' + (p.id === "p04" ? "주방·욕실" : p.size) + "</a>"; }).join("");
       var cta = full ? "전체 리모델링 상담하기" : d.name + " 상담하기";
       info.innerHTML =
