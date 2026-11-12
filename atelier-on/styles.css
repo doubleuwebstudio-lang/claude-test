@@ -629,35 +629,40 @@ select.input{appearance:none;background:var(--field) url("data:image/svg+xml,%3C
 .hs-on .hs-sticky{padding-bottom:clamp(16px, 3vh, 32px)}
 
 /* ---------- 홈 마지막 상담: 큰 제목 + 사진 ---------- */
-.cta-final{position:relative;display:grid;align-items:center;min-height:clamp(440px, 62vh, 600px);overflow:hidden;background:var(--walnut, #33291F)}
-.cta-final-photo{position:absolute;inset:0}
-.cta-final-photo .ph{position:absolute;inset:0;aspect-ratio:auto}
-.cta-final-photo .ph img{transform:scale(1.08);transition:transform 2.6s cubic-bezier(.2,.6,.2,1)}
-.cta-final.seen .cta-final-photo .ph img{transform:none}
-.cta-final-inner{position:relative;padding-block:clamp(40px, 4vw, 64px)}
-.cta-card{position:relative;max-width:480px;display:grid;gap:18px;padding:clamp(36px, 3.6vw, 52px);background:var(--paper);opacity:0;transform:translateY(32px);transition:opacity 1s ease .5s,transform 1.2s cubic-bezier(.2,.7,.2,1) .5s}
-.cta-card::before{content:"";position:absolute;inset:12px;border:1px solid #CDBB9F;pointer-events:none}
-.cta-final.seen .cta-card{opacity:1;transform:none}
-.cta-label{display:flex;align-items:center;gap:14px;font:500 12.5px/1 var(--sans);letter-spacing:.18em;color:var(--oak)}
+.cta-final{--cta-line:rgba(211,180,140,.35);background:#241C15;color:var(--paper)}
+.cta-final-inner{padding-block:var(--sec)}
+.cta-final-head{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(0,1fr);align-items:end;gap:32px clamp(40px, 6vw, 120px)}
+.cta-label{display:flex;align-items:center;gap:14px;margin-bottom:28px;font:500 12.5px/1 var(--sans);letter-spacing:.18em;color:#D3B48C}
 .cta-label::after{content:"";width:40px;height:1px;background:currentColor}
-.cta-final-title{font-size:clamp(26px, 2.4vw, 36px);line-height:1.35;letter-spacing:-.005em}
-.cta-text{color:var(--stone);max-width:28em}
-.cta-actions{display:flex;flex-wrap:wrap;align-items:center;gap:8px 24px;margin-top:4px;padding-top:18px;border-top:1px solid var(--line)}
-.cta-go{display:inline-flex;align-items:center;gap:16px;min-height:48px;font:400 19px/1 var(--serif);letter-spacing:.02em;color:var(--ink);text-decoration:none}
-.cta-go svg{width:32px;height:12px;transition:transform .35s cubic-bezier(.2,.7,.2,1)}
-.cta-go:hover{color:var(--oak)}
-.cta-go:hover svg{transform:translateX(8px)}
-.cta-go:focus-visible{outline:2px solid var(--oak);outline-offset:4px}
-.cta-aside{font:400 13px/1.6 var(--sans);color:var(--stone)}
-@media (prefers-reduced-motion:reduce){ .cta-final-photo .ph img,.cta-card{transition:none;transform:none;opacity:1} }
-@media (max-width:768px){
-  .cta-final{display:block;min-height:0;background:var(--paper-2)}
-  .cta-final-photo{position:relative;aspect-ratio:4/3}
-  .cta-final-inner{padding:0 20px 64px;margin-top:-56px}
-  .cta-card{padding:32px 24px}
-  .cta-card::before{inset:8px}
+.cta-final-title{font-size:clamp(36px, 4.6vw, 72px);line-height:1.28;letter-spacing:-.01em;color:var(--paper)}
+.cta-text{color:#CBBFAE;max-width:26em;padding-bottom:.6em}
+.cta-ways{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));margin-top:clamp(56px, 6vw, 88px);border-top:1px solid var(--cta-line);border-bottom:1px solid var(--cta-line)}
+.cta-way{display:grid;gap:8px;padding:28px 28px 30px;text-decoration:none;color:var(--paper);transition:background .25s}
+.cta-way:first-child{padding-left:0}
+.cta-way + .cta-way{border-left:1px solid var(--cta-line)}
+.cta-way-name{display:flex;align-items:center;gap:12px;font:400 clamp(19px, 1.6vw, 23px)/1.3 var(--serif);letter-spacing:.02em}
+.cta-way-name svg{width:30px;height:12px;margin-left:auto;color:#D3B48C;transition:transform .35s cubic-bezier(.2,.7,.2,1)}
+.cta-way-sub{font:400 13px/1.6 var(--sans);color:#B5A68F}
+.cta-way:hover{background:rgba(244,240,230,.04)}
+.cta-way:hover .cta-way-name{color:#E4D3B8}
+.cta-way:hover svg{transform:translateX(6px)}
+.cta-way:focus-visible{outline:2px solid #D3B48C;outline-offset:-2px}
+.cta-way .kk{width:8px;height:8px;background:#FEE500}
+.cta-note{margin-top:24px;font:400 13.5px/1.7 var(--sans);color:#B5A68F}
+/* 화면에 들어오면 문장이 올라오고, 칸 사이 선이 그어짐 */
+@media (prefers-reduced-motion:no-preference){
+  .cta-final-head{opacity:0;transform:translateY(28px);transition:opacity .9s ease,transform 1.1s cubic-bezier(.2,.7,.2,1)}
+  .cta-ways{clip-path:inset(0 100% 0 0);transition:clip-path 1.1s cubic-bezier(.6,0,.2,1) .35s}
+  .cta-final.seen .cta-final-head{opacity:1;transform:none}
+  .cta-final.seen .cta-ways{clip-path:inset(0)}
 }
-
+@media (max-width:768px){
+  .cta-final-head{grid-template-columns:1fr}
+  .cta-label{margin-bottom:20px}
+  .cta-ways{grid-template-columns:1fr;margin-top:40px}
+  .cta-way,.cta-way:first-child{padding:22px 0}
+  .cta-way + .cta-way{border-left:0;border-top:1px solid var(--cta-line)}
+}
 /* ---------- 공간 고르기: 사례 미리보기, 공사 기간 막대 ---------- */
 .picker-cases{justify-self:start;margin-top:4px}
 @media (max-width:768px){ .picker-cases{width:100%} }
@@ -895,3 +900,4 @@ section.stack-under .picker-modes button:not([aria-checked="true"]){background:t
 .dark-zone .promise{padding-top:var(--sec);padding-bottom:0}
 .dark-zone .promise + .section{padding-top:var(--sec);padding-bottom:var(--sec)}
 .stack-cover > .section{padding-block:var(--sec)}
+.stack-cover{clip-path:inset(-120px 0 0 0)}

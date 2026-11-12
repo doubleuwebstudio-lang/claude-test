@@ -199,16 +199,25 @@
   }
   window.ATELIER.photo = photo;
   /* 페이지 끝 상담 영역 (모든 페이지 공통): 사진 + 큰 제목 */
+  /* 페이지 끝 상담 영역 (모든 페이지 공통): 진한 바탕 + 큰 문장 + 상담 방법 세 칸. img·alt 인자는 예전 사진형 호환용 */
   function finalCta(img, alt, text) {
-    return '<section class="cta-final" aria-labelledby="final-title">' +
-      '<div class="cta-final-photo">' + photo(img || "7005297", alt || "베이지와 그레이 톤으로 꾸민 넓은 거실") + "</div>" +
-      '<div class="wrap cta-final-inner"><div class="cta-card">' +
-        '<p class="cta-label"><span>상담 안내</span></p>' +
-        '<h2 class="cta-final-title" id="final-title">우리 집 이야기,<br>평면도부터 같이 봐요.</h2>' +
+    var arrow = '<svg viewBox="0 0 32 12" aria-hidden="true"><path d="M0 6h30M25 1l5 5-5 5" fill="none" stroke="currentColor" stroke-width="1.2"/></svg>';
+    var way = function (href, attr, name, sub) {
+      return '<a class="cta-way" href="' + href + '"' + attr + '><span class="cta-way-name">' + name + arrow + '</span><span class="cta-way-sub">' + sub + "</span></a>";
+    };
+    return '<section class="cta-final" aria-labelledby="final-title"><div class="wrap cta-final-inner">' +
+      '<div class="cta-final-head">' +
+        '<div><p class="cta-label">상담 안내</p>' +
+        '<h2 class="cta-final-title" id="final-title">우리 집 이야기,<br>평면도부터 같이 봐요.</h2></div>' +
         '<p class="cta-text">' + esc(text || "원하시는 공간과 공사 계획을 알려주시면 상담을 통해 필요한 내용을 안내해 드립니다.") + "</p>" +
-        '<div class="cta-actions"><a class="cta-go" href="contact.html">상담 신청하기<svg viewBox="0 0 32 12" aria-hidden="true"><path d="M0 6h30M25 1l5 5-5 5" fill="none" stroke="currentColor" stroke-width="1.2"/></svg></a>' +
-        '<span class="cta-aside">평면도가 없어도 괜찮습니다</span></div>' +
-      "</div></div></section>";
+      "</div>" +
+      '<div class="cta-ways">' +
+        way("contact.html", "", "상담 신청하기", "양식으로 남기기") +
+        way("#", ' data-quick="kakao"', '<i class="kk" aria-hidden="true"></i>카카오톡 상담', "사진과 함께 채팅") +
+        way("#", ' data-quick="tel"', "전화 상담", "상담 가능 시간: 실제 업체 입력") +
+      "</div>" +
+      '<p class="cta-note">평면도가 없어도 괜찮습니다. 통화하면서 함께 정리해 드립니다.</p>' +
+    "</div></section>";
   }
   window.ATELIER.finalCta = finalCta;
   window.ATELIER.esc = esc;
@@ -746,12 +755,17 @@
     onScroll();
     top.addEventListener("click", function () { toTop(true); var f = document.querySelector(".skip"); if (f) f.focus({ preventScroll: true }); });
     // 자주 묻는 질문 옆 '바로 물어보기'는 플로팅 버튼과 같은 곳으로 연결
-    document.querySelectorAll("[data-quick]").forEach(function (q) {
-      var src = box.querySelector(q.dataset.quick === "kakao" ? ".fab-kakao" : ".fab-tel");
-      q.href = src.getAttribute("href");
-      if (src.target) { q.target = src.target; q.rel = "noopener"; }
-      q.addEventListener("click", function (e) { if (src.dataset.demo) { e.preventDefault(); src.click(); } });
-    });
+    // 페이지 끝 상담 영역의 카카오톡·전화 칸도 같은 곳으로 (사례 상세는 detail.js가 그린 뒤 다시 부름)
+    window.ATELIER.wireQuick = function () {
+      document.querySelectorAll("[data-quick]:not([data-wired])").forEach(function (q) {
+        var src = box.querySelector(q.dataset.quick === "kakao" ? ".fab-kakao" : ".fab-tel");
+        q.setAttribute("data-wired", "");
+        q.href = src.getAttribute("href");
+        if (src.target) { q.target = src.target; q.rel = "noopener"; }
+        q.addEventListener("click", function (e) { if (src.dataset.demo) { e.preventDefault(); box.classList.add("show-top"); src.click(); } });
+      });
+    };
+    window.ATELIER.wireQuick();
     box.querySelectorAll("[data-demo]").forEach(function (a) {
       a.addEventListener("click", function (e) {
         e.preventDefault();

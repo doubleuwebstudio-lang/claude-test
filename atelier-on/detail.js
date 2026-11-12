@@ -57,4 +57,5 @@
     A.finalCta(p.ctaImg, p.title + " 사진", "비슷한 인테리어를 계획 중이시라면 " + p.size + " 아파트의 " + p.scope + "에 대해 궁금한 점을 남겨 주세요.");
 
   A.ctaReveal();
+  if (A.wireQuick) A.wireQuick();
 })();
