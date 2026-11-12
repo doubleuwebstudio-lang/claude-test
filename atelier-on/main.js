@@ -413,6 +413,9 @@
         cards.forEach(function (c) { c.hidden = !(b.dataset.kind === "all" || c.dataset.kind === b.dataset.kind); });
       });
     });
+    // 메인에서 '시공 사례 보기'로 오면 해당 공사 방식으로 미리 거름 (#full, #part)
+    var pre = bar.querySelector('[data-kind="' + location.hash.slice(1) + '"]');
+    if (pre) pre.click();
   });
 
   /* ---- 약속 섹션: 사진 위에 따라 그린 도면 선이 스크롤에 맞춰 걷히며 현장 사진이 드러남 ---- */
@@ -535,10 +538,6 @@
       selLine.textContent = full ? "집 전체가 공사 범위입니다." :
         "선택한 공간: " + names(state.sel).join(", ");
       var d = full ? FULL : SPACES[state.cur];
-      var links = d.projects.map(function (id) {
-        var p = project(id);
-        return '<a class="case-mini" href="' + p.page + '">' + photo(p.thumb || p.cover, "") + "<span>" + (p.id === "p04" ? "30평대 주방·욕실" : p.size + " " + p.scope) + "</span></a>";
-      }).join("");
       var total = full ? d.phases.reduce(function (a, x) { return a + x[1]; }, 0) : 0;
       info.innerHTML =
         '<div class="picker-photo">' + (full ? photo(d.photos[0][0], d.photos[0][1]) : photo(d.photos[1][0], d.photos[1][1])) + "</div>" +
@@ -553,7 +552,7 @@
           '<div class="prep"><h4 class="prep-title">상담 전에 준비하면 좋은 것</h4><ul class="prep-list">' +
             d.prep.map(function (t) { return "<li>" + esc(t) + "</li>"; }).join("") + '</ul>' +
             '<p class="prep-note">준비가 어려우시면 그대로 문의하셔도 됩니다. 통화하면서 함께 정리해 드립니다.</p></div>' +
-          '<div class="cases"><p class="cases-title">' + (full ? "전체 리모델링 사례" : "관련 사례") + '</p><div class="cases-list">' + links + "</div></div>" +
+          '<a class="btn picker-cases" href="projects.html#' + (full ? "full" : "part") + '">시공 사례 보기</a>' +
         "</div>";
     }
     function remember() {

@@ -592,7 +592,14 @@ select.input{appearance:none;background:var(--field) url("data:image/svg+xml,%3C
 .dark-zone .promise-sub,.dark-zone .estimate-side p,.dark-zone .estimate-steps span{color:#CBBFAE;transition:color .9s}
 .dark-zone .promise-rule,.dark-zone .sec-title::after{background:#D3B48C}
 .dark-zone .estimate-steps li::before{color:#D3B48C}
-.dark-zone .quote{color:var(--ink);border-color:transparent}
+.dark-zone .quote{color:var(--paper);background:transparent;border:1px solid rgba(211,180,140,.4)}
+.dark-zone .quote-head{border-bottom-color:#D3B48C}
+.dark-zone .quote-head span,.dark-zone .quote th,.dark-zone .quote-note{color:#B5A68F}
+.dark-zone .quote th,.dark-zone .quote td{border-bottom-color:rgba(211,180,140,.2)}
+.dark-zone .quote td{color:#E4D8C6}
+.dark-zone .quote td:first-child{color:var(--paper)}
+.dark-zone .quote td.blank{color:#8E7F6A}
+.dark-zone .quote-total td{color:#D3B48C}
 .dark-zone .promise-line{color:inherit}
 .dark-zone .promise{padding-block:clamp(120px, 12vw, 180px) clamp(48px, 4vw, 64px)}
 .dark-zone :focus-visible{outline-color:#D3B48C}
@@ -663,12 +670,8 @@ select.input{appearance:none;background:var(--field) url("data:image/svg+xml,%3C
 }
 
 /* ---------- 공간 고르기: 사례 미리보기, 공사 기간 막대 ---------- */
-.cases{display:grid;gap:12px;padding-top:20px;border-top:1px solid var(--line)}
-.cases-title{font:500 12.5px/1.6 var(--sans);letter-spacing:var(--track-s);color:var(--stone)}
-.cases-list{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:12px 16px}
-.case-mini{display:grid;grid-template-columns:56px 1fr;gap:12px;align-items:center;text-decoration:none;font:400 14px/1.45 var(--sans);color:var(--ink)}
-.case-mini .ph{--ar:1/1}
-.case-mini:hover span{color:var(--oak);text-decoration:underline;text-underline-offset:3px}
+.picker-cases{justify-self:start;margin-top:4px}
+@media (max-width:768px){ .picker-cases{width:100%} }
 .period{display:grid;gap:12px}
 .period-head{display:flex;align-items:baseline;gap:16px;font:400 15px/1.6 var(--sans)}
 .period-head span{font:500 12.5px/1.6 var(--sans);letter-spacing:var(--track-s);color:var(--stone)}
@@ -795,7 +798,6 @@ select.input{appearance:none;background:var(--field) url("data:image/svg+xml,%3C
 }
 .dark-zone .promise + .section{padding-top:clamp(56px, 5vw, 80px)}
 .dark-zone .estimate{padding-top:clamp(48px, 5vw, 72px);border-top:1px solid rgba(211,180,140,.25)}
-.dark-zone .quote{box-shadow:0 1px 0 rgba(0,0,0,.2),0 28px 50px -24px rgba(0,0,0,.55)}
 
 /* ---------- 자주 묻는 질문: 바로 물어보기 ---------- */
 /* 자주 묻는 질문: 위 굵은 선 하나에 왼쪽 제목과 오른쪽 첫 질문을 맞추고, 바로 물어보기는 질문 목록의 마지막 줄로 */
