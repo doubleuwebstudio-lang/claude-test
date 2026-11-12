@@ -306,7 +306,12 @@ main:focus{outline:none}
 .home-hero-text p{font-size:18px;color:var(--stone)}
 .home-hero-text .link{margin-top:8px}
 .home-hero-plan{margin:0;display:grid;gap:12px;max-width:460px}
-.home-hero-plan figcaption{display:flex;align-items:center;gap:8px;font:400 12.5px/1.5 var(--sans);color:var(--stone)}
+.home-hero-plan figcaption{display:flex;flex-wrap:wrap;align-items:center;gap:8px 16px;font:400 12.5px/1.5 var(--sans);color:var(--stone)}
+.hero-progress{flex:none;width:56px;height:1px;background:var(--line);overflow:hidden}
+.hero-progress i{display:block;height:100%;background:var(--oak);transform:scaleX(0);transform-origin:0 50%}
+.hero-progress i.run{animation:heroBar linear forwards}
+@keyframes heroBar{to{transform:scaleX(1)}}
+.hero-auto{border:0;background:none;padding:10px 0;margin:-10px 0;font:500 12.5px/1.5 var(--sans);color:var(--oak);text-decoration:underline;text-underline-offset:4px;cursor:pointer}
 .home-hero-photo{position:relative;min-height:100%}
 .home-hero-photo .hero-shot{position:absolute;inset:0;opacity:0;transition:opacity .6s ease}
 .home-hero-photo .hero-shot.on{opacity:1}

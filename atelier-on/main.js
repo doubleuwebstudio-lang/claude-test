@@ -276,8 +276,47 @@
       g.addEventListener("click", function () { show(k); });
       g.addEventListener("keydown", function (e) { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); show(k); } });
     });
-    el.querySelector("svg").addEventListener("mouseleave", function () { show("all"); });
-    el.querySelector("svg").addEventListener("focusout", function (e) { if (!el.contains(e.relatedTarget)) show("all"); });
+    /* 자동 넘김: 공간을 차례로 보여 줌. 마우스·키보드가 도면이나 사진 위에 있으면 잠시 멈춤 */
+    var ORDER = ["living", "kitchen", "dining", "bed1", "bath", "entry", "bed2", "bed3", "all"];
+    var STEP = 3200, timer = null, hold = false, visible = true;
+    var playing = !window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    var cap = el.parentNode.querySelector("figcaption");
+    cap.insertAdjacentHTML("beforeend", '<span class="hero-progress" aria-hidden="true"><i></i></span>' +
+      '<button type="button" class="hero-auto"></button>');
+    var btn = cap.querySelector(".hero-auto"), bar = cap.querySelector(".hero-progress i");
+    function shown() { return el.offsetParent !== null; }
+    function restartBar() { bar.classList.remove("run"); void bar.offsetWidth; if (timer) bar.classList.add("run"); }
+    function stop() { clearTimeout(timer); timer = null; bar.classList.remove("run"); }
+    function schedule(delay) {
+      stop();
+      if (!playing || hold || !visible || document.hidden || !shown()) return;
+      timer = setTimeout(function () {
+        var n = ORDER[(ORDER.indexOf(current) + 1) % ORDER.length];
+        show(n); schedule(STEP);
+      }, delay);
+      bar.style.animationDuration = delay + "ms";
+      restartBar();
+    }
+    function setBtn() {
+      btn.textContent = playing ? "자동 넘김 멈춤" : "자동 넘김 재생";
+      btn.setAttribute("aria-pressed", playing ? "false" : "true");
+    }
+    btn.addEventListener("click", function () { playing = !playing; setBtn(); if (playing) schedule(1200); else stop(); });
+    setBtn();
+    [el.querySelector("svg"), box].forEach(function (n) {
+      n.addEventListener("mouseenter", function () { hold = true; stop(); });
+      n.addEventListener("mouseleave", function () { hold = false; if (!playing) show("all"); schedule(1800); });
+    });
+    el.addEventListener("focusin", function () { hold = true; stop(); });
+    el.addEventListener("focusout", function (e) {
+      if (el.contains(e.relatedTarget)) return;
+      hold = false; if (!playing) show("all"); schedule(1800);
+    });
+    document.addEventListener("visibilitychange", function () { schedule(STEP); });
+    if ("IntersectionObserver" in window) {
+      new IntersectionObserver(function (en) { visible = en[0].isIntersecting; schedule(STEP); }, { threshold: 0.3 }).observe(box);
+    }
+    schedule(3600);   // 첫 화면 효과가 끝난 뒤 시작
   });
 
   /* ---- 정적 마크업의 사진 ---- */
