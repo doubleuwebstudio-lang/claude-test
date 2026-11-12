@@ -284,10 +284,21 @@ main:focus{outline:none}
 @media (max-width:768px){ .plan .room text{font-size:11px} }
 /* 첫 화면 도면: 벽과 문이 한 번 그려집니다 */
 @media (prefers-reduced-motion:no-preference){
-  .plan.draw .ap-walls line,.plan.draw .ap-walls rect,.plan.draw .ap-marks .swing{stroke-dasharray:1;stroke-dashoffset:1;animation:draw 1.6s cubic-bezier(.5,0,.2,1) .2s forwards}
-  .plan.draw .ap-marks .swing{animation-delay:1.2s;animation-duration:.8s}
-  .plan.draw .ap-view,.plan.draw .room text,.plan.draw .ap-balcony,.plan.draw .ap-open{opacity:0;animation:fade .6s ease 1.6s forwards}
+  .plan.draw .ap-walls line,.plan.draw .ap-walls rect,.plan.draw .ap-marks .swing{stroke-dasharray:1;stroke-dashoffset:1;animation:draw 1.2s cubic-bezier(.5,0,.2,1) .1s forwards}
+  .plan.draw .ap-marks .swing{animation-delay:.9s;animation-duration:.6s}
+  .plan.draw .room text,.plan.draw .ap-balcony,.plan.draw .ap-open{opacity:0;animation:fade .5s ease 1s forwards}
+  /* 첫 화면 순서: 벽 → 사진 찍은 자리 → 시선 → 사진 */
+  .plan.draw .ap-view circle{opacity:0;transform-box:fill-box;transform-origin:center;animation:dot .4s cubic-bezier(.3,1.6,.5,1) 1.35s forwards}
+  .plan.draw .ap-view path{transform-box:view-box;transform-origin:var(--vx) var(--vy);transform:scale(0);animation:spread .6s cubic-bezier(.3,.7,.2,1) 1.6s forwards}
+  @media (min-width:901px){
+    .home-hero-photo .ph{clip-path:inset(0 100% 0 0);animation:reveal 1.1s cubic-bezier(.6,0,.2,1) 2s forwards}
+    .home-hero-photo .ph img{transform:translateX(-3%);animation:settle 1.4s cubic-bezier(.3,.7,.2,1) 2s forwards}
+  }
 }
+@keyframes dot{from{opacity:0;transform:scale(0)}to{opacity:1;transform:scale(1)}}
+@keyframes spread{to{transform:scale(1)}}
+@keyframes reveal{to{clip-path:inset(0 0 0 0)}}
+@keyframes settle{to{transform:none}}
 @keyframes draw{to{stroke-dashoffset:0}}
 @keyframes fade{to{opacity:1}}
 

@@ -111,7 +111,7 @@
     }).join(""));
     if (opt.view) {
       var v = opt.view, a1 = (v.dir - v.fov / 2) * Math.PI / 180, a2 = (v.dir + v.fov / 2) * Math.PI / 180, R = v.r || 70;
-      out.push('<g class="ap-view"><path d="M' + v.x + " " + v.y + " L" + (v.x + R * Math.cos(a1)).toFixed(1) + " " + (v.y + R * Math.sin(a1)).toFixed(1) +
+      out.push('<g class="ap-view" style="--vx:' + v.x + "px;--vy:" + (v.y + 20) + 'px"><path d="M' + v.x + " " + v.y + " L" + (v.x + R * Math.cos(a1)).toFixed(1) + " " + (v.y + R * Math.sin(a1)).toFixed(1) +
         " A" + R + " " + R + " 0 0 1 " + (v.x + R * Math.cos(a2)).toFixed(1) + " " + (v.y + R * Math.sin(a2)).toFixed(1) + ' Z"/><circle cx="' + v.x + '" cy="' + v.y + '" r="3.2"/></g>');
     }
     var L = function (x1, y1, x2, y2, cls) { return '<line class="' + cls + '" x1="' + x1 + '" y1="' + y1 + '" x2="' + x2 + '" y2="' + y2 + '" pathLength="1"/>'; };
