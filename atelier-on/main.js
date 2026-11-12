@@ -95,11 +95,6 @@
     gaps: [["v", 240, 160, 200]],
     balcony: [10, -14, 230, 22]
   };
-  function viewD(v) {
-    var a1 = (v.dir - v.fov / 2) * Math.PI / 180, a2 = (v.dir + v.fov / 2) * Math.PI / 180, R = v.r || 58;
-    return "M" + v.x + " " + v.y + " L" + (v.x + R * Math.cos(a1)).toFixed(1) + " " + (v.y + R * Math.sin(a1)).toFixed(1) +
-      " A" + R + " " + R + " 0 0 1 " + (v.x + R * Math.cos(a2)).toFixed(1) + " " + (v.y + R * Math.sin(a2)).toFixed(1) + " Z";
-  }
   function archPlan(opt) {
     opt = opt || {};
     var id = "ap" + (++planSeq), fill = opt.fill || [], hid = opt.hatchId || id + "-h";
@@ -114,10 +109,6 @@
       return '<g class="room' + (on ? " on" : "") + '"' + attrs + '><rect class="ap-fill" x="' + r[0] + '" y="' + r[1] + '" width="' + r[2] + '" height="' + r[3] + '"' +
         (on ? ' style="fill:url(#' + hid + ')"' : "") + '/><text x="' + (r[0] + r[2] / 2) + '" y="' + (r[1] + r[3] / 2 + 3) + '">' + esc(rm.label) + "</text></g>";
     }).join(""));
-    if (opt.view) {
-      var v = opt.view;
-      out.push('<g class="ap-view" style="--vx:' + v.x + "px;--vy:" + (v.y + 20) + 'px"><path d="' + viewD(v) + '"/><circle cx="' + v.x + '" cy="' + v.y + '" r="3.2"/></g>');
-    }
     var L = function (x1, y1, x2, y2, cls) { return '<line class="' + cls + '" x1="' + x1 + '" y1="' + y1 + '" x2="' + x2 + '" y2="' + y2 + '" pathLength="1"/>'; };
     out.push('<g class="ap-open">' + ARCH.open.map(function (w) { return L(w[0], w[1], w[2], w[3], ""); }).join("") + "</g>");
     out.push('<g class="ap-walls">' + ARCH.walls.map(function (w) { return L(w[0], w[1], w[2], w[3], "in"); }).join("") +
@@ -246,14 +237,19 @@
   /* ---- 첫 화면: 사진을 찍은 위치를 표시한 도면 ---- */
   /* 첫 화면: 도면의 공간에 마우스를 올리면 그 공간 사진과 촬영 위치로 바뀝니다 (같은 집 사진이 있는 공간만) */
   var HERO_VIEWS = {
-    all:     { img: "6933852", name: "거실과 주방", alt: "식탁 쪽에서 바라본 거실과 주방", pos: "58% 50%", v: { x: 214, y: 196, dir: -128, fov: 56, r: 58 } },
-    living:  { img: "6933855", name: "거실", alt: "창 쪽에 소파를 둔 거실", v: { x: 228, y: 118, dir: -152, fov: 56, r: 58 } },
-    kitchen: { img: "6933853", name: "주방", alt: "거실 쪽으로 열린 아일랜드 주방", v: { x: 146, y: 202, dir: -90, fov: 56, r: 58 } },
-    dining:  { img: "6933854", name: "식탁", alt: "주방 옆 식탁", pos: "45% 50%", v: { x: 232, y: 204, dir: -158, fov: 56, r: 58 } }
+    all:     { img: "6933852", name: "거실과 주방", alt: "거실과 주방 전경", pos: "58% 50%" },
+    living:  { img: "6933855", name: "거실", alt: "창 쪽에 소파를 둔 거실" },
+    kitchen: { img: "6933853", name: "주방", alt: "거실 쪽으로 열린 아일랜드 주방" },
+    dining:  { img: "6933854", name: "식탁", alt: "주방 옆 식탁", pos: "45% 50%" },
+    bed1:    { img: "6890398", name: "안방", from: "20평대 사례", alt: "흰 침구와 우드 가구의 침실" },
+    bed2:    { img: "6890412", name: "침실", from: "20평대 사례", alt: "벽 선반과 침대 양옆 조명" },
+    bed3:    { img: "7005285", name: "침실 수납", from: "40평대 사례", alt: "선반과 서랍으로 나눈 붙박이 수납" },
+    bath:    { img: "7046000", name: "욕실", from: "부분 인테리어 사례", alt: "샤워부스와 우드 패턴 타일 벽" },
+    entry:   { img: "7005286", name: "현관", from: "40평대 사례", alt: "낮은 수납장과 둥근 거울을 둔 현관", pos: "35% 50%" }
   };
   document.querySelectorAll("[data-hero-plan]").forEach(function (el) {
-    el.innerHTML = archPlan({ draw: true, interactive: true, fill: [], view: HERO_VIEWS.all.v,
-      label: "30평대 평면 예시. 거실, 주방, 식탁에 마우스를 올리면 그 공간 사진으로 바뀝니다",
+    el.innerHTML = archPlan({ draw: true, interactive: true, fill: [],
+      label: "30평대 평면 예시. 공간에 마우스를 올리면 그 공간 사진으로 바뀝니다",
       roomAttrs: function (rm) {
         return HERO_VIEWS[rm.id] ? ' tabindex="0" role="button" data-view="' + rm.id + '" aria-label="' + esc(rm.label) + ' 사진 보기"' : "";
       } });
@@ -262,8 +258,9 @@
     box.innerHTML = Object.keys(HERO_VIEWS).map(function (k) {
       var h = HERO_VIEWS[k];
       return '<div class="hero-shot' + (k === "all" ? " on" : "") + '" data-shot="' + k + '">' + photo(h.img, h.alt, { pos: h.pos, eager: k === "all" }) + "</div>";
-    }).join("") + '<p class="hero-shot-name" aria-live="polite">' + HERO_VIEWS.all.name + "</p>";
-    var path = el.querySelector(".ap-view path"), dot = el.querySelector(".ap-view circle"), label = box.querySelector(".hero-shot-name");
+    }).join("") + '<div class="hero-slats" aria-hidden="true">' + "<i></i><i></i><i></i><i></i><i></i><i></i>" + "</div>" +
+      '<p class="hero-shot-name" aria-live="polite">' + HERO_VIEWS.all.name + "</p>";
+    var label = box.querySelector(".hero-shot-name");
     var current = "all";
     function show(k) {
       if (k === current) return;
@@ -271,11 +268,7 @@
       var h = HERO_VIEWS[k];
       box.querySelectorAll(".hero-shot").forEach(function (s) { s.classList.toggle("on", s.dataset.shot === k); });
       el.querySelectorAll("[data-view]").forEach(function (g) { g.classList.toggle("cur", g.dataset.view === k); });
-      path.style.d = 'path("' + viewD(h.v) + '")';
-      path.setAttribute("d", viewD(h.v));
-      dot.style.cx = h.v.x + "px"; dot.style.cy = h.v.y + "px";
-      dot.setAttribute("cx", h.v.x); dot.setAttribute("cy", h.v.y);
-      label.textContent = h.name;
+      label.innerHTML = esc(h.name) + (h.from ? '<span>' + esc(h.from) + " 사진</span>" : "");
     }
     el.querySelectorAll("[data-view]").forEach(function (g) {
       var k = g.dataset.view;
