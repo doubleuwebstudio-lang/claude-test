@@ -51,6 +51,22 @@
         { room: "dress", img: "7005285", name: "드레스룸", note: "선반과 서랍으로 나눈 수납" },
         { room: "kitchen", img: "7005300", name: "식탁", note: "아일랜드와 나란히 둔 긴 테이블" }
       ]
+    },
+    {
+      id: "p04", page: "project-partial.html", crumb: "30평대 부분 인테리어", cover: "7045995", size: "30평대", scope: "주방·욕실 부분 인테리어", style: "화이트 미니멀",
+      title: "30평대 아파트 부분 인테리어",
+      oneLine: "거실과 방은 그대로 두고 주방과 욕실만 바꾼 집",
+      intro: [
+        "공사 범위를 주방과 욕실 두 곳으로 좁혀, 나머지 공간은 그대로 쓰면서 진행했습니다.",
+        "주방은 흰 도어와 우드 상판으로 ㄱ자 상하부장을 새로 짜고, 빌트인 오븐과 키 큰 수납장을 한 줄에 넣었습니다."
+      ],
+      more: "욕실은 바닥과 벽을 대리석 무늬 타일로 바꾸고 방수를 새로 했습니다. 샤워부스 안쪽 벽만 우드 패턴 타일로 마감해 흰 욕실에 따뜻한 면을 하나 두었습니다.",
+      gallery: [
+        { room: "kitchen", img: "7045992", name: "주방", note: "키 큰 수납장과 ㄱ자 상하부장" },
+        { room: "bath", img: "7046000", name: "욕실", note: "샤워부스와 우드 패턴 타일 벽" },
+        { room: "bath", img: "7046006", name: "욕실 수납", note: "세면대 하부장과 거울 옆 유리 선반" },
+        { room: "kitchen", img: "7045997", name: "주방 옆", note: "냉장고 자리와 현관으로 이어지는 통로", pos: "50% 45%" }
+      ]
     }
   ];
   window.ATELIER = { projects: PROJECTS };
@@ -205,10 +221,12 @@
     '<div class="foot-note"><p>이 사이트는 홈페이지 제작 포트폴리오용 데모입니다. 소개된 시공 사례는 모두 가상 프로젝트이며, 사업자 정보는 표시하지 않습니다. 사진은 Pexels(Max Vakhtbovych)의 무료 이미지입니다.</p><p>© ATELIER ON 데모</p></div></div>';
   document.body.append(footer);
 
+  function project(id) { return PROJECTS.filter(function (p) { return p.id === id; })[0]; }
   /* ---- 프로젝트 목록 ---- */
   document.querySelectorAll("[data-cards]").forEach(function (el) {
-    var level = +el.getAttribute("data-cards") || 3;
-    el.innerHTML = PROJECTS.map(function (p) { return card(p, level); }).join("");
+    var level = +el.getAttribute("data-cards") || 3, ids = el.getAttribute("data-ids");
+    var list = ids ? ids.split(",").map(project) : PROJECTS;
+    el.innerHTML = list.map(function (p) { return card(p, level); }).join("");
   });
 
   /* ---- 서비스 범위 평면도 ---- */
@@ -253,7 +271,7 @@
     living:  { name: "거실", rooms: ["living"], photos: [["6933855", "30평대 거실"], ["6890403", "20평대 거실"]], projects: ["p01", "p02", "p03"],
                works: ["바닥재", "벽 마감", "간접조명", "TV 벽", "발코니 확장"],
                desc: "가족이 가장 오래 머무는 곳이라 바닥과 조명을 바꾸는 것만으로도 집의 인상이 크게 달라집니다." },
-    kitchen: { name: "주방", rooms: ["kitchen"], photos: [["7005291", "40평대 주방"], ["6890396", "20평대 주방"]], projects: ["p01", "p02", "p03"],
+    kitchen: { name: "주방", rooms: ["kitchen"], photos: [["7005291", "40평대 주방"], ["6890396", "20평대 주방"]], projects: ["p04", "p01", "p02", "p03"],
                works: ["상하부장", "상판", "싱크·후드", "아일랜드", "동선"],
                desc: "자주 쓰는 물건의 위치와 요리하는 순서에 맞춰 수납과 동선을 다시 짭니다." },
     dining:  { name: "식탁", rooms: ["dining"], photos: [["6933854", "30평대 식탁"], ["7005300", "40평대 식탁"]], projects: ["p01", "p03"],
@@ -262,7 +280,7 @@
     bed:     { name: "안방·침실", rooms: ["bed1", "bed2", "bed3"], photos: [["6890398", "20평대 침실"], ["6890412", "20평대 침실 벽면"]], projects: ["p02"],
                works: ["붙박이장", "조명", "도배", "바닥"],
                desc: "붙박이장으로 수납을 벽 안에 넣으면 방이 넓어 보이고 정리가 쉬워집니다." },
-    bath:    { name: "욕실", rooms: ["bath"], photos: [["6890401", "20평대 욕실 세면대"], ["6890407", "20평대 욕실 샤워 공간"]], projects: ["p02"],
+    bath:    { name: "욕실", rooms: ["bath"], photos: [["7046000", "주방·욕실 부분 인테리어 사례의 욕실"], ["6890407", "20평대 욕실 샤워 공간"]], projects: ["p04", "p02"],
                works: ["타일", "방수", "세면대·수납장", "욕조 또는 샤워부스"],
                desc: "타일을 바꿀 때 방수를 새로 하는지 꼭 확인해야 합니다. 욕조와 샤워부스 중 무엇을 쓸지도 함께 정합니다." },
     entry:   { name: "현관", rooms: ["entry"], photos: [["7005286", "40평대 현관"], ["7005294", "40평대 현관 붙박이장"]], projects: ["p03"],
@@ -271,8 +289,8 @@
   };
   var FULL = { name: "전체 리모델링", photos: [["6933855", "30평대 거실"], ["6890394", "20평대 거실"]], projects: ["p01", "p02", "p03"],
                works: ["바닥", "벽", "주방", "욕실", "조명", "수납", "창호", "배관"],
-               period: "6~8주 (공사 범위와 관리사무실 공사 가능 시간에 따라 달라집니다)",
-               desc: "바닥, 벽, 주방, 욕실, 조명, 수납까지 집 전체를 하나의 계획으로 진행합니다. 지은 지 오래된 아파트처럼 배관·창호·욕실까지 손봐야 할 때 알맞습니다." };
+               period: "6~8주",
+               desc: "집 전체를 하나의 계획으로 진행합니다. 지은 지 오래된 아파트처럼 배관·창호·욕실까지 손봐야 할 때 알맞습니다." };
   var STEPS = [
     ["철거", "기존 마감재와 가구를 걷어 냅니다."],
     ["설비·방수", "배관을 정리하고 욕실·주방 바닥에 방수를 합니다."],
@@ -286,7 +304,6 @@
   ];
   var ROOM_SPACE = {};
   Object.keys(SPACES).forEach(function (k) { SPACES[k].rooms.forEach(function (r) { ROOM_SPACE[r] = k; }); });
-  function project(id) { return PROJECTS.filter(function (p) { return p.id === id; })[0]; }
 
   document.querySelectorAll("[data-picker]").forEach(function (root) {
     var state = { mode: "part", sel: ["kitchen"], cur: "kitchen" };
@@ -333,17 +350,17 @@
         b.classList.toggle("cur", b.dataset.space === state.cur);
       });
       selLine.textContent = full ? "집 전체가 공사 범위입니다." :
-        state.sel.length ? "선택한 공간: " + names(state.sel).join(", ") : "바꾸고 싶은 공간을 눌러 골라 보세요.";
+        "선택한 공간: " + names(state.sel).join(", ");
       var d = full ? FULL : SPACES[state.cur];
-      var links = d.projects.map(function (id) { var p = project(id); return '<a class="link" href="' + p.page + '">' + p.size + "</a>"; }).join("");
-      var cta = full ? "전체 리모델링 상담하기" : (state.sel.length ? "선택한 공간으로 상담하기" : "상담 문의하기");
+      var links = d.projects.map(function (id) { var p = project(id); return '<a class="link" href="' + p.page + '">' + (p.id === "p04" ? "주방·욕실" : p.size) + "</a>"; }).join("");
+      var cta = full ? "전체 리모델링 상담하기" : d.name + " 상담하기";
       info.innerHTML =
         '<h3 class="picker-name">' + d.name + "</h3>" +
         '<div class="picker-photos">' + d.photos.map(function (ph) { return photo(ph[0], ph[1]); }).join("") + "</div>" +
         "<p>" + d.desc + "</p>" +
-        '<dl class="picker-works"><dt>' + (full ? "포함되는 공사" : "많이 하는 공사") + '</dt><dd>' + d.works.map(function (w) { return "<span>" + w + "</span>"; }).join("") + "</dd>" +
-          (full ? '<dt>예시 기간</dt><dd class="period">' + d.period + "</dd>" : "") + "</dl>" +
-        '<p class="picker-links"><span>' + (full ? "집 전체를 바꾼 사례" : "이 공간이 나오는 사례") + "</span>" + links + "</p>" +
+        (full ? "" : '<p class="picker-meta"><span>많이 하는 공사</span>' + d.works.join(", ") + "</p>") +
+        (full ? '<p class="picker-meta"><span>예시 기간</span>' + d.period + "</p>" : "") +
+        '<p class="picker-meta picker-links"><span>' + (full ? "사례" : "관련 사례") + "</span>" + links + "</p>" +
         '<a class="btn picker-cta" href="contact.html">' + cta + "</a>";
       info.querySelector(".picker-cta").addEventListener("click", function () {
         try {
@@ -352,8 +369,7 @@
       });
     }
     function pick(space) {
-      var i = state.sel.indexOf(space);
-      if (i > -1 && state.cur === space) state.sel.splice(i, 1); else if (i < 0) state.sel.push(space);
+      state.sel = [space];
       state.cur = space;
       render();
     }

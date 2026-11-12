@@ -24,7 +24,7 @@
         '<p class="meta-tag">가상 프로젝트</p>' +
       '</div>' +
     '</section>' +
-    '<div class="wrap crumb-row"><nav class="crumb" aria-label="현재 위치"><a href="projects.html">시공 사례</a><span aria-hidden="true">/</span><span aria-current="page">' + p.size + '</span></nav></div>' +
+    '<div class="wrap crumb-row"><nav class="crumb" aria-label="현재 위치"><a href="projects.html">시공 사례</a><span aria-hidden="true">/</span><span aria-current="page">' + (p.crumb || p.size) + '</span></nav></div>' +
     '<section class="section"><div class="wrap story">' +
       '<dl class="facts">' +
         '<div><dt>공간</dt><dd>아파트</dd></div><div><dt>평형</dt><dd>' + p.size + '</dd></div>' +

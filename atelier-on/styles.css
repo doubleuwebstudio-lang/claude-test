@@ -143,6 +143,9 @@ main:focus{outline:none}
 .list-note{margin:-40px 0 40px;text-align:center;font:400 13px/1.6 var(--sans);color:var(--stone)}
 .page-head + .wrap .list-note{margin-top:0}
 @media (max-width:768px){ .list-note{margin:-24px 0 28px} }
+.cards.four{grid-template-columns:repeat(4,1fr)}
+@media (max-width:1200px){ .cards.four{grid-template-columns:repeat(2,1fr)} }
+@media (max-width:768px){ .cards.four{grid-template-columns:1fr} }
 /* 홈: 넓은 사진 1장 + 좁은 사진 2장, 같은 높이 */
 .cards.lead-row{grid-template-columns:2fr 1fr 1fr}
 .cards.lead-row .ph{aspect-ratio:auto;height:clamp(320px, 30vw, 480px)}
@@ -214,19 +217,16 @@ main:focus{outline:none}
 .picker-steps li::before{content:counter(st,decimal-leading-zero);font:400 18px/1 var(--serif);color:var(--oak);letter-spacing:.06em}
 .picker-steps b{font-weight:400;font-size:17px;letter-spacing:.06em}
 .picker-steps span{font:400 14px/1.7 var(--sans);color:var(--stone)}
-.picker-works dd.period{font-size:15px;color:var(--ink)}
 @media (max-width:768px){ .picker-steps li{grid-template-columns:44px 1fr} .picker-steps span{grid-column:2} }
 .picker-info{display:grid;gap:20px;padding-top:4px}
 .picker-name{font-size:22px;letter-spacing:.04em}
 .picker-photos{display:grid;grid-template-columns:1fr 1fr;gap:16px}
 .picker-photos .ph{--ar:4/5}
 .picker-info > p{color:var(--stone)}
-.picker-works{margin:0;display:grid;gap:8px}
-.picker-works dt{font:500 12.5px/1.6 var(--sans);letter-spacing:var(--track-s);color:var(--stone)}
-.picker-works dd{margin:0;display:flex;flex-wrap:wrap;gap:6px 0;font:400 15px/1.6 var(--sans)}
-.picker-works dd span+span::before{content:"|";margin:0 .8em;color:var(--line)}
-.picker-links{display:flex;flex-wrap:wrap;align-items:baseline;gap:6px 18px;color:var(--stone)}
-.picker-links span{font:500 12.5px/1.6 var(--sans);letter-spacing:var(--track-s)}
+.picker-meta{display:flex;flex-wrap:wrap;align-items:baseline;gap:6px 16px;font:400 15px/1.6 var(--sans);color:var(--ink)}
+.picker-meta span{flex:none;width:7.5em;font:500 12.5px/1.6 var(--sans);letter-spacing:var(--track-s);color:var(--stone)}
+.picker-meta + .picker-meta{margin-top:-8px}
+@media (max-width:768px){ .picker-meta span{width:100%} }
 .picker-cta{justify-self:start;margin-top:8px}
 @media (max-width:900px){
   .picker-body{grid-template-columns:1fr}
