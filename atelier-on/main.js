@@ -303,8 +303,8 @@
 
   /* ---- 첫 화면: 사진을 찍은 위치를 표시한 도면 ---- */
   /* 첫 화면: 도면의 공간에 마우스를 올리면 그 공간 사진과 촬영 위치로 바뀝니다 (같은 집 사진이 있는 공간만) */
+  var START = "living";   // 첫 화면에 먼저 보이는 공간 (자동 넘김도 여기서 시작)
   var HERO_VIEWS = {
-    all:     { img: "6933852", name: "거실과 주방", alt: "거실과 주방 전경", pos: "58% 50%" },
     living:  { img: "6933855", name: "거실", alt: "창 쪽에 소파를 둔 거실" },
     kitchen: { img: "6933853", name: "주방·식탁", alt: "거실 쪽으로 열린 아일랜드 주방과 식탁" },
     bed1:    { img: "6890398", name: "안방", from: "20평대 사례", alt: "흰 침구와 우드 가구의 침실" },
@@ -323,11 +323,12 @@
     if (!box) return;
     box.innerHTML = Object.keys(HERO_VIEWS).map(function (k) {
       var h = HERO_VIEWS[k];
-      return '<div class="hero-shot' + (k === "all" ? " on" : "") + '" data-shot="' + k + '">' + photo(h.img, h.alt, { pos: h.pos, eager: k === "all" }) + "</div>";
+      return '<div class="hero-shot' + (k === START ? " on" : "") + '" data-shot="' + k + '">' + photo(h.img, h.alt, { pos: h.pos, eager: k === START }) + "</div>";
     }).join("") + '<div class="hero-slats" aria-hidden="true">' + "<i></i><i></i><i></i><i></i><i></i><i></i>" + "</div>" +
-      '<p class="hero-shot-name" aria-live="polite">' + HERO_VIEWS.all.name + "</p>";
+      '<p class="hero-shot-name" aria-live="polite">' + HERO_VIEWS[START].name + "</p>";
     var label = box.querySelector(".hero-shot-name");
-    var current = "all";
+    var current = START;
+    el.querySelectorAll('[data-view="' + START + '"]').forEach(function (g) { g.classList.add("cur"); });
     function show(k) {
       if (k === current) return;
       current = k;
@@ -344,7 +345,7 @@
       g.addEventListener("keydown", function (e) { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); show(k); } });
     });
     /* 자동 넘김: 공간을 차례로 보여 줌. 마우스·키보드가 도면이나 사진 위에 있으면 잠시 멈춤 */
-    var ORDER = ["living", "kitchen", "bed1", "bath", "entry", "bed2", "bed3", "all"];
+    var ORDER = ["living", "kitchen", "bed1", "bath", "entry", "bed2", "bed3"];
     var STEP = 3200, timer = null, hold = false, visible = true;
     var playing = !window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     var cap = el.parentNode.querySelector("figcaption");
@@ -372,12 +373,12 @@
     setBtn();
     [el.querySelector("svg"), box].forEach(function (n) {
       n.addEventListener("mouseenter", function () { hold = true; stop(); });
-      n.addEventListener("mouseleave", function () { hold = false; if (!playing) show("all"); schedule(1800); });
+      n.addEventListener("mouseleave", function () { hold = false; schedule(1800); });
     });
     el.addEventListener("focusin", function () { hold = true; stop(); });
     el.addEventListener("focusout", function (e) {
       if (el.contains(e.relatedTarget)) return;
-      hold = false; if (!playing) show("all"); schedule(1800);
+      hold = false; schedule(1800);
     });
     document.addEventListener("visibilitychange", function () { schedule(STEP); });
     if ("IntersectionObserver" in window) {
