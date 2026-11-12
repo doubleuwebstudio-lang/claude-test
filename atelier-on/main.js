@@ -53,7 +53,7 @@
       ]
     },
     {
-      id: "p04", page: "project-partial.html", crumb: "30평대 부분 인테리어", cover: "7045995", size: "30평대", scope: "주방·욕실 부분 인테리어", style: "화이트 미니멀",
+      id: "p04", page: "project-partial.html", crumb: "30평대 부분 인테리어", cover: "7045995", size: "30평대", scope: "주방·욕실 부분 인테리어", style: "화이트 클래식",
       title: "30평대 아파트 부분 인테리어",
       oneLine: "거실과 방은 그대로 두고 주방과 욕실만 바꾼 집",
       intro: [
@@ -65,7 +65,7 @@
         { room: "kitchen", img: "7045992", name: "주방", note: "키 큰 수납장과 ㄱ자 상하부장" },
         { room: "bath", img: "7046000", name: "욕실", note: "샤워부스와 우드 패턴 타일 벽" },
         { room: "bath", img: "7046006", name: "욕실 수납", note: "세면대 하부장과 거울 옆 유리 선반" },
-        { room: "kitchen", img: "7045997", name: "주방 옆", note: "냉장고 자리와 현관으로 이어지는 통로", pos: "50% 45%" }
+        { room: "bath", img: "7046005", name: "세면대", note: "넓은 세면대와 샤워부스 문" }
       ]
     }
   ];

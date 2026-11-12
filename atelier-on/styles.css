@@ -96,7 +96,7 @@ main:focus{outline:none}
 .hero{position:relative;height:clamp(560px, 88vh, 920px);display:grid;align-items:end;justify-items:center;color:var(--on-photo)}
 .hero .ph,.photo-band .ph{position:absolute;inset:0;aspect-ratio:auto}
 .hero::after,.photo-band::after{content:"";position:absolute;inset:0;pointer-events:none;
-  background:linear-gradient(180deg,rgba(28,24,20,.48) 0,rgba(28,24,20,0) 20%,rgba(28,24,20,0) 32%,rgba(28,24,20,.42) 62%,rgba(28,24,20,.66) 100%)}
+  background:linear-gradient(180deg,rgba(28,24,20,.38) 0,rgba(28,24,20,0) 13%,rgba(28,24,20,0) 58%,rgba(28,24,20,.5) 82%,rgba(28,24,20,.62) 100%)}
 .hero-copy,.photo-band-copy{text-shadow:0 1px 14px rgba(28,24,20,.28);position:relative;z-index:1;width:min(760px, calc(100% - 40px));padding-bottom:clamp(56px, 9vh, 96px);text-align:center;display:grid;gap:14px;justify-items:center}
 .hero-title{font-size:clamp(28px, 3.2vw, 46px);letter-spacing:.04em;line-height:1.5}
 .hero-copy p,.photo-band-copy p{font-size:16px;opacity:.95}
@@ -221,7 +221,7 @@ main:focus{outline:none}
 .picker-info{display:grid;gap:20px;padding-top:4px}
 .picker-name{font-size:22px;letter-spacing:.04em}
 .picker-photos{display:grid;grid-template-columns:1fr 1fr;gap:16px}
-.picker-photos .ph{--ar:4/5}
+.picker-photos .ph{--ar:18/25}
 .picker-info > p{color:var(--stone)}
 .picker-meta{display:flex;flex-wrap:wrap;align-items:baseline;gap:6px 16px;font:400 15px/1.6 var(--sans);color:var(--ink)}
 .picker-meta span{flex:none;width:7.5em;font:500 12.5px/1.6 var(--sans);letter-spacing:var(--track-s);color:var(--stone)}
@@ -293,12 +293,12 @@ main:focus{outline:none}
 
 /* ---------- 홈 첫 화면: 왼쪽 글과 도면, 오른쪽 사진 ---------- */
 .home-hero{display:grid;grid-template-columns:minmax(380px, 40%) 1fr;min-height:clamp(620px, calc(100svh - var(--header)), 900px)}
-.home-hero-copy{display:flex;flex-direction:column;justify-content:space-between;gap:48px;padding:clamp(48px, 6vw, 96px) clamp(32px, 4vw, 72px) 40px max(40px, calc((100vw - 1440px) / 2))}
+.home-hero-copy{display:flex;flex-direction:column;justify-content:center;gap:clamp(48px, 6vh, 72px);padding:clamp(48px, 6vw, 96px) clamp(32px, 4vw, 72px) 40px max(40px, calc((100vw - 1440px) / 2))}
 .home-hero-text{display:grid;gap:20px;justify-items:start}
 .home-hero-title{font-size:clamp(32px, 3.3vw, 50px);line-height:1.35;letter-spacing:.01em}
 .home-hero-text p{font-size:18px;color:var(--stone)}
 .home-hero-text .link{margin-top:8px}
-.home-hero-plan{margin:0;display:grid;gap:12px;max-width:420px}
+.home-hero-plan{margin:0;display:grid;gap:12px;max-width:460px}
 .home-hero-plan figcaption{display:flex;align-items:center;gap:8px;font:400 12.5px/1.5 var(--sans);color:var(--stone)}
 .home-hero-plan figcaption i{flex:none;width:8px;height:8px;border-radius:50%;background:var(--oak)}
 .home-hero-photo{position:relative;min-height:100%}
@@ -309,6 +309,7 @@ main:focus{outline:none}
   .home-hero-photo .ph{position:relative;aspect-ratio:4/3}
   .home-hero-copy{padding:40px 20px 8px;gap:40px}
   .home-hero-plan{max-width:none}
+  .home-hero-plan [data-hero-plan],.home-hero-plan figcaption{display:none}
 }
 
 /* ---------- 페이지 제목 (시공 사례 목록) ---------- */
