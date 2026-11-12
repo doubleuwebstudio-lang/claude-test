@@ -10,7 +10,7 @@
     return '<section class="space-block n' + n + '" aria-labelledby="sp-' + k + '">' +
       '<div class="space-head"><h3 id="sp-' + k + '">' + s.name + '</h3><p>' + s.line + '</p></div>' +
       '<div class="space-photos">' + s.photos.map(function (ph) {
-        return '<figure>' + A.photo(ph[0], s.name + ": " + ph[1], { pos: ph[2] }) + '<figcaption>' + ph[1] + '</figcaption></figure>';
+        return '<figure>' + A.photo(ph[0], s.name + ": " + ph[1] + (ph[3] ? " (다른 집 참고 사진)" : ""), { pos: ph[2] || undefined }) + '<figcaption>' + ph[1] + (ph[3] ? '<span class="ref-mark">참고 사진 (다른 집)</span>' : "") + '</figcaption></figure>';
       }).join("") + '</div></section>';
   }
   var i = list.indexOf(p);

@@ -395,7 +395,8 @@ main:focus{outline:none}
 .space-head p{color:var(--stone);font-size:16px}
 .space-photos{display:grid;gap:var(--gap)}
 .space-photos figure{margin:0}
-.space-photos figcaption{padding-top:10px;font:400 13px/1.6 var(--sans);color:var(--stone)}
+.space-photos figcaption{padding-top:10px;font:400 13px/1.6 var(--sans);color:var(--stone);display:flex;flex-wrap:wrap;gap:4px 12px}
+.ref-mark{color:var(--oak)}
 .n1 .space-photos .ph{--ar:16/10}
 .n2 .space-photos{grid-template-columns:3fr 2fr;align-items:end}
 .n2 .space-photos figure:first-child .ph{--ar:4/3}
