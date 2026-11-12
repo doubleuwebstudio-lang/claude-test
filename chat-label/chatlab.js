@@ -240,6 +240,83 @@
     return { score: Math.round(52 + 47 * raw), parts };
   }
 
+
+  // ---------- 명장면과 심전도 ----------
+  const RALLY_GAP = 2 * 60e3;   // 카톡 시간은 분 단위라 2분 안이면 즉답으로 본다
+  const COLD_GAP = 48 * 3600e3; // 이틀 넘게 조용하면 냉전
+  const FIRSTS = [
+    { key: "first", label: "첫 메시지", test: () => true },
+    { key: "laugh", label: "첫 'ㅋㅋ'", test: (m) => /ㅋㅋ/.test(m.text) },
+    { key: "photo", label: "첫 사진", test: (m) => m.kind === "photo" },
+    { key: "plan", label: "첫 약속", test: (m) => /약속|만나자|볼까\?|보자|시간\s?돼\?/.test(m.text) },
+    { key: "thanks", label: "첫 '고마워'", test: (m) => /고마워|고맙/.test(m.text) },
+    { key: "night", label: "첫 '잘 자'", test: (m) => /잘\s?자(?![료가])/.test(m.text) },
+    { key: "miss", label: "첫 '보고 싶다'", test: (m) => /보고\s?싶/.test(m.text) },
+    { key: "love", label: "첫 '사랑해'", test: (m) => /사랑해/.test(m.text) },
+  ];
+
+  function dayKey(t) { const d = new Date(t); return new Date(d.getFullYear(), d.getMonth(), d.getDate()).getTime(); }
+
+  function moments(allMessages, a, b) {
+    const msgs = allMessages.filter((m) => m.name === a || m.name === b);
+    if (msgs.length < 2) return null;
+
+    const days = [], idx = new Map();
+    const end = dayKey(msgs[msgs.length - 1].t);
+    for (let d = new Date(dayKey(msgs[0].t)); d.getTime() <= end; d.setDate(d.getDate() + 1)) {
+      idx.set(d.getTime(), days.length);
+      days.push({ t: d.getTime(), n: 0, a: 0, b: 0 });
+    }
+    const dayOf = (t) => idx.get(dayKey(t));
+
+    let rally = null, cur = null, laugh = null, longest = null;
+    const waited = { [a]: 0, [b]: 0 }; // waited[x] = x가 상대 답장을 기다린 시간
+    const cold = [];
+    const firsts = [];
+    const seen = new Set();
+
+    for (let i = 0; i < msgs.length; i++) {
+      const m = msgs[i], prev = msgs[i - 1];
+      const day = days[dayOf(m.t)];
+      day.n++; day[m.name === a ? "a" : "b"]++;
+
+      if (m.kind === "text") {
+        const run = Math.max(0, ...(m.text.match(/ㅋ+/g) || []).map((x) => x.length));
+        if (run >= 3 && (!laugh || run > laugh.len)) laugh = { len: run, i };
+        if (!longest || m.text.length > longest.len) longest = { len: m.text.length, i };
+      }
+      for (const f of FIRSTS) if (!seen.has(f.key) && f.test(m)) { seen.add(f.key); firsts.push({ key: f.key, label: f.label, i }); }
+
+      if (!prev) { cur = { from: 0, to: 0, turns: 1 }; continue; }
+      const gap = m.t - prev.t;
+      if (prev.name !== m.name && gap < SESSION_GAP) waited[prev.name] += gap;
+      if (gap >= COLD_GAP) cold.push({ from: i - 1, to: i, ms: gap });
+      if (gap <= RALLY_GAP) {
+        cur.to = i;
+        if (prev.name !== m.name) cur.turns++;
+      } else {
+        cur = { from: i, to: i, turns: 1 };
+      }
+      if (!rally || cur.turns > rally.turns) rally = { ...cur };
+    }
+
+    let hottest = 0;
+    days.forEach((d, k) => { if (d.n > days[hottest].n) hottest = k; });
+    const colds = cold.sort((x, y) => y.ms - x.ms).slice(0, 3).sort((x, y) => x.from - y.from);
+
+    return {
+      a, b, msgs, days,
+      hottest: { day: hottest, ...days[hottest] },
+      rally: rally && rally.turns >= 4 ? { ...rally, day: dayOf(msgs[rally.from].t), ms: msgs[rally.to].t - msgs[rally.from].t } : null,
+      laugh: laugh && { ...laugh, day: dayOf(msgs[laugh.i].t) },
+      longest: longest && longest.len >= 20 ? { ...longest, day: dayOf(msgs[longest.i].t) } : null,
+      waited,
+      cold: colds.map((c) => ({ ...c, fromDay: dayOf(msgs[c.from].t), toDay: dayOf(msgs[c.to].t) })),
+      firsts: firsts.map((f) => ({ ...f, day: dayOf(msgs[f.i].t) })).sort((x, y) => x.i - y.i),
+      avg: msgs.length / days.length,
+    };
+  }
+
   // ---------- 예시 대화 (가상의 두 사람) ----------
   function makeSample() {
     let seed = 7;
@@ -255,7 +332,9 @@
       const h = d.getHours(), ap = h < 12 ? "오전" : "오후", hh = h % 12 || 12;
       return `${d.getFullYear()}년 ${d.getMonth() + 1}월 ${d.getDate()}일 ${ap} ${hh}:${String(d.getMinutes()).padStart(2, "0")}`;
     };
+    const rally = ["아 잠깐 지금 하늘 봐", "왜왜", "무지개 떴어!!", "헐 어디?", "창문 열어봐 동쪽", "오 진짜다", "사진", "와 대박", "소원 빌어 빨리", "빌었어 ㅋㅋ", "뭐 빌었는데", "비밀인데", "말해줘", "나중에 만나서", "ㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋ 궁금하게 만드네", "그게 포인트지", "치사해", "토요일에 알려줄게", "토요일 몇 시?", "2시 어때", "좋아 그럼 성수에서 보자", "콜", "기대된다 ㅎㅎ", "나도"];
     for (let day = 0; day < 34; day++) {
+      if (day >= 17 && day <= 20) continue; // 나흘 동안 조용했던 때
       if (rnd() < 0.12) continue;
       const base = new Date(2026, 9, 7 + day);
       lines.push(`${base.getFullYear()}년 ${base.getMonth() + 1}월 ${base.getDate()}일 ${"일월화수목금토"[base.getDay()]}요일`);
@@ -277,10 +356,15 @@
         t = new Date(t.getTime() + (6.2 + rnd() * 3) * 3600e3);
         if (t.getDate() !== base.getDate()) break;
       }
-      if (rnd() < 0.3) lines.push(`${fmt(new Date(base.getTime() + (24 + 1 + rnd() * 1.5) * 3600e3))}, ${A} : 아직 안 자? ㅎㅎ`);
+      if (day === 21) lines.push(`${fmt(new Date(base.getTime() + 8.5 * 3600e3))}, ${B} : 미안 요즘 회사 일 때문에 정신이 하나도 없었어 ㅠㅠ 연락 못 한 거 계속 마음에 걸렸는데 막상 하려니까 너무 늦은 것 같아서 더 못 했어. 주말에 맛있는 거 사줄게 진짜로`);
+      if (day === 9) {
+        let rt = new Date(base.getTime() + 21.2 * 3600e3);
+        rally.forEach((txt, k) => { lines.push(`${fmt(rt)}, ${k % 2 ? B : A} : ${txt}`); rt = new Date(rt.getTime() + 35e3); });
+      }
+      if (day !== 16 && rnd() < 0.3) lines.push(`${fmt(new Date(base.getTime() + (24 + 1 + rnd() * 1.5) * 3600e3))}, ${A} : 아직 안 자? ㅎㅎ`);
     }
     return lines.join("\n");
   }
 
-  return { parse, analyze, speakers, estimateType, compat, makeSample, kindOf };
+  return { parse, analyze, moments, speakers, estimateType, compat, makeSample, kindOf };
 });

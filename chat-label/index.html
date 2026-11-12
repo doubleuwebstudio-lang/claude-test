@@ -141,6 +141,41 @@ details.paste textarea { width: 100%; min-height: 120px; margin-top: 8px; border
 .paid .tag { font-size: 12px; font-weight: 800; border: 1.5px solid var(--ink); border-radius: 999px; padding: 1px 10px; width: fit-content; }
 .paid .price { font-family: var(--f-num); font-size: 14px; }
 
+
+/* 관계 심전도 */
+.ecg-head { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: baseline; gap: 6px 16px; }
+.ecg-head p { font-size: 13px; color: var(--muted); }
+.ecg-wrap { position: relative; overflow-x: auto; }
+.ecg-wrap svg { display: block; width: 100%; min-width: 560px; height: auto; touch-action: pan-x; }
+.ecg-wrap .pin { cursor: pointer; }
+.ecg-wrap .pin circle { transition: r .12s; }
+.ecg-wrap .pin.hl circle { fill: var(--ink); }
+.ecg-wrap .pin.hl text { fill: var(--surface); }
+.tip { position: absolute; pointer-events: none; background: var(--ink); color: var(--surface); font-size: 12.5px; padding: 6px 10px; border-radius: 8px; white-space: nowrap; transform: translate(-50%, -100%); }
+.tip .num { font-size: 12px; }
+.moments { display: grid; gap: 12px; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); }
+.moment { border: 1px solid var(--line); border-radius: 12px; padding: 14px; display: grid; gap: 6px; align-content: start; min-width: 0; background: var(--surface); }
+.moment:focus-visible, .moment.hl { border-color: var(--ink); box-shadow: 0 0 0 1px var(--ink); }
+.moment .mh { display: flex; gap: 8px; align-items: center; font-weight: 800; font-size: 14px; }
+.moment .no { width: 24px; height: 24px; border-radius: 50%; border: 2px solid var(--ink); display: grid; place-items: center; font-family: var(--f-num); font-size: 12px; flex: none; }
+.moment .no.cold { border-style: dashed; }
+.moment .val { font-family: var(--f-num); font-size: 34px; font-weight: 600; line-height: 1.1; font-variant-numeric: tabular-nums; }
+.moment .val small { font-size: 15px; font-family: var(--f-body); font-weight: 600; margin-left: 4px; }
+.moment .when { font-size: 13px; color: var(--muted); }
+.moment .quote { font-size: 13.5px; border-left: 3px solid var(--line); padding: 2px 0 2px 10px; display: grid; gap: 3px; overflow-wrap: anywhere; }
+.moment .quote div { display: flex; gap: 6px; align-items: baseline; min-width: 0; }
+.moment .quote .dot { position: relative; top: -1px; }
+.wait { display: grid; gap: 10px; }
+.wait .w { display: grid; gap: 4px; font-size: 14px; }
+.wait .w .bar { height: 8px; border-radius: 4px; background: var(--line); overflow: hidden; }
+.wait .w .bar i { display: block; height: 100%; }
+.firsts { display: grid; gap: 0; }
+.firsts .f { display: grid; grid-template-columns: 74px minmax(96px, 130px) minmax(0, 1fr); gap: 10px; padding: 8px 0; border-bottom: 1px solid var(--line); font-size: 14px; align-items: baseline; }
+.firsts .f:last-child { border-bottom: 0; }
+.firsts .f .d { font-family: var(--f-num); font-size: 13px; color: var(--muted); }
+.firsts .f .q { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+@media (max-width: 520px) { .firsts .f { grid-template-columns: 64px 1fr; } .firsts .f .q { grid-column: 2; white-space: normal; } }
+
 /* 공유 카드 */
 .share { display: grid; gap: 16px; grid-template-columns: 1fr; align-items: start; }
 @media (min-width: 760px) { .share { grid-template-columns: 300px 1fr; } }
@@ -215,6 +250,32 @@ footer { font-size: 12.5px; color: var(--muted); display: grid; gap: 4px; border
       </div>
     </div>
 
+    <div class="panel" style="gap:14px" id="ecgPanel">
+      <div class="ecg-head">
+        <h2>우리 관계 심전도</h2>
+        <p id="ecgSummary"></p>
+      </div>
+      <div class="ecg-wrap" id="ecg"></div>
+      <div class="legend" id="ecgLegend"></div>
+    </div>
+
+    <div style="display:grid;gap:12px">
+      <h2 style="font-size:24px">명장면</h2>
+      <div class="moments" id="moments"></div>
+    </div>
+
+    <div class="result" style="grid-template-columns:repeat(auto-fit,minmax(min(100%,320px),1fr))">
+      <div class="panel">
+        <h2>답장을 기다린 시간</h2>
+        <div class="wait" id="wait"></div>
+      </div>
+      <div class="panel">
+        <h2>처음 순간들</h2>
+        <div class="firsts" id="firsts"></div>
+        <p class="muted" style="font-size:12.5px">내보낸 대화 안에서 찾은 '처음'이에요. 그 전 대화는 알 수 없어요.</p>
+      </div>
+    </div>
+
     <div class="panel" style="gap:14px">
       <h2>공유 카드</h2>
       <div class="share">
@@ -274,6 +335,12 @@ footer { font-size: 12.5px; color: var(--muted); display: grid; gap: 4px; border
     return s[0] + "*".repeat(s.length - 2) + s[s.length - 1];
   };
   const nm = (n) => ($("mask").checked ? maskName(n) : n);
+  // 받침에 따라 조사 고르기: josa("지민", "이", "가") → "지민이"
+  const josa = (w, withB, noB) => {
+    const c = w.charCodeAt(w.length - 1);
+    if (c < 0xac00 || c > 0xd7a3) return w + withB + "(" + noB + ")";
+    return w + ((c - 0xac00) % 28 ? withB : noB);
+  };
   const pct = (x) => Math.round(x * 100) + "%";
   const mins = (m) => m == null ? "–" : m < 1 ? "1분 안" : m < 60 ? Math.round(m) + "분" : (m / 60).toFixed(1) + "시간";
   const dstr = (t) => { const d = new Date(t); return `${d.getFullYear()}.${String(d.getMonth() + 1).padStart(2, "0")}.${String(d.getDate()).padStart(2, "0")}`; };
@@ -352,7 +419,7 @@ footer { font-size: 12.5px; color: var(--muted); display: grid; gap: 4px; border
     v.push(`대화를 마지막으로 끝내는 쪽은 <b>${esc(nm(ender.name))}</b>. 전체 ${an.sessions}번 중 ${ender.ends}번이에요.`);
     if (A.affection + B.affection > 0) {
       const w = A.affection >= B.affection ? A : B;
-      v.push(`'보고 싶다', '고마워' 같은 표현은 <b>${esc(nm(w.name))}</b>가 ${w.affection}번으로 더 많이 했어요.`);
+      v.push(`'보고 싶다', '고마워' 같은 표현은 <b>${esc(josa(nm(w.name), "이", "가"))}</b> ${w.affection}번으로 더 많이 했어요.`);
     }
     $("verdicts").innerHTML = v.map((s) => `<li>${s}</li>`).join("");
 
@@ -414,7 +481,183 @@ footer { font-size: 12.5px; color: var(--muted); display: grid; gap: 4px; border
     const wl = (p, cls) => `<div><span class="who"><span class="dot ${cls}"></span>${esc(nm(p.name))}</span><ol>${p.topWords.map((w) => `<li>${esc(w.w)}<span>${w.c}</span></li>`).join("") || "<li class='muted'>단어가 부족해요</li>"}</ol></div>`;
     $("words").innerHTML = wl(A, "a") + wl(B, "b");
 
+    renderMoments();
     drawCard();
+  }
+
+
+  // ---------- 관계 심전도와 명장면 ----------
+  const WD = "일월화수목금토";
+  const dlabel = (t) => { const d = new Date(t); return `${d.getMonth() + 1}월 ${d.getDate()}일 (${WD[d.getDay()]})`; };
+  const dshort = (t) => { const d = new Date(t); return `${String(d.getMonth() + 1).padStart(2, "0")}.${String(d.getDate()).padStart(2, "0")}`; };
+  const clock = (t) => { const d = new Date(t); const h = d.getHours(); return `${h < 12 ? "오전" : "오후"} ${h % 12 || 12}:${String(d.getMinutes()).padStart(2, "0")}`; };
+  const clip = (s, n) => { s = String(s).replace(/\s*\n\s*/g, " "); return s.length > n ? s.slice(0, n - 1) + "…" : s; };
+  const span = (ms) => {
+    const m = Math.round(ms / 60000);
+    if (m < 60) return `${m}분`;
+    const h = Math.floor(m / 60), r = m % 60;
+    if (h < 48) return r ? `${h}시간 ${r}분` : `${h}시간`;
+    return `${(ms / 864e5).toFixed(1)}일`;
+  };
+  const sideOf = (name) => (name === state.a ? "a" : "b");
+  const said = (m, n = 60) => `<div><span class="dot ${sideOf(m.name)}"></span><span><b>${esc(nm(m.name))}</b> ${esc(clip(m.text, n))}</span></div>`;
+
+  function renderMoments() {
+    const mo = ChatLab.moments(state.parsed.messages, state.a, state.b);
+    state.moments = mo;
+    if (!mo) { $("ecgPanel").hidden = true; return; }
+    $("ecgPanel").hidden = false;
+    const M = mo.msgs;
+
+    // 명장면 목록 (번호는 그래프 위 핀과 같다)
+    const items = [];
+    items.push({ day: mo.hottest.day, title: "가장 뜨거웠던 날", val: `${mo.hottest.n}<small>개</small>`,
+      when: `${dlabel(mo.hottest.t)} · 평소의 ${(mo.hottest.n / Math.max(mo.avg, 0.1)).toFixed(1)}배`,
+      body: `<div class="quote"><div><span class="dot a"></span><span>${esc(nm(state.a))} ${mo.hottest.a}개</span></div><div><span class="dot b"></span><span>${esc(nm(state.b))} ${mo.hottest.b}개</span></div></div>` });
+    if (mo.rally) {
+      const r = mo.rally, lines = M.slice(r.from, Math.min(r.to + 1, r.from + 5));
+      items.push({ day: r.day, title: "최장 랠리", val: `${r.turns}<small>번 주고받음</small>`,
+        when: `${dlabel(M[r.from].t)} ${clock(M[r.from].t)} · ${span(Math.max(r.ms, 60000))} 동안 2분 안에 계속 답장`,
+        body: `<div class="quote">${lines.map((m) => said(m, 34)).join("")}${r.to - r.from + 1 > lines.length ? `<div class="muted">… ${r.to - r.from + 1 - lines.length}개 더</div>` : ""}</div>` });
+    }
+    if (mo.laugh) {
+      const m = M[mo.laugh.i];
+      items.push({ day: mo.laugh.day, title: "최장 웃음", val: `ㅋ×${mo.laugh.len}`,
+        when: `${dlabel(m.t)} · ${esc(nm(m.name))}`, body: `<div class="quote">${said(m, 70)}</div>` });
+    }
+    if (mo.longest && (!mo.laugh || mo.longest.i !== mo.laugh.i)) {
+      const m = M[mo.longest.i];
+      items.push({ day: mo.longest.day, title: "가장 긴 메시지", val: `${mo.longest.len}<small>자</small>`,
+        when: `${dlabel(m.t)} · ${esc(nm(m.name))}`, body: `<div class="quote">${said(m, 90)}</div>` });
+    }
+    items.forEach((it, k) => (it.no = String(k + 1)));
+    mo.cold.forEach((c, k) => {
+      const last = M[c.from], back = M[c.to];
+      items.push({ cold: true, day: c.fromDay, no: "냉" + (mo.cold.length > 1 ? k + 1 : ""), title: "냉전", val: span(c.ms) + `<small>침묵</small>`,
+        when: `${dlabel(last.t)} → ${dlabel(back.t)}`,
+        body: `<div class="quote"><div class="muted">마지막 말</div>${said(last, 46)}<div class="muted">침묵을 깬 사람</div>${said(back, 46)}</div>` });
+    });
+    $("moments").innerHTML = items.map((it) => `<article class="moment" tabindex="0" data-pin="${esc(it.no)}">
+        <div class="mh"><span class="no${it.cold ? " cold" : ""}">${it.cold ? "냉" : it.no}</span>${it.title}</div>
+        <div class="val">${it.val}</div><div class="when">${it.when}</div>${it.body}</article>`).join("");
+
+    // 심전도 그래프
+    let pts = mo.days, scale = 1;
+    if (pts.length > 400) { // 1년이 넘으면 주 단위로 묶는다
+      scale = 7; const w = [];
+      for (let k = 0; k < pts.length; k += 7) {
+        const g = pts.slice(k, k + 7);
+        w.push({ t: g[0].t, n: g.reduce((s, d) => s + d.n, 0), a: g.reduce((s, d) => s + d.a, 0), b: g.reduce((s, d) => s + d.b, 0), end: g[g.length - 1].t });
+      }
+      pts = w;
+    }
+    const W = 760, H = 270, L = 40, R = 14, T = 46, B = 196, lane = 226;
+    const n = pts.length, step = n > 1 ? (W - L - R) / (n - 1) : 0;
+    const max = Math.max(...pts.map((d) => d.n), 1);
+    const nice = [5, 10, 20, 25, 50, 100, 200, 250, 500, 1000, 2000, 5000].find((v) => v * 4 >= max) || Math.ceil(max / 4);
+    const top = nice * Math.ceil(max / nice);
+    const X = (k) => L + k * step, Y = (v) => B - (v / top) * (B - T);
+    const at = (day) => Math.min(n - 1, Math.floor(day / scale));
+    let svg = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="날짜별 메시지 수 그래프">`;
+    // 심전도 종이 모눈
+    for (let x = L; x <= W - R; x += 12) svg += `<line x1="${x}" x2="${x}" y1="${T - 8}" y2="${B}" stroke="var(--line)" stroke-width="${(x - L) % 60 ? 0.4 : 1}"/>`;
+    for (let v = 0; v <= top; v += nice) svg += `<line x1="${L}" x2="${W - R}" y1="${Y(v)}" y2="${Y(v)}" stroke="var(--line)" stroke-width="1"/><text x="${L - 6}" y="${Y(v) + 4}" text-anchor="end" font-size="10" fill="var(--muted)" font-family="IBM Plex Mono, monospace">${v}</text>`;
+    // 냉전 구간
+    mo.cold.forEach((c) => {
+      const x1 = X(at(c.fromDay)), x2 = X(at(c.toDay));
+      svg += `<rect x="${x1}" y="${T - 8}" width="${Math.max(x2 - x1, 3)}" height="${B - T + 8}" fill="var(--a-soft)"/>`;
+      const bw = x2 - x1, lab = bw >= 84 ? `냉전 ${span(c.ms)}` : bw >= 30 ? "냉전" : "";
+      if (lab) svg += `<text x="${(x1 + x2) / 2}" y="${T + 6}" text-anchor="middle" font-size="11" fill="var(--a)" font-weight="700">${lab}</text>`;
+    });
+    // 선
+    const path = pts.map((d, k) => `${k ? "L" : "M"}${X(k).toFixed(1)},${Y(d.n).toFixed(1)}`).join("");
+    svg += `<path d="${path}" fill="none" stroke="var(--b)" stroke-width="2.2" stroke-linejoin="round"/>`;
+    svg += `<line x1="${L}" x2="${W - R}" y1="${B}" y2="${B}" stroke="var(--ink)"/>`;
+    // 날짜 눈금: 달이 바뀌는 곳
+    let lastX = -99;
+    pts.forEach((d, k) => {
+      const dt = new Date(d.t);
+      if (k === 0 || dt.getDate() <= scale) {
+        if (X(k) - lastX < 46) return;
+        lastX = X(k);
+        svg += `<text x="${X(k)}" y="${B + 15}" text-anchor="${k === 0 ? "start" : "middle"}" font-size="10.5" fill="var(--muted)" font-family="IBM Plex Mono, monospace">${dt.getMonth() + 1}월${k === 0 ? " " + dt.getDate() + "일" : ""}</text>`;
+      }
+    });
+    // 처음 순간 줄
+    svg += `<text x="${L - 6}" y="${lane + 4}" text-anchor="end" font-size="10.5" fill="var(--muted)">처음</text><line x1="${L}" x2="${W - R}" y1="${lane}" y2="${lane}" stroke="var(--line)" stroke-dasharray="2 3"/>`;
+    const laneGroups = new Map();
+    mo.firsts.forEach((f) => { const k = at(f.day); if (!laneGroups.has(k)) laneGroups.set(k, []); laneGroups.get(k).push(f); });
+    laneGroups.forEach((fs, k) => {
+      const f = fs[0], x = X(k);
+      svg += `<g><title>${fs.map((g) => `${g.label} · ${dlabel(M[g.i].t)}`).join("\n")}</title><rect x="${x - 4}" y="${lane - 4}" width="8" height="8" transform="rotate(45 ${x} ${lane})" fill="var(--${sideOf(M[f.i].name)})"/>${fs.length > 1 ? `<text x="${x + 8}" y="${lane + 4}" font-size="10" fill="var(--muted)" font-family="IBM Plex Mono, monospace">${fs.length}</text>` : ""}</g>`;
+    });
+    // 핀
+    const pinGroups = new Map();
+    items.filter((it) => !it.cold).forEach((it) => { const k = at(it.day); if (!pinGroups.has(k)) pinGroups.set(k, []); pinGroups.get(k).push(it); });
+    pinGroups.forEach((group, k) => {
+      const x = X(k), y0 = Y(pts[k].n), y = Math.max(14, y0 - 24);
+      svg += `<line x1="${x}" x2="${x}" y1="${y + 10}" y2="${y0}" stroke="var(--ink)" stroke-width="1"/>`;
+      group.forEach((it, j) => {
+        const cx = Math.max(L + 10, Math.min(W - R - 10, x + (j - (group.length - 1) / 2) * 22));
+        svg += `<g class="pin" data-pin="${it.no}"><title>${it.title}</title><circle cx="${cx}" cy="${y}" r="10" fill="var(--surface)" stroke="var(--ink)" stroke-width="2"/><text x="${cx}" y="${y + 4}" text-anchor="middle" font-size="11" font-weight="700" fill="var(--ink)" font-family="IBM Plex Mono, monospace">${it.no}</text></g>`;
+      });
+    });
+    svg += `<line id="ecgCursor" x1="0" x2="0" y1="${T - 8}" y2="${B}" stroke="var(--ink)" stroke-dasharray="3 3" visibility="hidden"/>`;
+    svg += `</svg><div class="tip" id="ecgTip" hidden></div>`;
+    $("ecg").innerHTML = svg;
+
+    $("ecgSummary").innerHTML = `${scale > 1 ? "주" : "하루"} 평균 <span class="num">${(mo.avg * scale).toFixed(1)}</span>개 · 대화한 날 <span class="num">${mo.days.filter((d) => d.n).length}</span>/${mo.days.length}일`;
+    $("ecgLegend").innerHTML = `<span><span class="dot" style="background:var(--b);border-radius:2px;height:3px;width:14px"></span>${scale > 1 ? "주별" : "날짜별"} 메시지 수</span><span><span class="dot" style="background:var(--a-soft);border-radius:2px;border:1px solid var(--a)"></span>이틀 넘게 조용했던 냉전</span><span class="muted">◆ 처음 순간 (색은 먼저 말한 사람)</span>`;
+
+    // 커서와 말풍선
+    const svgEl = $("ecg").querySelector("svg"), tip = $("ecgTip"), cur = $("ecgCursor");
+    const move = (e) => {
+      const r = svgEl.getBoundingClientRect();
+      const vx = ((e.clientX - r.left) / r.width) * W;
+      const k = Math.max(0, Math.min(n - 1, Math.round((vx - L) / (step || 1))));
+      const d = pts[k];
+      cur.setAttribute("x1", X(k)); cur.setAttribute("x2", X(k)); cur.setAttribute("visibility", "visible");
+      tip.hidden = false;
+      tip.innerHTML = `${scale > 1 ? dshort(d.t) + "–" + dshort(d.end) : dlabel(d.t)} · <span class="num">${d.n}</span>개<br><span class="muted" style="color:inherit;opacity:.75">${esc(nm(state.a))} ${d.a} / ${esc(nm(state.b))} ${d.b}</span>`;
+      const wrap = $("ecg").getBoundingClientRect();
+      const px = r.left - wrap.left + (X(k) / W) * r.width + $("ecg").scrollLeft;
+      tip.style.left = Math.max(70, Math.min(px, $("ecg").scrollWidth - 70)) + "px";
+      tip.style.top = (r.top - wrap.top + (Y(d.n) / H) * r.height - 10) + "px";
+    };
+    svgEl.addEventListener("pointermove", move);
+    svgEl.addEventListener("pointerleave", () => { tip.hidden = true; cur.setAttribute("visibility", "hidden"); });
+
+    // 카드 ↔ 핀 연결
+    const hl = (no, on) => {
+      $("ecg").querySelectorAll(`.pin[data-pin="${no}"]`).forEach((g) => g.classList.toggle("hl", on));
+      $("moments").querySelectorAll(`.moment[data-pin="${no}"]`).forEach((c) => c.classList.toggle("hl", on));
+    };
+    $("moments").querySelectorAll(".moment").forEach((c) => {
+      const no = c.dataset.pin;
+      c.addEventListener("mouseenter", () => hl(no, true)); c.addEventListener("mouseleave", () => hl(no, false));
+      c.addEventListener("focus", () => hl(no, true)); c.addEventListener("blur", () => hl(no, false));
+    });
+    $("ecg").querySelectorAll(".pin").forEach((g) => {
+      const no = g.dataset.pin;
+      g.addEventListener("mouseenter", () => hl(no, true)); g.addEventListener("mouseleave", () => hl(no, false));
+      g.addEventListener("click", () => { const c = $("moments").querySelector(`.moment[data-pin="${no}"]`); if (c) { c.focus({ preventScroll: true }); c.scrollIntoView({ block: "nearest", behavior: "smooth" }); } });
+    });
+
+    // 기다린 시간
+    const movie = 2 * 3600e3;
+    const wa = mo.waited[state.a], wb = mo.waited[state.b], wmax = Math.max(wa, wb, 1);
+    const wrow = (who, other, ms, cls) => `<div class="w"><span><b>${esc(josa(nm(who), "이", "가"))}</b> ${esc(nm(other))}의 답장을 기다린 시간</span>
+      <span class="num" style="font-size:22px;font-weight:600">${span(ms)}</span>
+      <div class="bar"><i style="width:${Math.round((ms / wmax) * 100)}%;background:var(--${cls})"></i></div>
+      <span class="muted" style="font-size:13px">${ms >= movie ? `영화 ${(ms / movie).toFixed(1)}편 볼 시간` : `라면 ${Math.max(1, Math.round(ms / 180e3))}개 끓일 시간`}</span></div>`;
+    $("wait").innerHTML = wrow(state.a, state.b, wa, "a") + wrow(state.b, state.a, wb, "b") +
+      `<p class="muted" style="font-size:12.5px">한 대화 안에서 상대가 답할 때까지 걸린 시간을 모두 더했어요. 6시간 넘는 공백은 빼고 셉니다.</p>`;
+
+    // 처음 순간들
+    $("firsts").innerHTML = mo.firsts.map((f) => {
+      const m = M[f.i];
+      return `<div class="f"><span class="d">${dshort(m.t)}</span><span><b>${f.label}</b></span><span class="q"><span class="dot ${sideOf(m.name)}" style="display:inline-block;margin-right:6px"></span>${esc(nm(m.name))} · ${esc(clip(m.text, 40))}</span></div>`;
+    }).join("");
   }
 
   // ---------- 공유 카드 ----------

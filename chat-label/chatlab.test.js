@@ -46,3 +46,18 @@ test("예시 대화 분석", () => {
   assert.ok(ji.replyMedian < do_.replyMedian, "지민이 더 빨리 답한다");
   console.log(a.total, a.compat, ji.type.letters, do_.type.letters, ji.replyMedian, do_.replyMedian, ji.initShare.toFixed(2));
 });
+
+test("명장면: 랠리, 냉전, 첫 순간", () => {
+  const r = L.parse(L.makeSample());
+  const m = L.moments(r.messages, "지민", "도윤");
+  assert.ok(m.rally.turns >= 20, "무지개 랠리를 찾는다");
+  assert.equal(m.cold.length >= 1, true);
+  const c = m.cold.find((x) => x.ms >= 4 * 864e5);
+  assert.ok(c, "나흘 넘는 냉전");
+  assert.equal(m.msgs[c.to].name, "도윤");
+  assert.ok(m.laugh.len >= 27);
+  assert.deepEqual(m.firsts.map((f) => f.key).slice(0, 1), ["first"]);
+  assert.ok(m.firsts.some((f) => f.key === "miss"));
+  assert.equal(m.days.reduce((s, d) => s + d.n, 0), m.msgs.length);
+  console.log(m.rally.turns, m.cold.map((x) => Math.round(x.ms / 36e5)), m.hottest.n, m.firsts.map((f) => f.label).join(","), Math.round(m.waited["지민"] / 6e4), Math.round(m.waited["도윤"] / 6e4));
+});
