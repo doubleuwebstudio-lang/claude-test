@@ -455,3 +455,10 @@ select.input{appearance:none;background:var(--field) url("data:image/svg+xml,%3C
 .foot nav a:hover{color:var(--oak)}
 .foot-note{grid-column:1 / -1;padding-top:24px;border-top:1px solid var(--line);display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap}
 @media (max-width:768px){ .foot{grid-template-columns:1fr} .foot nav{flex-wrap:wrap;gap:12px 24px} }
+
+/* ---------- 홈 스크롤 스냅 (PC, 섹션 경계 근처에서만 맞춤) ---------- */
+@media (min-width:901px) and (min-height:700px){
+  html:has(body[data-page="home"]){scroll-snap-type:y proximity}
+  body[data-page="home"] main > section{scroll-snap-align:start}
+  body[data-page="home"] .site-footer{scroll-snap-align:end}
+}
