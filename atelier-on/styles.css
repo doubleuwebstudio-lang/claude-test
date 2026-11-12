@@ -455,3 +455,13 @@ select.input{appearance:none;background:var(--field) url("data:image/svg+xml,%3C
 .foot nav a:hover{color:var(--oak)}
 .foot-note{grid-column:1 / -1;padding-top:24px;border-top:1px solid var(--line);display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap}
 @media (max-width:768px){ .foot{grid-template-columns:1fr} .foot nav{flex-wrap:wrap;gap:12px 24px} }
+
+/* ---------- 섹션 제목 등장: 가는 선이 그려진 뒤 글자가 선 위로 올라옴 ---------- */
+.title-motion .sec-title,.title-motion .t-h2{position:relative}
+.title-motion .sec-title .tt,.title-motion .t-h2 .tt{display:inline-block;overflow:hidden;vertical-align:top;padding-bottom:.08em}
+.title-motion .sec-title .tt>span,.title-motion .t-h2 .tt>span{display:inline-block;transform:translateY(110%);transition:transform .9s cubic-bezier(.2,.75,.2,1) .35s}
+.title-motion .sec-title::after,.title-motion .t-h2::after{content:"";display:block;width:44px;height:1px;margin:12px auto 0;background:var(--oak);transform:scaleX(0);transition:transform .5s cubic-bezier(.5,0,.2,1)}
+.title-motion .row-head .sec-title::after,.title-motion .faq-side .sec-title::after,.title-motion .t-h2::after{margin-left:0;transform-origin:0 50%}
+.title-motion .cta .sec-title::after,.title-motion .sec-head .t-h2::after{margin-left:auto;transform-origin:50% 50%}
+.title-motion .in .tt>span{transform:none}
+.title-motion .in::after{transform:scaleX(1)}
