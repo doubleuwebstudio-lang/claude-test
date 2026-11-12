@@ -5,14 +5,14 @@
   var p = list.filter(function (x) { return x.id === id; })[0] || list[0];
   document.title = p.title + " | 아틀리에 온";
 
-  var seen = {};
-  function fig(g, cls) {
-    var fid = seen[g.room] ? "" : ' id="photo-' + g.room + '"';
-    seen[g.room] = true;
-    return '<figure class="' + cls + '"' + fid + ' data-room="' + g.room + '">' + A.photo(g.img, g.name + ": " + g.note, { pos: g.pos }) +
-      '<figcaption><b>' + g.name + '</b>' + g.note + '</figcaption></figure>';
+  function spaceBlock(s, k) {
+    var n = s.photos.length;
+    return '<section class="space-block n' + n + '" aria-labelledby="sp-' + k + '">' +
+      '<div class="space-head"><h3 id="sp-' + k + '">' + s.name + '</h3><p>' + s.line + '</p></div>' +
+      '<div class="space-photos">' + s.photos.map(function (ph) {
+        return '<figure>' + A.photo(ph[0], s.name + ": " + ph[1], { pos: ph[2] }) + '<figcaption>' + ph[1] + '</figcaption></figure>';
+      }).join("") + '</div></section>';
   }
-  var G = p.gallery;
   var i = list.indexOf(p);
   var prev = list[(i + list.length - 1) % list.length], next = list[(i + 1) % list.length];
 
@@ -32,13 +32,21 @@
         '<div class="todo"><dt>공사 기간</dt><dd>실제 업체 입력<small>예: ' + (p.id === "p04" ? "3주" : "6~8주") + '</small></dd></div>' +
         '<div class="todo"><dt>예산 범위</dt><dd>실제 업체 입력<small>예: 상담 후 안내</small></dd></div>' +
       '</dl>' +
-      '<div class="story-text"><h2 class="t-h2">' + p.oneLine + '</h2>' + p.intro.map(function (t) { return "<p>" + t + "</p>"; }).join("") + '</div>' +
+      '<div class="story-text"><h2 class="t-h2">' + p.oneLine + '</h2>' +
+        '<div class="story-part"><h3>이 집의 고민</h3><p>' + p.concern + '</p></div>' +
+        '<div class="story-part"><h3>이렇게 풀었습니다</h3>' + p.intro.map(function (t) { return "<p>" + t + "</p>"; }).join("") + '</div>' +
+        '<div class="story-part"><h3>핵심 결정</h3><ol class="decisions">' + p.decisions.map(function (t) { return "<li>" + t + "</li>"; }).join("") + '</ol></div>' +
+      '</div>' +
     '</div></section>' +
-    '<section class="wrap flow" aria-label="공간별 사진">' +
-      fig(G[0], "wide") +
-      '<p class="flow-text">' + p.more + '</p>' +
-      '<div class="pair">' + fig(G[1], "half") + fig(G[2], "half") + '</div>' +
-      (G[3] ? fig(G[3], "wide") : "") +
+    '<section class="wrap materials" aria-labelledby="mat-title">' +
+      '<div class="materials-head"><h2 class="sec-title" id="mat-title">공간별 자재</h2><p>이 사례에 쓴 마감재 조합입니다. 같은 자재가 궁금하시면 상담 때 샘플을 보여 드립니다.</p></div>' +
+      '<div class="mat-wrap"><table class="mat-table"><thead><tr><th scope="col">공간</th><th scope="col">바닥</th><th scope="col">벽</th><th scope="col">가구·조명</th></tr></thead><tbody>' +
+        p.materials.map(function (r) { return '<tr><th scope="row">' + r[0] + '</th><td data-k="바닥">' + r[1] + '</td><td data-k="벽">' + r[2] + '</td><td data-k="가구·조명">' + r[3] + '</td></tr>'; }).join("") +
+      '</tbody></table></div>' +
+      '<p class="mat-note">가상 사례라 브랜드와 품번은 적지 않았습니다. 실제 업체 납품 시 자재명을 채웁니다.</p>' +
+    '</section>' +
+    '<section class="wrap spaces" aria-label="공간별 사진">' +
+      p.spaces.map(spaceBlock).join("") +
       '<p class="credit">' + A.credit + '</p>' +
     '</section>' +
     '<nav class="wrap pn" aria-label="다른 시공 사례">' +
