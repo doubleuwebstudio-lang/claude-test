@@ -201,7 +201,7 @@
   /* 페이지 끝 상담 영역 (모든 페이지 공통): 사진 + 큰 제목 */
   function finalCta(img, alt, text) {
     return '<section class="cta-final" aria-labelledby="final-title">' +
-      '<div class="cta-final-photo">' + photo(img || "6890403", alt || "창가에 붙박이 선반을 짜 넣은 밝은 거실") + "</div>" +
+      '<div class="cta-final-photo">' + photo(img || "7005297", alt || "베이지와 그레이 톤으로 꾸민 넓은 거실") + "</div>" +
       '<div class="wrap cta-final-inner"><div class="cta-card">' +
         '<p class="cta-label"><span>상담 안내</span></p>' +
         '<h2 class="cta-final-title" id="final-title">우리 집 이야기,<br>평면도부터 같이 봐요.</h2>' +
@@ -519,7 +519,7 @@
         '<div class="picker-plan">' +
           '<div class="picker-cards" role="group" aria-label="공간 목록">' +
             Object.keys(SPACES).map(function (k) {
-              return '<button type="button" class="space-card" data-space="' + k + '" aria-pressed="false">' + photo(SPACES[k].photos[0][0], "") + "<span>" + SPACES[k].name + "</span></button>";
+              return '<button type="button" class="space-card" data-space="' + k + '" aria-pressed="false"><span>' + SPACES[k].name + "</span></button>";
             }).join("") +
           "</div>" +
           '<p class="picker-sel sr-only" aria-live="polite"></p>' +
@@ -527,6 +527,9 @@
         '<div class="picker-info"></div>' +
       "</div>";
 
+    // 공사 방식 전환 버튼은 섹션 제목 줄 오른쪽 자리로 옮김
+    var modesEl = root.querySelector(".picker-modes"), slot = root.closest(".wrap") && root.closest(".wrap").querySelector(".svc-modes");
+    if (slot) slot.appendChild(modesEl);
     var info = root.querySelector(".picker-info"), selLine = root.querySelector(".picker-sel");
     var planBox = root.querySelector(".picker-plan");
     function names(list) { return list.map(function (k) { return SPACES[k].name; }); }
@@ -534,7 +537,7 @@
       var full = state.mode === "full";
       planBox.hidden = full;
       root.classList.toggle("is-full", full);
-      root.querySelectorAll(".picker-modes button").forEach(function (b) { b.setAttribute("aria-checked", b.dataset.mode === state.mode); });
+      modesEl.querySelectorAll("button").forEach(function (b) { b.setAttribute("aria-checked", b.dataset.mode === state.mode); });
       root.querySelectorAll(".space-card").forEach(function (b) {
         b.setAttribute("aria-pressed", state.sel.indexOf(b.dataset.space) > -1);
       });
@@ -567,7 +570,7 @@
       render(); remember();
     }
     root.querySelectorAll(".space-card").forEach(function (b) { b.addEventListener("click", function () { pick(b.dataset.space); }); });
-    root.querySelectorAll(".picker-modes button").forEach(function (b) {
+    modesEl.querySelectorAll("button").forEach(function (b) {
       b.addEventListener("click", function () {
         state.mode = b.dataset.mode;
         if (!state.sel.length) state.sel = ["kitchen"];
@@ -652,21 +655,21 @@
     }).join("");
     var sec = track.closest(".hscroll"), sticky = sec.querySelector(".hs-sticky"), bar = sec.querySelector(".hs-bar i");
     var mq = window.matchMedia("(min-width: 901px) and (min-height: 640px) and (prefers-reduced-motion: no-preference)");
-    var dist = 0;
+    var dist = 0, RUN = 0.6;   // 세로로 60%만 내려도 카드가 끝까지 넘어감 (멈춰 있는 구간을 짧게)
     function measure() {
       if (!mq.matches) {
         sec.classList.remove("hs-on"); sec.style.height = ""; track.style.transform = ""; return;
       }
       sec.classList.add("hs-on");
       dist = Math.max(0, track.scrollWidth - document.documentElement.clientWidth);
-      sec.style.height = (sticky.offsetHeight + dist) + "px";
+      sec.style.height = (sticky.offsetHeight + dist * RUN) + "px";
       update();
     }
     function update() {
       var prog;
       if (sec.classList.contains("hs-on")) {
         var top = sec.getBoundingClientRect().top - (document.querySelector(".site-header") || {offsetHeight: 0}).offsetHeight;
-        prog = Math.min(1, Math.max(0, -top / (dist || 1)));
+        prog = Math.min(1, Math.max(0, -top / ((dist * RUN) || 1)));
         track.style.transform = "translate3d(" + (-prog * dist).toFixed(1) + "px,0,0)";
       } else {
         var max = track.scrollWidth - track.clientWidth;
@@ -684,7 +687,7 @@
     track.addEventListener("focusin", function (e) {
       if (!sec.classList.contains("hs-on")) return;
       var card = e.target.closest(".hs-card"); if (!card) return;
-      var x = Math.min(dist, Math.max(0, card.offsetLeft - 40));
+      var x = Math.min(dist, Math.max(0, card.offsetLeft - 40)) * RUN;
       var hh = (document.querySelector(".site-header") || {offsetHeight: 0}).offsetHeight;
       window.scrollTo({ top: sec.getBoundingClientRect().top + window.scrollY - hh + x, behavior: "instant" });
     });
