@@ -438,8 +438,6 @@
             }).join("") +
           "</div>" +
           '<p class="picker-sel sr-only" aria-live="polite"></p>' +
-          '<div class="prep"><h3 class="prep-title"></h3><ul class="prep-list"></ul>' +
-            '<p class="prep-note">준비가 어려우시면 그대로 문의하셔도 됩니다. 통화하면서 함께 정리해 드립니다.</p></div>' +
         "</div>" +
         '<div class="picker-steps" hidden>' +
           '<h3 class="picker-steps-title">공사 순서</h3>' +
@@ -456,6 +454,7 @@
       var full = state.mode === "full";
       planBox.hidden = full;
       stepsBox.hidden = !full;
+      root.classList.toggle("is-full", full);
       root.querySelectorAll(".picker-modes button").forEach(function (b) { b.setAttribute("aria-checked", b.dataset.mode === state.mode); });
       root.querySelectorAll(".space-card").forEach(function (b) {
         b.setAttribute("aria-pressed", state.sel.indexOf(b.dataset.space) > -1);
@@ -463,33 +462,22 @@
       selLine.textContent = full ? "집 전체가 공사 범위입니다." :
         "선택한 공간: " + names(state.sel).join(", ");
       var d = full ? FULL : SPACES[state.cur];
-      if (!full) {
-        root.querySelector(".prep-title").textContent = d.name + " 상담 전에 준비하면 좋은 것";
-        root.querySelector(".prep-list").innerHTML = d.prep.map(function (t) { return "<li>" + esc(t) + "</li>"; }).join("");
-      }
       var links = d.projects.map(function (id) { var p = project(id); return '<a class="link" href="' + p.page + '">' + (p.id === "p04" ? "주방·욕실" : p.size) + "</a>"; }).join("");
       var cta = full ? "전체 리모델링 상담하기" : d.name + " 상담하기";
       info.innerHTML =
         '<div class="picker-photo">' + (full ? photo(d.photos[0][0], d.photos[0][1]) : photo(d.photos[1][0], d.photos[1][1])) + "</div>" +
-        '<h3 class="picker-name">' + d.name + "</h3>" +
-        "<p>" + d.desc + "</p>" +
-        (full ? "" : '<p class="picker-meta"><span>많이 하는 공사</span>' + d.works.join(", ") + "</p>") +
-        (full ? '<p class="picker-meta"><span>예시 기간</span>' + d.period + "</p>" : "") +
-        '<p class="picker-meta picker-links"><span>' + (full ? "사례" : "관련 사례") + "</span>" + links + "</p>";
-      align();
+        '<div class="picker-text">' +
+          '<h3 class="picker-name">' + d.name + "</h3>" +
+          '<p class="picker-desc">' + d.desc + "</p>" +
+          '<div class="picker-metas">' +
+            (full ? '<p class="picker-meta"><span>예시 기간</span>' + d.period + "</p>" : '<p class="picker-meta"><span>많이 하는 공사</span>' + d.works.join(", ") + "</p>") +
+            '<p class="picker-meta picker-links"><span>' + (full ? "사례" : "관련 사례") + '</span><span class="lk">' + links + "</span></p>" +
+          "</div>" +
+          (full ? "" : '<div class="prep"><h4 class="prep-title">상담 전에 준비하면 좋은 것</h4><ul class="prep-list">' +
+            d.prep.map(function (t) { return "<li>" + esc(t) + "</li>"; }).join("") + '</ul>' +
+            '<p class="prep-note">준비가 어려우시면 그대로 문의하셔도 됩니다. 통화하면서 함께 정리해 드립니다.</p></div>') +
+        "</div>";
     }
-    /* PC: 오른쪽 사진을 왼쪽 카드 사진 두 줄과 같은 높이로 맞춤 (제목이 왼쪽 아래 줄 카드 이름과 같은 줄에 옴) */
-    function align() {
-      var ph = info.querySelector(".picker-photo .ph");
-      if (!ph) return;
-      var cards = root.querySelectorAll(".space-card .ph");
-      if (window.innerWidth <= 900 || state.mode === "full" || !cards.length) { ph.style.height = ""; ph.style.aspectRatio = ""; return; }
-      var top = cards[0].getBoundingClientRect().top, bottom = cards[cards.length - 1].getBoundingClientRect().bottom;
-      ph.style.aspectRatio = "auto";
-      ph.style.height = Math.round(bottom - top) + "px";
-    }
-    window.addEventListener("resize", align);
-    window.addEventListener("load", align);
     function pick(space) {
       state.sel = [space];
       state.cur = space;

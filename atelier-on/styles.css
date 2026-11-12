@@ -197,54 +197,62 @@ main:focus{outline:none}
 .picker-modes button{min-height:48px;padding:0 28px;border:1px solid var(--ink);background:transparent;color:var(--ink);font:500 14px/1 var(--sans);letter-spacing:var(--track-s);cursor:pointer}
 .picker-modes button+button{border-left:0}
 .picker-modes button[aria-checked="true"]{background:var(--ink);color:var(--paper)}
-.picker-body{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);gap:clamp(40px, 6vw, 96px);align-items:start}
-.picker-plan{display:grid;gap:20px}
-.prep{margin-top:12px;padding-top:24px;border-top:1px solid var(--line);display:grid;gap:14px}
-.prep-title{font:500 13.5px/1.6 var(--sans);letter-spacing:var(--track-s);color:var(--oak)}
-.prep-list{list-style:none;margin:0;padding:0;display:grid;gap:10px}
-.prep-list li{display:grid;grid-template-columns:22px 1fr;align-items:baseline;font-size:16px;line-height:1.6}
-.prep-list li::before{content:"";width:12px;height:12px;border:1px solid var(--stone);transform:translateY(1px)}
-.prep-note{font:400 13px/1.6 var(--sans);color:var(--stone)}
-.picker-cards{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
-.picker-cards .space-card:first-child{grid-column:span 2}
-.picker-cards .space-card:first-child .ph{--ar:2.07/1}
-.space-card{display:grid;gap:10px;padding:0;border:0;background:none;text-align:left;cursor:pointer;color:var(--ink);font:400 17px/1.4 var(--serif);letter-spacing:.02em}
-.space-card .ph{--ar:1/1;box-shadow:inset 0 0 0 0 var(--oak);transition:box-shadow .2s}
+/* 부분 인테리어: 위 카드 한 줄 / 아래 사진 + 글 묶음 */
+.picker-body{display:grid;grid-template-columns:minmax(0,1fr);gap:56px}
+.picker-plan{display:grid;gap:0}
+.picker-cards{display:grid;grid-template-columns:repeat(5,1fr);gap:var(--gap)}
+.space-card{display:grid;gap:12px;padding:0;border:0;background:none;text-align:left;cursor:pointer;color:var(--ink);font:400 17px/1.4 var(--serif);letter-spacing:.02em}
+.space-card .ph{--ar:4/3}
 .space-card .ph::after{content:"";position:absolute;inset:0;box-shadow:inset 0 0 0 0 var(--oak);transition:box-shadow .2s;pointer-events:none}
 .space-card .ph img{transition:transform .6s cubic-bezier(.2,.7,.2,1),filter .3s}
 .space-card:hover .ph img{transform:scale(1.04)}
-.space-card[aria-pressed="false"] .ph img{filter:saturate(.75) brightness(1.02)}
+.space-card[aria-pressed="false"] .ph img{filter:saturate(.7) brightness(1.03)}
+.space-card[aria-pressed="false"] span{color:var(--stone)}
 .space-card[aria-pressed="true"] .ph::after{box-shadow:inset 0 0 0 3px var(--oak)}
-.space-card[aria-pressed="true"] span{color:var(--oak)}
+.space-card[aria-pressed="true"] span{color:var(--ink)}
+.space-card span{padding-top:10px;border-top:1px solid var(--line)}
+.space-card[aria-pressed="true"] span{border-top-color:var(--oak)}
 .space-card:focus-visible{outline:none}
 .space-card:focus-visible .ph{outline:2px solid var(--oak);outline-offset:3px}
-.picker-sel{font-size:17px}
-.picker-note{font:400 13px/1.6 var(--sans);color:var(--stone)}
+.picker-info{display:grid;grid-template-columns:minmax(0,7fr) minmax(0,5fr);gap:clamp(32px, 4vw, 72px);align-items:start;padding-top:56px;border-top:1px solid var(--line)}
+.picker-photo .ph{--ar:4/3}
+.picker-text{display:grid;gap:24px;align-content:start}
+.picker-name{font-size:clamp(28px, 2.6vw, 38px);letter-spacing:.02em;line-height:1.25;margin:-6px 0 0}
+.picker-desc{color:var(--stone)}
+.picker-metas{display:grid;gap:8px;padding-top:20px;border-top:1px solid var(--line)}
+.picker-meta{display:grid;grid-template-columns:7.5em 1fr;align-items:baseline;gap:4px 16px;font:400 15px/1.6 var(--sans);color:var(--ink)}
+.picker-meta span{font:500 12.5px/1.6 var(--sans);letter-spacing:var(--track-s);color:var(--stone)}
+.picker-meta .lk{display:flex;flex-wrap:wrap;gap:4px 16px;font:inherit;letter-spacing:0;color:inherit}
 .picker-steps{display:grid;gap:20px}
-.picker-steps-title{font-size:19px;letter-spacing:.04em}
+.picker-steps-title{font-size:clamp(24px, 2.2vw, 32px);letter-spacing:.02em}
 .picker-steps ol{list-style:none;margin:0;padding:0;counter-reset:st;border-top:1px solid var(--line)}
 .picker-steps li{counter-increment:st;display:grid;grid-template-columns:52px 120px 1fr;align-items:baseline;gap:8px 16px;padding:16px 0;border-bottom:1px solid var(--line)}
 .picker-steps li::before{content:counter(st,decimal-leading-zero);font:400 18px/1 var(--serif);color:var(--oak);letter-spacing:.06em}
 .picker-steps b{font-weight:400;font-size:17px;letter-spacing:.06em}
 .picker-steps span{font:400 14px/1.7 var(--sans);color:var(--stone)}
-@media (max-width:768px){ .picker-steps li{grid-template-columns:44px 1fr} .picker-steps span{grid-column:2} }
-.picker-info{display:grid;gap:20px}
-.picker-name{font-size:clamp(26px, 2.4vw, 34px);letter-spacing:.02em;line-height:1.3;margin-top:-10px}
-.space-card span{line-height:1.4}
-.picker-photo .ph{--ar:4/3}
-.picker-info > p{color:var(--stone)}
-.picker-meta{display:flex;flex-wrap:wrap;align-items:baseline;gap:6px 16px;font:400 15px/1.6 var(--sans);color:var(--ink)}
-.picker-meta span{flex:none;width:7.5em;font:500 12.5px/1.6 var(--sans);letter-spacing:var(--track-s);color:var(--stone)}
-.picker-meta + .picker-meta{margin-top:-8px}
-@media (max-width:768px){ .picker-meta span{width:100%} }
-.picker-cta{justify-self:start;margin-top:8px}
+.prep{display:grid;gap:12px;padding-top:20px;border-top:1px solid var(--line)}
+.prep-title{font:500 12.5px/1.6 var(--sans);letter-spacing:var(--track-s);color:var(--oak)}
+.prep-list{list-style:none;margin:0;padding:0;display:grid;gap:8px}
+.prep-list li{display:grid;grid-template-columns:22px 1fr;align-items:baseline;font-size:15.5px;line-height:1.6}
+.prep-list li::before{content:"";width:12px;height:12px;border:1px solid var(--stone);transform:translateY(1px)}
+.prep-note{font:400 12.5px/1.6 var(--sans);color:var(--stone)}
+.picker-note{font:400 13px/1.6 var(--sans);color:var(--stone)}
+/* 전체 리모델링: 공사 순서 | 사진 + 글 */
+.picker.is-full .picker-body{grid-template-columns:minmax(0,1fr) minmax(0,1.1fr);gap:clamp(40px, 6vw, 96px);align-items:start}
+.picker.is-full .picker-info{grid-template-columns:1fr;padding-top:0;border-top:0;gap:28px}
+.picker.is-full .picker-name{margin:0}
 @media (max-width:900px){
-  .picker-body{grid-template-columns:1fr}
+  .picker.is-full .picker-body,.picker-info{grid-template-columns:1fr}
+  .picker-info{padding-top:40px}
 }
 @media (max-width:768px){
   .picker-modes button{flex:1;padding:0 12px}
-  .picker-cards{grid-template-columns:repeat(2,1fr);gap:12px}
-  .picker-cta{justify-self:stretch}
+  .picker-body{gap:32px}
+  .picker-cards{display:flex;gap:12px;overflow-x:auto;margin-inline:-20px;padding:0 20px 4px;scroll-snap-type:x mandatory;scrollbar-width:none}
+  .picker-cards::-webkit-scrollbar{display:none}
+  .space-card{flex:none;width:38%;scroll-snap-align:start;font-size:15px}
+  .picker-steps li{grid-template-columns:44px 1fr}
+  .picker-steps span{grid-column:2}
 }
 
 /* ---------- 왼쪽 정렬 머리 (홈 시공 사례·FAQ) ---------- */
