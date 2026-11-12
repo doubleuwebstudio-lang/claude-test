@@ -415,6 +415,20 @@
     });
   });
 
+  /* ---- 약속 섹션: 도면 → 현장 (화면에 들어오면 도면이 그려짐) ---- */
+  document.querySelectorAll("[data-proof-plan]").forEach(function (el) {
+    el.innerHTML = archPlan({ fill: ["kitchen"], label: "30평대 평면 예시. 주방·식탁 자리에 A 표시" });
+    var svg = el.querySelector("svg");
+    svg.insertAdjacentHTML("beforeend",
+      '<g class="ap-callout"><circle cx="225" cy="145" r="8.5"/><text x="225" y="148.5">A</text></g>' +
+      '<g class="ap-dim"><line x1="10" y1="226" x2="310" y2="226"/><line x1="10" y1="222" x2="10" y2="230"/><line x1="110" y1="222" x2="110" y2="230"/><line x1="240" y1="222" x2="240" y2="230"/><line x1="310" y1="222" x2="310" y2="230"/></g>');
+    svg.setAttribute("viewBox", "0 -20 320 254");
+    var go = function () { svg.classList.add("draw"); el.closest(".proof").classList.add("seen"); };
+    if (!("IntersectionObserver" in window)) return go();
+    var io = new IntersectionObserver(function (en) { if (en[0].isIntersecting) { go(); io.disconnect(); } }, { threshold: 0.35 });
+    io.observe(el);
+  });
+
   /* ---- 정적 마크업의 사진 ---- */
   document.querySelectorAll("[data-img]").forEach(function (el) {
     el.outerHTML = photo(el.getAttribute("data-img"), el.getAttribute("data-alt"), { pos: el.getAttribute("data-pos"), eager: el.hasAttribute("data-eager") });
@@ -680,6 +694,13 @@
     window.addEventListener("scroll", onScroll, { passive: true });
     onScroll();
     top.addEventListener("click", function () { toTop(true); var f = document.querySelector(".skip"); if (f) f.focus({ preventScroll: true }); });
+    // 자주 묻는 질문 옆 '바로 물어보기'는 플로팅 버튼과 같은 곳으로 연결
+    document.querySelectorAll("[data-quick]").forEach(function (q) {
+      var src = box.querySelector(q.dataset.quick === "kakao" ? ".fab-kakao" : ".fab-tel");
+      q.href = src.getAttribute("href");
+      if (src.target) { q.target = src.target; q.rel = "noopener"; }
+      q.addEventListener("click", function (e) { if (src.dataset.demo) { e.preventDefault(); src.click(); } });
+    });
     box.querySelectorAll("[data-demo]").forEach(function (a) {
       a.addEventListener("click", function (e) {
         e.preventDefault();
