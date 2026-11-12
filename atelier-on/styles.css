@@ -157,9 +157,10 @@ main:focus{outline:none}
 
 /* ---------- 소개 (업체 소개 페이지) ---------- */
 .split{display:grid;grid-template-columns:1fr 1fr;gap:clamp(40px, 7vw, 140px);align-items:center}
-.split-text{display:grid;gap:22px;max-width:540px}
+.split-text{display:grid;gap:24px;max-width:560px}
+.split-text .lead{font-size:19px;line-height:1.85;color:var(--ink)}
 .split-text .link{justify-self:start;margin-top:8px}
-.split .ph{--ar:4/5}
+.split .ph{--ar:1/1}
 @media (max-width:768px){ .split{grid-template-columns:1fr;gap:40px} .split .ph{--ar:4/3} }
 
 /* ---------- 서비스: 가는 선으로 나눈 두 칸 ---------- */
@@ -198,8 +199,8 @@ main:focus{outline:none}
 .picker .plan .room:hover rect{fill:var(--paper-2)}
 .picker .plan .room.sel rect{fill:url(#pick-hatch)}
 .picker .plan .room.sel text{paint-order:stroke;stroke:#C9B08C;stroke-width:5px;stroke-linejoin:round}
-.picker .plan .room.cur rect{stroke:var(--oak);stroke-width:3}
-.picker .plan .room:focus-visible rect{stroke:var(--oak);stroke-width:4}
+.picker .plan .room.cur rect{stroke:var(--oak);stroke-width:2}
+.picker .plan .room:focus-visible rect{stroke:var(--oak);stroke-width:3}
 .picker-chips{display:flex;flex-wrap:wrap;gap:8px}
 .picker-chips button{min-height:44px;padding:0 18px;border:1px solid var(--line);background:var(--field);color:var(--ink);font:500 14px/1 var(--sans);letter-spacing:.06em;cursor:pointer}
 .picker-chips button[aria-pressed="true"]{border-color:#8C7050;background:#E6DAC6}
@@ -237,6 +238,19 @@ main:focus{outline:none}
   .picker-cta{justify-self:stretch}
 }
 
+/* ---------- 왼쪽 정렬 머리 (홈 시공 사례·FAQ) ---------- */
+.row-head{display:flex;justify-content:space-between;align-items:flex-end;gap:24px;margin-bottom:48px}
+.row-head .sec-title{text-align:left;margin-bottom:8px}
+.row-head .list-note{margin:0;text-align:left}
+.faq-split{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,2fr);gap:clamp(40px, 6vw, 120px);align-items:start}
+.faq-side{display:grid;gap:16px;justify-items:start}
+.faq-side .sec-title{text-align:left;margin-bottom:0}
+.faq-side p{color:var(--stone)}
+@media (max-width:768px){
+  .row-head{flex-direction:column;align-items:flex-start;margin-bottom:32px}
+  .faq-split{grid-template-columns:1fr;gap:28px}
+}
+
 /* ---------- 상담 안내 ---------- */
 .cta{display:grid;justify-items:center;text-align:center;gap:16px}
 .cta .sec-title{margin-bottom:16px}
@@ -246,8 +260,8 @@ main:focus{outline:none}
 
 /* ---------- 평면도 ---------- */
 .plan{width:100%;height:auto}
-.plan .wall{fill:none;stroke:var(--ink);stroke-width:4}
-.plan .room rect{fill:transparent;stroke:var(--ink);stroke-width:1.2;transition:fill .2s}
+.plan .wall{fill:none;stroke:#5C5752;stroke-width:2.5}
+.plan .room rect{fill:transparent;stroke:#8A8175;stroke-width:1;transition:fill .2s}
 .plan .room text{font:500 13px var(--sans);fill:var(--ink);text-anchor:middle;dominant-baseline:middle}
 .plan .room.on text{paint-order:stroke;stroke:#C9B08C;stroke-width:5px;stroke-linejoin:round}
 @media (max-width:768px){ .plan .room text{font-size:15px} }
