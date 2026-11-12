@@ -577,7 +577,9 @@ select.input{appearance:none;background:var(--field) url("data:image/svg+xml,%3C
 .hs-on .hs-card:first-child{width:clamp(560px, 58vw, 920px)}
 
 /* ---------- 어두운 월넛 구간 (약속 + 견적) ---------- */
-.dark-zone{--walnut:#33291F;position:relative;z-index:2;background:var(--walnut);color:var(--paper);border-radius:clamp(20px, 2.4vw, 36px) clamp(20px, 2.4vw, 36px) 0 0;box-shadow:0 -24px 60px rgba(30,24,18,.16)}
+.dark-zone{--walnut:#33291F;position:relative;z-index:2;background:var(--walnut);color:var(--paper);box-shadow:0 -24px 60px rgba(30,24,18,.16)}
+/* 고정 범위를 이 묶음 안으로 제한: 월넛 판이 끝나면 서비스 섹션도 함께 올라감 */
+.stack{position:relative}
 /* 덮이는 서비스 섹션: 멈춘 채 살짝 어두워지고 작아짐 */
 .stack-under{position:sticky;z-index:1;--cover:0;transform-origin:50% 100%;transform:scale(calc(1 - var(--cover) * .04))}
 .stack-under::after{content:"";position:absolute;inset:0;pointer-events:none;background:rgb(30,24,18);opacity:calc(var(--cover) * .35)}
