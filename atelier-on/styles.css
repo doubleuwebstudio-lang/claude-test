@@ -881,3 +881,7 @@ select.input{appearance:none;background:var(--field) url("data:image/svg+xml,%3C
 }
 .picker:not(.is-full) .picker-info{border-top:0;padding-top:0}
 .picker:not(.is-full) .picker-body{gap:48px}
+
+/* ---------- 섹션 구분: 공간 고르기 섹션만 한 단계 진한 리넨색 ---------- */
+section.stack-under{background:var(--paper-2)}
+section.stack-under .picker-modes button:not([aria-checked="true"]){background:transparent}
