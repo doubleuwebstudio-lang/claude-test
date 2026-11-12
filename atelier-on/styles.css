@@ -194,13 +194,13 @@ main:focus{outline:none}
 .picker-body{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);gap:clamp(40px, 6vw, 96px);align-items:start}
 .picker-plan{display:grid;gap:20px}
 .picker .plan .room{cursor:pointer;outline:none}
-.picker .plan .room text{font-size:9.5px}
-.picker .plan .room rect{transition:fill .2s,stroke .2s}
-.picker .plan .room:hover rect{fill:var(--paper-2)}
-.picker .plan .room.sel rect{fill:url(#pick-hatch)}
-.picker .plan .room.sel text{paint-order:stroke;stroke:#C9B08C;stroke-width:5px;stroke-linejoin:round}
-.picker .plan .room.cur rect{stroke:var(--oak);stroke-width:2}
-.picker .plan .room:focus-visible rect{stroke:var(--oak);stroke-width:3}
+.picker .plan .room text{font-size:10px}
+.picker .plan .room .ap-fill{transition:fill .2s,stroke .2s}
+.picker .plan .room:hover .ap-fill{fill:var(--paper-2)}
+.picker .plan .room.sel .ap-fill{fill:url(#pick-hatch)}
+.picker .plan .room.sel text{paint-order:stroke;stroke:#D3BE9C;stroke-width:5px;stroke-linejoin:round}
+.picker .plan .room.cur .ap-fill{stroke:var(--oak);stroke-width:1.5}
+.picker .plan .room:focus-visible .ap-fill{stroke:var(--oak);stroke-width:2.5}
 .picker-chips{display:flex;flex-wrap:wrap;gap:8px}
 .picker-chips button{min-height:44px;padding:0 18px;border:1px solid var(--line);background:var(--field);color:var(--ink);font:500 14px/1 var(--sans);letter-spacing:.06em;cursor:pointer}
 .picker-chips button[aria-pressed="true"]{border-color:#8C7050;background:#E6DAC6}
@@ -259,12 +259,52 @@ main:focus{outline:none}
 @media (max-width:768px){ .cta .btn{width:100%} }
 
 /* ---------- 평면도 ---------- */
-.plan{width:100%;height:auto}
-.plan .wall{fill:none;stroke:#5C5752;stroke-width:2.5}
-.plan .room rect{fill:transparent;stroke:#8A8175;stroke-width:1;transition:fill .2s}
-.plan .room text{font:500 13px var(--sans);fill:var(--ink);text-anchor:middle;dominant-baseline:middle}
-.plan .room.on text{paint-order:stroke;stroke:#C9B08C;stroke-width:5px;stroke-linejoin:round}
-@media (max-width:768px){ .plan .room text{font-size:15px} }
+.plan{width:100%;height:auto;--plan-bg:var(--paper)}
+.band .plan{--plan-bg:var(--paper-2)}
+.plan .room text{font:500 9px var(--sans);fill:var(--ink);text-anchor:middle;letter-spacing:.02em}
+.plan .room.on text{paint-order:stroke;stroke:#D3BE9C;stroke-width:4px;stroke-linejoin:round}
+.plan .ap-fill{fill:transparent;transition:fill .2s}
+.plan .ap-walls line,.plan .ap-walls rect{fill:none;stroke:#46423E;stroke-linecap:square}
+.plan .ap-walls .in{stroke-width:3}
+.plan .ap-walls .out{stroke-width:7}
+.plan .ap-open line{stroke:#9B9287;stroke-width:.8;stroke-dasharray:3 3}
+.plan .ap-cut{fill:var(--plan-bg)}
+.plan .ap-marks .win{stroke:#46423E;stroke-width:.7}
+.plan .ap-marks .leaf{stroke:#46423E;stroke-width:1.2}
+.plan .ap-marks .swing{fill:none;stroke:#8A8175;stroke-width:.7}
+.plan .ap-balcony rect{fill:none;stroke:#8A8175;stroke-width:.8}
+.plan .ap-balcony text{font:500 7.5px var(--sans);fill:var(--stone);text-anchor:middle;letter-spacing:.04em}
+.plan .ap-view path{fill:rgba(120,90,60,.16);stroke:var(--oak);stroke-width:.8;stroke-dasharray:2 2}
+.plan .ap-view circle{fill:var(--oak)}
+@media (max-width:768px){ .plan .room text{font-size:11px} }
+/* 첫 화면 도면: 벽과 문이 한 번 그려집니다 */
+@media (prefers-reduced-motion:no-preference){
+  .plan.draw .ap-walls line,.plan.draw .ap-walls rect,.plan.draw .ap-marks .swing{stroke-dasharray:1;stroke-dashoffset:1;animation:draw 1.6s cubic-bezier(.5,0,.2,1) .2s forwards}
+  .plan.draw .ap-marks .swing{animation-delay:1.2s;animation-duration:.8s}
+  .plan.draw .ap-view,.plan.draw .room text,.plan.draw .ap-balcony,.plan.draw .ap-open{opacity:0;animation:fade .6s ease 1.6s forwards}
+}
+@keyframes draw{to{stroke-dashoffset:0}}
+@keyframes fade{to{opacity:1}}
+
+/* ---------- 홈 첫 화면: 왼쪽 글과 도면, 오른쪽 사진 ---------- */
+.home-hero{display:grid;grid-template-columns:minmax(380px, 40%) 1fr;min-height:clamp(620px, calc(100svh - var(--header)), 900px)}
+.home-hero-copy{display:flex;flex-direction:column;justify-content:space-between;gap:48px;padding:clamp(48px, 6vw, 96px) clamp(32px, 4vw, 72px) 40px max(40px, calc((100vw - 1440px) / 2))}
+.home-hero-text{display:grid;gap:20px;justify-items:start}
+.home-hero-title{font-size:clamp(32px, 3.3vw, 50px);line-height:1.35;letter-spacing:.01em}
+.home-hero-text p{font-size:18px;color:var(--stone)}
+.home-hero-text .link{margin-top:8px}
+.home-hero-plan{margin:0;display:grid;gap:12px;max-width:420px}
+.home-hero-plan figcaption{display:flex;align-items:center;gap:8px;font:400 12.5px/1.5 var(--sans);color:var(--stone)}
+.home-hero-plan figcaption i{flex:none;width:8px;height:8px;border-radius:50%;background:var(--oak)}
+.home-hero-photo{position:relative;min-height:100%}
+.home-hero-photo .ph{position:absolute;inset:0;aspect-ratio:auto}
+@media (max-width:900px){
+  .home-hero{grid-template-columns:1fr;min-height:0}
+  .home-hero-photo{order:-1;min-height:0}
+  .home-hero-photo .ph{position:relative;aspect-ratio:4/3}
+  .home-hero-copy{padding:40px 20px 8px;gap:40px}
+  .home-hero-plan{max-width:none}
+}
 
 /* ---------- 페이지 제목 (시공 사례 목록) ---------- */
 .page-head{padding-top:clamp(80px, 8vw, 128px);padding-bottom:clamp(48px, 5vw, 80px);display:grid;justify-items:center;text-align:center;gap:20px}

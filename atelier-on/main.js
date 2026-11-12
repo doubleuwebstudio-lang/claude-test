@@ -13,17 +13,6 @@
         "거실과 주방이 자연스럽게 이어지도록 공간을 정리했습니다."
       ],
       more: "식탁은 주방 아일랜드 바로 옆에 두어 요리하는 사람과 앉은 사람이 마주 볼 수 있게 했습니다. 거실 한쪽 벽은 우드 슬랫으로 마감해 흰 벽이 많은 집에 따뜻한 결을 더했습니다.",
-      outer: [10, 10, 300, 200],
-      rooms: [
-        { id: "bed1", label: "안방", r: [10, 10, 100, 110] },
-        { id: "bed2", label: "침실", r: [10, 120, 100, 90] },
-        { id: "living", label: "거실", r: [110, 10, 130, 120] },
-        { id: "kitchen", label: "주방", r: [110, 130, 70, 80] },
-        { id: "dining", label: "식탁", r: [180, 130, 60, 80] },
-        { id: "bath", label: "욕실", r: [240, 10, 70, 60] },
-        { id: "bed3", label: "침실", r: [240, 70, 70, 80] },
-        { id: "entry", label: "현관", r: [240, 150, 70, 60] }
-      ],
       gallery: [
         { room: "living", img: "6933855", name: "거실", note: "창 쪽에 소파, 맞은편 벽에 TV 수납장" },
         { room: "dining", img: "6933854", name: "식탁", note: "주방 바로 옆 자리", pos: "45% 50%" },
@@ -40,15 +29,6 @@
         "창가와 벽면에 붙박이 수납을 더해 생활용품이 눈에 덜 띄게 정리했습니다."
       ],
       more: "주방은 상부장까지 흰색으로 맞춰 벽처럼 보이게 했습니다. 욕실은 세면대 상판을 우드로 골라 거실·침실과 같은 재료로 이어지게 했습니다.",
-      outer: [10, 10, 260, 200],
-      rooms: [
-        { id: "bed1", label: "안방", r: [10, 10, 100, 110] },
-        { id: "bed2", label: "침실", r: [10, 120, 100, 90] },
-        { id: "living", label: "거실", r: [110, 10, 160, 110] },
-        { id: "kitchen", label: "주방", r: [110, 120, 100, 90] },
-        { id: "bath", label: "욕실", r: [210, 120, 60, 50] },
-        { id: "entry", label: "현관", r: [210, 170, 60, 40] }
-      ],
       gallery: [
         { room: "living", img: "6890403", name: "거실", note: "창가에 짜 넣은 붙박이 선반" },
         { room: "kitchen", img: "6890396", name: "주방", note: "흰 상하부장과 타일 벽", pos: "45% 50%" },
@@ -65,16 +45,6 @@
         "현관과 드레스룸에 붙박이 수납을 넉넉히 두어 넓은 집을 정돈해 쓸 수 있게 했습니다."
       ],
       more: "현관에는 낮은 수납장과 천장까지 닿는 붙박이장을 함께 두어 신발과 겉옷을 나눠 넣을 수 있게 했습니다. 드레스룸은 선반과 서랍으로 칸을 나눠 계절마다 옷을 바꿔 넣기 쉽게 했습니다.",
-      outer: [10, 10, 300, 200],
-      rooms: [
-        { id: "bed1", label: "안방", r: [10, 10, 110, 120] },
-        { id: "dress", label: "드레스룸", r: [10, 130, 110, 80] },
-        { id: "living", label: "거실", r: [120, 10, 120, 130] },
-        { id: "kitchen", label: "주방", r: [120, 140, 120, 70] },
-        { id: "bed2", label: "침실", r: [240, 10, 70, 80] },
-        { id: "entry", label: "현관", r: [240, 90, 70, 60] },
-        { id: "bath", label: "욕실", r: [240, 150, 70, 60] }
-      ],
       gallery: [
         { room: "kitchen", img: "7005291", name: "주방", note: "그레이 유리 상부장과 베이지 하부장" },
         { room: "entry", img: "7005286", name: "현관", note: "낮은 수납장과 둥근 거울", pos: "35% 50%" },
@@ -87,24 +57,76 @@
 
   function esc(s) { return String(s).replace(/[&<>"]/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]; }); }
 
-  /* ---- 평면도 SVG ---- */
   var planSeq = 0;
-  function planSVG(p, opt) {
-    opt = opt || {};
-    var hatch = "hatch-" + (++planSeq);
-    var o = p.outer, vbW = o[0] + o[2] + 10, vbH = o[1] + o[3] + 10;
-    var rooms = p.rooms.map(function (rm) {
-      var r = rm.r, on = opt.fill && opt.fill.indexOf(rm.id) > -1;
-      return '<g class="room' + (on ? " on" : "") + '"><rect x="' + r[0] + '" y="' + r[1] + '" width="' + r[2] + '" height="' + r[3] + '"' +
-        (on ? ' style="fill:url(#' + hatch + ')"' : "") + "/>" +
-        '<text x="' + (r[0] + r[2] / 2) + '" y="' + (r[1] + r[3] / 2) + '">' + esc(rm.label) + "</text></g>";
-    }).join("");
-    return '<svg class="plan" viewBox="0 0 ' + vbW + " " + vbH + '" role="img" aria-label="' + esc(opt.label || p.size + " 평면 개념도") + '">' +
-      (opt.fill ? '<defs><pattern id="' + hatch + '" width="8" height="8" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="8" height="8" fill="#C9B08C"/><path d="M0 0v8" stroke="#8C7050" stroke-width="2"/></pattern></defs>' : "") +
-      rooms + '<rect class="wall" x="' + o[0] + '" y="' + o[1] + '" width="' + o[2] + '" height="' + o[3] + '"/></svg>';
-  }
 
-  window.ATELIER.planSVG = planSVG;
+  /* ---- 건축 도면식 평면도 (30평대 예시) ----
+     벽 두께, 문 열림 호, 창, 발코니, 열린 공간(점선)을 그립니다. 공간 고르기·업체 소개·첫 화면이 같이 씁니다. */
+  var ARCH = {
+    rooms: [
+      { id: "bed1", label: "안방", r: [10, 10, 100, 110] },
+      { id: "bed2", label: "침실", r: [10, 120, 100, 90] },
+      { id: "living", label: "거실", r: [110, 10, 130, 120] },
+      { id: "kitchen", label: "주방", r: [110, 130, 70, 80] },
+      { id: "dining", label: "식탁", r: [180, 130, 60, 80] },
+      { id: "bath", label: "욕실", r: [240, 10, 70, 60] },
+      { id: "bed3", label: "침실", r: [240, 70, 70, 80] },
+      { id: "entry", label: "현관", r: [240, 150, 70, 60] }
+    ],
+    walls: [[110, 10, 110, 210], [10, 120, 110, 120], [240, 10, 240, 210], [240, 70, 310, 70], [240, 150, 310, 150]],
+    open: [[110, 130, 240, 130], [180, 130, 180, 210]],
+    windows: [["h", 10, 25, 95], ["h", 10, 125, 225], ["v", 10, 140, 190], ["v", 310, 85, 135], ["h", 210, 120, 170]],
+    doors: [["v", 110, 100, 114, -1], ["v", 110, 126, 140, -1], ["v", 240, 44, 58, 1], ["v", 240, 80, 94, 1], ["v", 310, 172, 190, -1]],
+    gaps: [["v", 240, 160, 200]],
+    balcony: [10, -14, 230, 22]
+  };
+  function archPlan(opt) {
+    opt = opt || {};
+    var id = "ap" + (++planSeq), fill = opt.fill || [], hid = opt.hatchId || id + "-h";
+    var out = [];
+    out.push('<defs><pattern id="' + hid + '" width="7" height="7" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="7" height="7" fill="#D3BE9C"/><path d="M0 0v7" stroke="#8C7050" stroke-width="1.6"/></pattern></defs>');
+    var b = ARCH.balcony;
+    out.push('<g class="ap-balcony"><rect x="' + b[0] + '" y="' + b[1] + '" width="' + b[2] + '" height="' + (b[3] - 4) + '"/>' +
+      '<text x="' + (b[0] + b[2] / 2) + '" y="' + (b[1] + 9) + '">발코니</text></g>');
+    out.push(ARCH.rooms.map(function (rm) {
+      var r = rm.r, on = fill.indexOf(rm.id) > -1;
+      var attrs = opt.roomAttrs ? opt.roomAttrs(rm) : "";
+      return '<g class="room' + (on ? " on" : "") + '"' + attrs + '><rect class="ap-fill" x="' + r[0] + '" y="' + r[1] + '" width="' + r[2] + '" height="' + r[3] + '"' +
+        (on ? ' style="fill:url(#' + hid + ')"' : "") + '/><text x="' + (r[0] + r[2] / 2) + '" y="' + (r[1] + r[3] / 2 + 3) + '">' + esc(rm.label) + "</text></g>";
+    }).join(""));
+    if (opt.view) {
+      var v = opt.view, a1 = (v.dir - v.fov / 2) * Math.PI / 180, a2 = (v.dir + v.fov / 2) * Math.PI / 180, R = v.r || 70;
+      out.push('<g class="ap-view"><path d="M' + v.x + " " + v.y + " L" + (v.x + R * Math.cos(a1)).toFixed(1) + " " + (v.y + R * Math.sin(a1)).toFixed(1) +
+        " A" + R + " " + R + " 0 0 1 " + (v.x + R * Math.cos(a2)).toFixed(1) + " " + (v.y + R * Math.sin(a2)).toFixed(1) + ' Z"/><circle cx="' + v.x + '" cy="' + v.y + '" r="3.2"/></g>');
+    }
+    var L = function (x1, y1, x2, y2, cls) { return '<line class="' + cls + '" x1="' + x1 + '" y1="' + y1 + '" x2="' + x2 + '" y2="' + y2 + '" pathLength="1"/>'; };
+    out.push('<g class="ap-open">' + ARCH.open.map(function (w) { return L(w[0], w[1], w[2], w[3], ""); }).join("") + "</g>");
+    out.push('<g class="ap-walls">' + ARCH.walls.map(function (w) { return L(w[0], w[1], w[2], w[3], "in"); }).join("") +
+      '<rect class="out" x="10" y="10" width="300" height="200" pathLength="1"/></g>');
+    // 벽을 끊는 자리 (창·문·통로)
+    var cut = function (o, at, a, z, t) {
+      return o === "h" ? '<rect class="ap-cut" x="' + a + '" y="' + (at - t) + '" width="' + (z - a) + '" height="' + (2 * t) + '"/>'
+                       : '<rect class="ap-cut" x="' + (at - t) + '" y="' + a + '" width="' + (2 * t) + '" height="' + (z - a) + '"/>';
+    };
+    var g = [];
+    ARCH.windows.forEach(function (w) {
+      g.push(cut(w[0], w[1], w[2], w[3], 3.6));
+      [-2.2, 0, 2.2].forEach(function (d) {
+        g.push(w[0] === "h" ? L(w[2], w[1] + d, w[3], w[1] + d, "win") : L(w[1] + d, w[2], w[1] + d, w[3], "win"));
+      });
+    });
+    ARCH.gaps.forEach(function (w) { g.push(cut(w[0], w[1], w[2], w[3], 2.4)); });
+    ARCH.doors.forEach(function (d) {
+      var X = d[1], a = d[2], z = d[3], s = d[4], wd = z - a, t = d[1] === 10 || d[1] === 310 ? 3.6 : 2.4;
+      g.push(cut(d[0], X, a, z, t));
+      g.push(L(X, a, X + s * wd, a, "leaf"));
+      g.push('<path class="swing" pathLength="1" d="M' + (X + s * wd) + " " + a + " A" + wd + " " + wd + " 0 0 " + (s > 0 ? 1 : 0) + " " + X + " " + z + '"/>');
+    });
+    out.push('<g class="ap-marks">' + g.join("") + "</g>");
+    var a11y = opt.interactive ? ' role="group"' : ' role="img"';
+    return '<svg class="plan arch' + (opt.draw ? " draw" : "") + '" viewBox="0 -20 320 240"' + a11y + ' aria-label="' + esc(opt.label || "30평대 평면 예시") + '">' + out.join("") + "</svg>";
+  }
+  window.ATELIER.archPlan = archPlan;
+
 
   var CREDIT = "사진: Pexels, Max Vakhtbovych";
   function photo(id, alt, opt) {
@@ -193,10 +215,16 @@
   var base = PROJECTS[0];
   document.querySelectorAll("[data-scope]").forEach(function (el) {
     var full = el.getAttribute("data-scope") === "full";
-    el.innerHTML = planSVG(base, {
-      fill: full ? base.rooms.map(function (r) { return r.id; }) : ["kitchen", "bath"],
+    el.innerHTML = archPlan({
+      fill: full ? ARCH.rooms.map(function (r) { return r.id; }) : ["kitchen", "bath"],
       label: full ? "모든 공간이 공사 범위인 평면 예시" : "주방과 욕실만 공사 범위인 평면 예시"
     });
+  });
+
+  /* ---- 첫 화면: 사진을 찍은 위치를 표시한 도면 ---- */
+  document.querySelectorAll("[data-hero-plan]").forEach(function (el) {
+    el.innerHTML = archPlan({ draw: true, fill: [], view: { x: 214, y: 196, dir: -128, fov: 62, r: 92 },
+      label: "30평대 평면 예시. 첫 화면 사진은 식탁 쪽에서 거실과 주방을 바라본 모습입니다" });
   });
 
   /* ---- 정적 마크업의 사진 ---- */
@@ -261,14 +289,9 @@
   function project(id) { return PROJECTS.filter(function (p) { return p.id === id; })[0]; }
 
   document.querySelectorAll("[data-picker]").forEach(function (root) {
-    var plan = PROJECTS[0], state = { mode: "part", sel: ["kitchen"], cur: "kitchen" };
-    var o = plan.outer;
-    var rooms = plan.rooms.map(function (rm) {
-      var r = rm.r, sp = ROOM_SPACE[rm.id];
-      return '<g class="room" role="button" tabindex="0" data-space="' + sp + '" aria-label="' + esc(rm.label) + '">' +
-        '<rect x="' + r[0] + '" y="' + r[1] + '" width="' + r[2] + '" height="' + r[3] + '"/>' +
-        '<text x="' + (r[0] + r[2] / 2) + '" y="' + (r[1] + r[3] / 2) + '">' + esc(rm.label) + "</text></g>";
-    }).join("");
+    var state = { mode: "part", sel: ["kitchen"], cur: "kitchen" };
+    var planSvg = archPlan({ interactive: true, hatchId: "pick-hatch", label: "30평대 평면 예시. 공간을 눌러 고르세요",
+      roomAttrs: function (rm) { return ' role="button" tabindex="0" data-space="' + ROOM_SPACE[rm.id] + '" aria-label="' + esc(rm.label) + '"'; } });
     root.innerHTML =
       '<div class="picker-modes" role="radiogroup" aria-label="공사 방식">' +
         '<button type="button" role="radio" data-mode="part">부분 인테리어</button>' +
@@ -276,9 +299,7 @@
       "</div>" +
       '<div class="picker-body">' +
         '<div class="picker-plan">' +
-          '<svg class="plan" viewBox="0 0 ' + (o[0] + o[2] + 10) + " " + (o[1] + o[3] + 10) + '" role="group" aria-label="30평대 평면 예시. 공간을 눌러 고르세요">' +
-            '<defs><pattern id="pick-hatch" width="8" height="8" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="8" height="8" fill="#C9B08C"/><path d="M0 0v8" stroke="#8C7050" stroke-width="2"/></pattern></defs>' +
-            rooms + '<rect class="wall" x="' + o[0] + '" y="' + o[1] + '" width="' + o[2] + '" height="' + o[3] + '"/></svg>' +
+          planSvg +
           '<div class="picker-chips" role="group" aria-label="공간 목록">' +
             Object.keys(SPACES).map(function (k) { return '<button type="button" data-space="' + k + '">' + SPACES[k].name + "</button>"; }).join("") +
           "</div>" +
