@@ -415,18 +415,43 @@
     });
   });
 
-  /* ---- 약속 섹션: 도면 → 현장 (화면에 들어오면 도면이 그려짐) ---- */
-  document.querySelectorAll("[data-proof-plan]").forEach(function (el) {
-    el.innerHTML = archPlan({ fill: ["kitchen"], label: "30평대 평면 예시. 주방·식탁 자리에 A 표시" });
-    var svg = el.querySelector("svg");
-    svg.insertAdjacentHTML("beforeend",
-      '<g class="ap-callout"><circle cx="225" cy="145" r="8.5"/><text x="225" y="148.5">A</text></g>' +
-      '<g class="ap-dim"><line x1="10" y1="226" x2="310" y2="226"/><line x1="10" y1="222" x2="10" y2="230"/><line x1="110" y1="222" x2="110" y2="230"/><line x1="240" y1="222" x2="240" y2="230"/><line x1="310" y1="222" x2="310" y2="230"/></g>');
-    svg.setAttribute("viewBox", "0 -20 320 254");
-    var go = function () { svg.classList.add("draw"); el.closest(".proof").classList.add("seen"); };
-    if (!("IntersectionObserver" in window)) return go();
-    var io = new IntersectionObserver(function (en) { if (en[0].isIntersecting) { go(); io.disconnect(); } }, { threshold: 0.35 });
-    io.observe(el);
+  /* ---- 약속 섹션: 사진 위에 따라 그린 도면 선이 스크롤에 맞춰 걷히며 현장 사진이 드러남 ---- */
+  document.querySelectorAll("[data-trace-lines]").forEach(function (el) {
+    var P = function (pts) { return '<polyline pathLength="1" points="' + pts + '"/>'; };
+    el.innerHTML = '<svg viewBox="0 0 1000 667" preserveAspectRatio="xMidYMid slice" aria-hidden="true">' +
+      '<g class="tl-main">' +
+        P("455,382 600,384 898,545 268,525 455,382") +            // 아일랜드 윗면
+        P("268,525 268,667") + P("898,545 898,667") + P("268,546 898,566") +
+        P("410,412 562,413 652,518 325,517 410,412") +            // 쿡탑
+        P("0,428 350,371") + P("0,452 350,384") +                  // 뒤쪽 조리대
+        P("118,112 255,165 255,252 118,228 118,112") +            // 상부장
+        P("0,196 302,268") +                                       // 선반
+        P("380,0 452,142 590,142 622,0") +                         // 천장 우물
+        P("412,190 640,190") + P("412,190 412,378") + P("606,192 606,378") + // 창
+        P("690,134 690,440") + P("735,124 735,440") +              // 우드 슬랫 벽
+      '</g>' +
+      '<g class="tl-light">' + P("286,0 420,176") + P("892,66 736,182") + '</g>' +
+      '<g class="tl-note-wrap"><g class="tl-note">' +
+        '<line x1="525" y1="150" x2="525" y2="206"/><circle cx="525" cy="226" r="20"/>' +
+        '<line x1="268" y1="600" x2="898" y2="620"/><line x1="268" y1="590" x2="268" y2="610"/><line x1="898" y1="610" x2="898" y2="630"/>' +
+        '<text x="583" y="602">아일랜드 · 거실 쪽으로 열기</text>' +
+        '<line x1="812" y1="128" x2="858" y2="226"/><text x="866" y="240">천장 간접조명 줄</text>' +
+      '</g></g></svg>';
+    var fig = el.closest(".trace");
+    var still = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (still) { fig.style.setProperty("--p", 1); fig.classList.add("drawn"); return; }
+    var drawn = false;
+    function tick() {
+      var r = fig.getBoundingClientRect(), vh = window.innerHeight;
+      if (!drawn && r.top < vh * 0.85) { drawn = true; fig.classList.add("drawn"); }
+      // 사진 위쪽이 화면 60% 지점에 오면 시작해서, 화면 20% 지점에서 끝
+      var p = (vh * 0.6 - r.top) / (vh * 0.4);
+      p = Math.max(0, Math.min(1, p));
+      fig.style.setProperty("--p", p.toFixed(3));
+    }
+    window.addEventListener("scroll", tick, { passive: true });
+    window.addEventListener("resize", tick);
+    tick();
   });
 
   /* ---- 정적 마크업의 사진 ---- */
