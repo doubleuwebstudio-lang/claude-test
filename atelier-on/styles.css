@@ -579,7 +579,7 @@ select.input{appearance:none;background:var(--field) url("data:image/svg+xml,%3C
 .hs-on .hs-card:first-child{width:clamp(560px, 58vw, 920px)}
 
 /* ---------- 어두운 월넛 구간 (약속 + 견적) ---------- */
-.dark-zone{--walnut:#33291F;position:relative;z-index:2;background:var(--walnut);color:var(--paper);box-shadow:0 -24px 60px rgba(30,24,18,.16)}
+.dark-zone{--walnut:#33291F;position:relative;background:var(--walnut);color:var(--paper);box-shadow:0 -24px 60px rgba(30,24,18,.16)}
 /* 고정 범위를 이 묶음 안으로 제한: 월넛 판이 끝나면 서비스 섹션도 함께 올라감 */
 .stack{position:relative}
 /* 덮이는 서비스 섹션: 멈춘 채 살짝 어두워지고 작아짐 */
@@ -634,7 +634,7 @@ select.input{appearance:none;background:var(--field) url("data:image/svg+xml,%3C
 @media print{ .fab{display:none} }
 
 /* 가로 스크롤 다음 섹션 위 여백 줄이기 */
-.hscroll + .stack .stack-under{padding-top:clamp(56px, 5vw, 88px)}
+.hscroll + .stack > .stack-under{padding-top:clamp(56px, 5vw, 88px)}
 .hs-on .hs-sticky{padding-bottom:clamp(16px, 3vh, 32px)}
 
 /* ---------- 홈 마지막 상담: 큰 제목 + 사진 ---------- */
@@ -849,3 +849,8 @@ select.input{appearance:none;background:var(--field) url("data:image/svg+xml,%3C
 .draw-motion .quote.in th,.draw-motion .quote.in td{background-size:100% 1px}
 .draw-motion .quote .quote-total td{background:none}
 .dark-zone .quote{--qline:rgba(211,180,140,.28)}
+
+/* 두 번째 덮기: 월넛 판이 멈추고 자주 묻는 질문·상담이 위로 올라옴 */
+.stack-b{position:relative;z-index:2;background:#241C15}
+.stack-b > .dark-zone.stack-under{position:sticky;z-index:1}
+.stack-cover{position:relative;z-index:2;background:var(--paper);box-shadow:0 -24px 60px rgba(20,15,10,.28)}

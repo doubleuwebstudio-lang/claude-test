@@ -690,29 +690,32 @@
     });
   });
 
-  /* ---- 홈: 서비스 섹션이 멈춘 채 약속·견적(월넛 판)이 위로 덮으며 올라옴 ---- */
+  /* ---- 홈: 앞 섹션이 멈춘 채 다음 판이 위로 덮으며 올라옴 (두 번)
+     1) 서비스 섹션 위로 월넛 판(약속·견적)  2) 월넛 판 위로 자주 묻는 질문·상담 ---- */
   (function () {
-    var under = document.querySelector(".stack-under"), zone = document.querySelector(".dark-zone");
-    if (!under || !zone) return;
     var calm = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     function hh() { var h = document.querySelector(".site-header"); return h ? h.offsetHeight : 0; }
-    function place() {
-      /* 섹션이 화면보다 길면 아래 끝이 화면 아래에 닿았을 때 멈추게 */
-      var top = Math.min(hh(), window.innerHeight - under.offsetHeight);
-      under.style.top = top + "px";
-      tick();
-    }
-    function tick() {
-      if (calm) return;
-      var r = zone.getBoundingClientRect(), vh = window.innerHeight;
-      var p = Math.min(1, Math.max(0, (vh - r.top) / (vh - hh())));
-      under.style.setProperty("--cover", p.toFixed(3));
-    }
-    window.addEventListener("scroll", tick, { passive: true });
-    window.addEventListener("resize", place);
-    window.addEventListener("load", place);
-    if ("ResizeObserver" in window) new ResizeObserver(place).observe(under);
-    place();
+    document.querySelectorAll(".stack").forEach(function (stack) {
+      var under = [].filter.call(stack.children, function (c) { return c.classList.contains("stack-under"); })[0];
+      var cover = under && under.nextElementSibling;
+      if (!under || !cover) return;
+      function place() {
+        /* 섹션이 화면보다 길면 아래 끝이 화면 아래에 닿았을 때 멈추게 */
+        under.style.top = Math.min(hh(), window.innerHeight - under.offsetHeight) + "px";
+        tick();
+      }
+      function tick() {
+        if (calm) return;
+        var r = cover.getBoundingClientRect(), vh = window.innerHeight;
+        var p = Math.min(1, Math.max(0, (vh - r.top) / (vh - hh())));
+        under.style.setProperty("--cover", p.toFixed(3));
+      }
+      window.addEventListener("scroll", tick, { passive: true });
+      window.addEventListener("resize", place);
+      window.addEventListener("load", place);
+      if ("ResizeObserver" in window) new ResizeObserver(place).observe(under);
+      place();
+    });
   })();
 
   /* ---- 플로팅 버튼: 카카오톡 상담, 전화, 맨 위로 ---- */
