@@ -475,14 +475,21 @@
         "<p>" + d.desc + "</p>" +
         (full ? "" : '<p class="picker-meta"><span>많이 하는 공사</span>' + d.works.join(", ") + "</p>") +
         (full ? '<p class="picker-meta"><span>예시 기간</span>' + d.period + "</p>" : "") +
-        '<p class="picker-meta picker-links"><span>' + (full ? "사례" : "관련 사례") + "</span>" + links + "</p>" +
-        '<a class="btn picker-cta" href="contact.html">' + cta + "</a>";
-      info.querySelector(".picker-cta").addEventListener("click", function () {
-        try {
-          sessionStorage.setItem("atelier-scope", JSON.stringify({ mode: state.mode, spaces: full ? [] : names(state.sel) }));
-        } catch (e) { /* 저장이 막혀 있으면 미리 채우기 없이 이동 */ }
-      });
+        '<p class="picker-meta picker-links"><span>' + (full ? "사례" : "관련 사례") + "</span>" + links + "</p>";
+      align();
     }
+    /* PC: 오른쪽 사진을 왼쪽 카드 사진 두 줄과 같은 높이로 맞춤 (제목이 왼쪽 아래 줄 카드 이름과 같은 줄에 옴) */
+    function align() {
+      var ph = info.querySelector(".picker-photo .ph");
+      if (!ph) return;
+      var cards = root.querySelectorAll(".space-card .ph");
+      if (window.innerWidth <= 900 || state.mode === "full" || !cards.length) { ph.style.height = ""; ph.style.aspectRatio = ""; return; }
+      var top = cards[0].getBoundingClientRect().top, bottom = cards[cards.length - 1].getBoundingClientRect().bottom;
+      ph.style.aspectRatio = "auto";
+      ph.style.height = Math.round(bottom - top) + "px";
+    }
+    window.addEventListener("resize", align);
+    window.addEventListener("load", align);
     function pick(space) {
       state.sel = [space];
       state.cur = space;
