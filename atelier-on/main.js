@@ -30,10 +30,10 @@
       ],
       more: "주방은 상부장까지 흰색으로 맞춰 벽처럼 보이게 했습니다. 욕실은 세면대 상판을 우드로 골라 거실·침실과 같은 재료로 이어지게 했습니다.",
       gallery: [
-        { room: "living", img: "6890403", name: "거실", note: "창가에 짜 넣은 붙박이 선반" },
+        { room: "bed1", img: "6890412", name: "침실", note: "벽에 짜 넣은 선반과 침대 양옆 조명" },
         { room: "kitchen", img: "6890396", name: "주방", note: "흰 상하부장과 타일 벽", pos: "45% 50%" },
-        { room: "bath", img: "6890401", name: "욕실", note: "우드 상판 세면대와 조명 거울", pos: "35% 50%" },
-        { room: "bed1", img: "6890398", name: "안방", note: "흰 침구와 우드 가구" }
+        { room: "bath", img: "6890407", name: "욕실", note: "샤워 공간과 우드 상판 세면대", pos: "40% 50%" },
+        { room: "living", img: "6890414", name: "창가 수납", note: "창 아래에 둔 낮은 우드 수납장" }
       ]
     },
     {
@@ -223,7 +223,7 @@
 
   /* ---- 첫 화면: 사진을 찍은 위치를 표시한 도면 ---- */
   document.querySelectorAll("[data-hero-plan]").forEach(function (el) {
-    el.innerHTML = archPlan({ draw: true, fill: [], view: { x: 214, y: 196, dir: -128, fov: 62, r: 92 },
+    el.innerHTML = archPlan({ draw: true, fill: [], view: { x: 214, y: 196, dir: -128, fov: 56, r: 58 },
       label: "30평대 평면 예시. 첫 화면 사진은 식탁 쪽에서 거실과 주방을 바라본 모습입니다" });
   });
 

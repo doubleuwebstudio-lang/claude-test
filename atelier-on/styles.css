@@ -246,6 +246,8 @@ main:focus{outline:none}
 .faq-side{display:grid;gap:16px;justify-items:start}
 .faq-side .sec-title{text-align:left;margin-bottom:0}
 .faq-side p{color:var(--stone)}
+.faq-side .faq-note{margin:0;text-align:left}
+.home-hero-plan .link{justify-self:start;margin-top:4px}
 @media (max-width:768px){
   .row-head{flex-direction:column;align-items:flex-start;margin-bottom:32px}
   .faq-split{grid-template-columns:1fr;gap:28px}
@@ -256,6 +258,9 @@ main:focus{outline:none}
 .cta .sec-title{margin-bottom:16px}
 .cta p{max-width:30em;color:var(--stone)}
 .cta .btn{margin-top:24px}
+.cta-steps{list-style:none;margin:8px 0 0;padding:0;counter-reset:cs;display:flex;flex-wrap:wrap;justify-content:center;gap:8px 32px;font:400 14px/1.6 var(--sans);color:var(--stone)}
+.cta-steps li{counter-increment:cs;display:flex;gap:8px;align-items:baseline}
+.cta-steps li::before{content:counter(cs,decimal-leading-zero);font:400 15px var(--serif);color:var(--oak)}
 @media (max-width:768px){ .cta .btn{width:100%} }
 
 /* ---------- 평면도 ---------- */
@@ -274,7 +279,7 @@ main:focus{outline:none}
 .plan .ap-marks .swing{fill:none;stroke:#8A8175;stroke-width:.7}
 .plan .ap-balcony rect{fill:none;stroke:#8A8175;stroke-width:.8}
 .plan .ap-balcony text{font:500 7.5px var(--sans);fill:var(--stone);text-anchor:middle;letter-spacing:.04em}
-.plan .ap-view path{fill:rgba(120,90,60,.16);stroke:var(--oak);stroke-width:.8;stroke-dasharray:2 2}
+.plan .ap-view path{fill:rgba(120,90,60,.1);stroke:var(--oak);stroke-width:.8;stroke-dasharray:2 2}
 .plan .ap-view circle{fill:var(--oak)}
 @media (max-width:768px){ .plan .room text{font-size:11px} }
 /* 첫 화면 도면: 벽과 문이 한 번 그려집니다 */

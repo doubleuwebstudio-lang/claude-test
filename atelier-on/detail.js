@@ -44,9 +44,10 @@
       '<a class="pn-all link" href="projects.html">전체 시공 사례</a>' +
       '<a class="pn-next" href="' + next.page + '"><span>다음 사례</span><b>' + next.title + '</b></a>' +
     '</nav>' +
-    '<section class="section"><div class="wrap cta">' +
+    '<section class="section band"><div class="wrap cta">' +
       '<h2 class="sec-title">상담 문의</h2>' +
       '<p>비슷한 인테리어를 계획 중이시라면 ' + p.size + ' 아파트의 ' + p.scope + '에 대해 궁금한 점을 남겨 주세요.</p>' +
+      '<ol class="cta-steps"><li>상담 신청</li><li>현장 확인·실측</li><li>디자인 제안·견적</li></ol>' +
       '<a class="btn" href="contact.html">상담 문의하기</a>' +
     '</div></section>';
 
