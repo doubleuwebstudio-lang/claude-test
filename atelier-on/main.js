@@ -513,16 +513,30 @@
     });
   })();
 
-  /* ---- 메뉴로 페이지를 옮기면 항상 맨 위부터 (같은 페이지면 맨 위로 이동) ---- */
-  if ("scrollRestoration" in history) history.scrollRestoration = "manual";
-  if (!location.hash) window.scrollTo(0, 0);
-  document.querySelectorAll(".nav a, .mobile-menu a, .foot nav a, .logo").forEach(function (a) {
+  /* ---- 메뉴로 페이지를 옮기면 항상 맨 위부터 (같은 페이지면 맨 위로 이동) ----
+     미리보기처럼 페이지가 다른 화면 안(프레임)에 들어가 있으면 바깥 화면이 스크롤되므로,
+     창 스크롤과 함께 맨 위 요소를 화면에 맞추는 방식(scrollIntoView)도 같이 씁니다. */
+  function toTop(smooth) {
+    var how = smooth && !window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "smooth" : "instant";
+    try { window.scrollTo({ top: 0, left: 0, behavior: how }); } catch (e) { window.scrollTo(0, 0); }
+    document.documentElement.scrollTop = 0; document.body.scrollTop = 0;
+    var first = document.documentElement;
+    try { first.scrollIntoView({ block: "start", behavior: how }); } catch (e) { /* 지원하지 않으면 창 스크롤만 */ }
+  }
+  try { if ("scrollRestoration" in history) history.scrollRestoration = "manual"; } catch (e) {}
+  if (!location.hash) {
+    toTop(false);
+    window.addEventListener("load", function () { if (window.scrollY < 2) toTop(false); });
+    window.addEventListener("pageshow", function (e) { if (e.persisted) toTop(false); });
+    setTimeout(function () { toTop(false); }, 60);
+  }
+  document.querySelectorAll(".nav a, .mobile-menu a, .foot nav a, .logo, .head-cta").forEach(function (a) {
     a.addEventListener("click", function (e) {
       var url = new URL(a.href, location.href);
       if (url.pathname === location.pathname && !url.hash) {
         e.preventDefault();
-        window.scrollTo({ top: 0, behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth" });
         var mm = document.querySelector(".mobile-menu.open"); if (mm) document.querySelector(".menu-btn").click();
+        toTop(true);
       }
     });
   });
