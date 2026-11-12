@@ -26,14 +26,8 @@
       <p class="lead">계획하고 계신 인테리어에 대해 간단히 알려주세요. * 표시가 없는 항목은 정해지지 않았다면 비워 두셔도 됩니다.</p>
       <p class="notice"><b>데모 사이트 안내</b><br>이 양식은 화면 확인용입니다. 입력한 내용은 어디에도 전송되거나 저장되지 않습니다.</p>
       <div class="next">
-        <h2 class="t-h3">문의 후 진행 순서</h2>
-        <ol>
-          <li>남겨 주신 내용을 확인하고 전화로 연락드립니다.</li>
-          <li>통화로 원하는 공간과 공사 범위, 일정을 여쭙니다.</li>
-          <li>현장을 확인하고 평면도와 함께 실측합니다.</li>
-          <li>디자인을 제안하고 항목별 견적을 드립니다.</li>
-          <li>계약 후 공사 일정을 확정합니다.</li>
-        </ol>
+        <h2 class="t-h3">문의를 남기시면</h2>
+        <p>남겨 주신 내용을 확인하고 전화로 연락드립니다. 통화로 공간과 일정을 여쭌 뒤 현장 확인 날짜를 정합니다.</p>
         <p class="next-links"><a class="link" href="about.html#process">전체 진행 과정</a><a class="link" href="#faq">자주 묻는 질문</a></p>
       </div>
     </div>
@@ -47,6 +41,19 @@
       </div>
       <div class="field"><label for="area">공사 지역<span class="req" aria-hidden="true">*</span></label>
         <input class="input" id="area" name="area" placeholder="예: 서울 마포구" required aria-required="true"></div>
+      <fieldset class="field chips" id="scope-field">
+        <legend>바꾸고 싶은 공간 <span class="opt">여러 개 고를 수 있습니다</span></legend>
+        <div class="chip-list">
+          <label class="chip"><input type="checkbox" name="scope" value="전체 리모델링"><span>전체 리모델링</span></label>
+          <label class="chip"><input type="checkbox" name="scope" value="현관"><span>현관</span></label>
+          <label class="chip"><input type="checkbox" name="scope" value="거실"><span>거실</span></label>
+          <label class="chip"><input type="checkbox" name="scope" value="주방·식탁"><span>주방·식탁</span></label>
+          <label class="chip"><input type="checkbox" name="scope" value="안방·침실"><span>안방·침실</span></label>
+          <label class="chip"><input type="checkbox" name="scope" value="욕실"><span>욕실</span></label>
+          <label class="chip"><input type="checkbox" name="scope" value="아직 모르겠음"><span>아직 모르겠음</span></label>
+        </div>
+        <p class="hint" id="scope-hint" hidden></p>
+      </fieldset>
       <div class="two">
         <div class="field"><label for="size">아파트 평형</label>
           <select class="input" id="size" name="size"><option value="">선택해 주세요</option><option>20평 미만</option><option>20평대</option><option>30평대</option><option>40평대</option><option>50평 이상</option><option>잘 모르겠음</option></select></div>
@@ -65,7 +72,7 @@
 
       <div class="consent field" id="consent-field">
         <details><summary>개인정보 수집·이용 안내 보기</summary>
-          <dl><dt>필수 항목</dt><dd>이름, 연락처, 공사 지역, 문의 내용</dd><dt>선택 항목</dt><dd>아파트 평형, 공사 예정 시기, 예산 범위, 평면도 보유 여부</dd><dt>이용 목적</dt><dd>상담 문의 확인 및 답변</dd><dt>보관 기간</dt><dd>상담 종료 후 실제 운영 정책에 따름</dd></dl>
+          <dl><dt>필수 항목</dt><dd>이름, 연락처, 공사 지역, 문의 내용</dd><dt>선택 항목</dt><dd>바꾸고 싶은 공간, 아파트 평형, 공사 예정 시기, 예산 범위, 평면도 보유 여부</dd><dt>이용 목적</dt><dd>상담 문의 확인 및 답변</dd><dt>보관 기간</dt><dd>상담 종료 후 실제 운영 정책에 따름</dd></dl>
         </details>
         <label class="check"><input type="checkbox" id="agree" required aria-required="true"><span>개인정보 수집·이용에 동의합니다.<span class="req" aria-hidden="true">*</span></span></label>
       </div>
@@ -91,14 +98,17 @@
 <script>
 (function () {
   var form = document.getElementById("form"), out = document.getElementById("result");
-  // 메인의 평면도에서 고른 공간이 있으면 문의 내용을 미리 채웁니다.
+  // 메인의 '우리 집에 필요한 인테리어'에서 고른 공간이 있으면 미리 체크합니다.
   try {
     var scope = JSON.parse(sessionStorage.getItem("atelier-scope") || "null");
-    sessionStorage.removeItem("atelier-scope");
-    var msg = document.getElementById("msg");
-    if (scope && !msg.value) {
-      msg.value = scope.mode === "full" ? "아파트 전체 리모델링 상담을 원합니다." :
-        scope.spaces.length ? scope.spaces.join(", ") + " 부분 인테리어 상담을 원합니다." : "";
+    if (scope) {
+      var want = scope.mode === "full" ? ["전체 리모델링"] : scope.spaces, hit = [];
+      document.querySelectorAll('input[name="scope"]').forEach(function (c) { if (want.indexOf(c.value) > -1) { c.checked = true; hit.push(c.value); } });
+      if (hit.length) {
+        var h = document.getElementById("scope-hint");
+        h.textContent = "메인에서 고른 " + hit.join(", ") + "을(를) 미리 체크해 두었습니다. 바꾸셔도 됩니다.";
+        h.hidden = false;
+      }
     }
   } catch (e) { /* 저장소를 쓸 수 없으면 빈 칸으로 둡니다 */ }
   var MSG = { name: "이름을 입력해 주세요.", tel: "연락받을 번호를 입력해 주세요.", area: "공사할 지역을 입력해 주세요.", msg: "문의 내용을 입력해 주세요.", agree: "개인정보 수집·이용에 동의해 주세요." };

@@ -30,8 +30,8 @@
       '<dl class="facts">' +
         '<div><dt>공간</dt><dd>아파트</dd></div><div><dt>평형</dt><dd>' + p.size + '</dd></div>' +
         '<div><dt>공사 범위</dt><dd>' + p.scope + '</dd></div><div><dt>스타일</dt><dd>' + p.style + '</dd></div>' +
-        '<div class="todo"><dt>공사 기간</dt><dd>실제 업체 입력<small>예: ' + (p.id === "p04" ? "3주" : "6~8주") + '</small></dd></div>' +
-        '<div class="todo"><dt>예산 범위</dt><dd>실제 업체 입력<small>예: 상담 후 안내</small></dd></div>' +
+        '<div class="ex"><dt>공사 기간</dt><dd>' + (p.id === "p04" ? "약 3주" : "6~8주") + '<small>예시</small></dd></div>' +
+        '<div class="ex"><dt>예산 범위</dt><dd>상담 후 안내<small>예시</small></dd></div>' +
       '</dl>' +
       '<div class="story-text"><h2 class="t-h2">' + p.oneLine + '</h2>' +
         '<div class="story-part"><h3>이 집의 고민</h3><p>' + p.concern + '</p></div>' +
@@ -43,7 +43,7 @@
       p.spaces.slice(0, half).map(spaceBlock).join("") +
     '</section>' +
     '<section class="wrap materials" aria-labelledby="mat-title">' +
-      '<div class="materials-head"><h2 class="sec-title" id="mat-title">공간별 자재</h2><p>이 사례에 쓴 마감재 조합입니다. 같은 자재가 궁금하시면 상담 때 샘플을 보여 드립니다.</p></div>' +
+      '<div class="materials-head"><h2 class="t-h2" id="mat-title">공간별 자재</h2><p>이 사례에 쓴 마감재 조합입니다. 같은 자재가 궁금하시면 상담 때 샘플을 보여 드립니다.</p></div>' +
       '<div class="mat-wrap"><table class="mat-table"><thead><tr><th scope="col">공간</th><th scope="col">바닥</th><th scope="col">벽</th><th scope="col">가구·조명</th></tr></thead><tbody>' +
         p.materials.map(function (r) { return '<tr><th scope="row">' + r[0] + '</th><td data-k="바닥">' + r[1] + '</td><td data-k="벽">' + r[2] + '</td><td data-k="가구·조명">' + r[3] + '</td></tr>'; }).join("") +
       '</tbody></table></div>' +
@@ -54,15 +54,10 @@
       '<p class="credit">' + A.credit + '</p>' +
     '</section>' +
     '<nav class="wrap pn" aria-label="다른 시공 사례">' +
-      '<a class="pn-prev" href="' + prev.page + '"><span>이전 사례</span><b>' + prev.title + '</b></a>' +
+      '<a class="pn-prev" href="' + prev.page + '">' + A.photo(prev.thumb || prev.cover, "") + '<span>이전 사례</span><b>' + prev.title + '</b></a>' +
       '<a class="pn-all link" href="projects.html">전체 시공 사례</a>' +
-      '<a class="pn-next" href="' + next.page + '"><span>다음 사례</span><b>' + next.title + '</b></a>' +
+      '<a class="pn-next" href="' + next.page + '">' + A.photo(next.thumb || next.cover, "") + '<span>다음 사례</span><b>' + next.title + '</b></a>' +
     '</nav>' +
-    '<section class="section band"><div class="wrap cta">' +
-      '<h2 class="sec-title">상담 문의</h2>' +
-      '<p>비슷한 인테리어를 계획 중이시라면 ' + p.size + ' 아파트의 ' + p.scope + '에 대해 궁금한 점을 남겨 주세요.</p>' +
-      '<ol class="cta-steps"><li>상담 신청</li><li>현장 확인·실측</li><li>디자인 제안·견적</li></ol>' +
-      '<a class="btn" href="contact.html">상담 문의하기</a>' +
-    '</div></section>';
+    A.finalCta(p.spaces[1].photos[0][0], p.spaces[1].photos[0][1], "비슷한 인테리어를 계획 중이시라면 " + p.size + " 아파트의 " + p.scope + "에 대해 궁금한 점을 남겨 주세요.");
 
 })();

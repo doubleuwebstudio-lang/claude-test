@@ -222,13 +222,6 @@ main:focus{outline:none}
 .picker-meta{display:grid;grid-template-columns:7.5em 1fr;align-items:baseline;gap:4px 16px;font:400 15px/1.6 var(--sans);color:var(--ink)}
 .picker-meta span{font:500 12.5px/1.6 var(--sans);letter-spacing:var(--track-s);color:var(--stone)}
 .picker-meta .lk{display:flex;flex-wrap:wrap;gap:4px 16px;font:inherit;letter-spacing:0;color:inherit}
-.picker-steps{display:grid;gap:20px}
-.picker-steps-title{font-size:clamp(24px, 2.2vw, 32px);letter-spacing:.02em}
-.picker-steps ol{list-style:none;margin:0;padding:0;counter-reset:st;border-top:1px solid var(--line)}
-.picker-steps li{counter-increment:st;display:grid;grid-template-columns:52px 120px 1fr;align-items:baseline;gap:8px 16px;padding:16px 0;border-bottom:1px solid var(--line)}
-.picker-steps li::before{content:counter(st,decimal-leading-zero);font:400 18px/1 var(--serif);color:var(--oak);letter-spacing:.06em}
-.picker-steps b{font-weight:400;font-size:17px;letter-spacing:.06em}
-.picker-steps span{font:400 14px/1.7 var(--sans);color:var(--stone)}
 .prep{display:grid;gap:12px;padding-top:20px;border-top:1px solid var(--line)}
 .prep-title{font:500 12.5px/1.6 var(--sans);letter-spacing:var(--track-s);color:var(--oak)}
 .prep-list{list-style:none;margin:0;padding:0;display:grid;gap:8px}
@@ -237,11 +230,10 @@ main:focus{outline:none}
 .prep-note{font:400 12.5px/1.6 var(--sans);color:var(--stone)}
 .picker-note{font:400 13px/1.6 var(--sans);color:var(--stone)}
 /* 전체 리모델링: 공사 순서 | 사진 + 글 */
-.picker.is-full .picker-body{grid-template-columns:minmax(0,1fr) minmax(0,1.1fr);gap:clamp(40px, 6vw, 96px);align-items:start}
-.picker.is-full .picker-info{grid-template-columns:1fr;padding-top:0;border-top:0;gap:28px}
+.picker.is-full .picker-info{padding-top:0;border-top:0}
 .picker.is-full .picker-name{margin:0}
 @media (max-width:900px){
-  .picker.is-full .picker-body,.picker-info{grid-template-columns:1fr}
+  .picker-info{grid-template-columns:1fr}
   .picker-info{padding-top:40px}
 }
 @media (max-width:768px){
@@ -250,9 +242,7 @@ main:focus{outline:none}
   .picker-cards{display:flex;gap:12px;overflow-x:auto;margin-inline:-20px;padding:0 20px 4px;scroll-snap-type:x mandatory;scrollbar-width:none}
   .picker-cards::-webkit-scrollbar{display:none}
   .space-card{flex:none;width:38%;scroll-snap-align:start;font-size:15px}
-  .picker-steps li{grid-template-columns:44px 1fr}
-  .picker-steps span{grid-column:2}
-}
+    }
 
 /* ---------- 왼쪽 정렬 머리 (홈 시공 사례·FAQ) ---------- */
 .row-head{display:flex;justify-content:space-between;align-items:flex-end;gap:24px;margin-bottom:48px}
@@ -658,3 +648,95 @@ select.input{appearance:none;background:var(--field) url("data:image/svg+xml,%3C
   .cta-final-text{padding:56px 20px 72px}
   .cta-final .btn{width:100%}
 }
+
+/* ---------- 공간 고르기: 사례 미리보기, 공사 기간 막대 ---------- */
+.cases{display:grid;gap:12px;padding-top:20px;border-top:1px solid var(--line)}
+.cases-title{font:500 12.5px/1.6 var(--sans);letter-spacing:var(--track-s);color:var(--stone)}
+.cases-list{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:12px 16px}
+.case-mini{display:grid;grid-template-columns:56px 1fr;gap:12px;align-items:center;text-decoration:none;font:400 14px/1.45 var(--sans);color:var(--ink)}
+.case-mini .ph{--ar:1/1}
+.case-mini:hover span{color:var(--oak);text-decoration:underline;text-underline-offset:3px}
+.period{display:grid;gap:12px}
+.period-head{display:flex;align-items:baseline;gap:16px;font:400 15px/1.6 var(--sans)}
+.period-head span{font:500 12.5px/1.6 var(--sans);letter-spacing:var(--track-s);color:var(--stone)}
+.period-head b{font:400 22px/1 var(--serif);letter-spacing:.02em;color:var(--ink)}
+.period-bar{list-style:none;margin:0;padding:0;display:flex;gap:4px}
+.period-bar li{display:grid;gap:6px;min-width:0;font:400 13px/1.4 var(--sans);color:var(--ink)}
+.period-bar i{display:block;height:8px;background:#C9B08C}
+.period-bar li:nth-child(2) i{background:var(--oak)}
+.period-bar li:nth-child(3) i{background:#5A4632}
+.period-bar small{font-size:12px;color:var(--stone)}
+.period-note{font:400 12.5px/1.6 var(--sans);color:var(--stone)}
+
+/* ---------- 시공 사례 목록 ---------- */
+.list-head{display:flex;justify-content:space-between;align-items:flex-end;gap:32px;flex-wrap:wrap;padding-top:clamp(96px, 9vw, 144px);padding-bottom:clamp(40px, 4vw, 64px)}
+.list-head > div:first-child{display:grid;gap:14px}
+.list-title{font-size:clamp(34px, 4.2vw, 64px);line-height:1.2;letter-spacing:-.005em}
+.list-head .lead{color:var(--stone)}
+.list-head .list-note{margin:0;text-align:left}
+.filter{display:flex;gap:28px;border-bottom:1px solid var(--line)}
+.filter button{position:relative;display:flex;gap:6px;align-items:baseline;min-height:44px;padding:0;border:0;background:none;cursor:pointer;font:500 14.5px/1 var(--sans);letter-spacing:var(--track-s);color:var(--stone)}
+.filter button small{font:400 12px/1 var(--sans);color:var(--oak)}
+.filter button[aria-pressed="true"]{color:var(--ink)}
+.filter button[aria-pressed="true"]::after{content:"";position:absolute;left:0;right:0;bottom:-1px;height:2px;background:var(--ink)}
+.filter button:hover{color:var(--ink)}
+.filter button:focus-visible{outline:2px solid var(--oak);outline-offset:4px}
+@media (max-width:768px){ .filter{width:100%;gap:22px} .list-head{gap:28px} }
+
+/* ---------- 업체 소개 ---------- */
+.eyebrow{font:500 13px/1.6 var(--sans);letter-spacing:var(--track-s);color:var(--oak)}
+.about-title{font-size:clamp(34px, 4.2vw, 64px);line-height:1.3;letter-spacing:-.005em}
+.about-hero .split-text{gap:20px}
+.about-hero .split-text > p:last-child{color:var(--stone)}
+.about-hero .ph{--ar:4/5}
+@media (max-width:768px){ .about-hero .ph{--ar:4/3} }
+.service .scope-key{order:4;justify-content:flex-start;margin-top:0}
+.fit{order:3;display:grid;gap:12px;margin-top:12px}
+.fit-title{font:500 12.5px/1.6 var(--sans);letter-spacing:var(--track-s);color:var(--stone)}
+.fit ul{list-style:none;margin:0;padding:0;border-top:1px solid var(--line)}
+.fit li{display:flex;gap:12px;align-items:baseline;padding:12px 0;border-bottom:1px solid var(--line);font-size:16px;color:var(--ink)}
+.fit li::before{content:"";flex:none;width:6px;height:6px;background:var(--oak);transform:translateY(-3px)}
+.ways{list-style:none;margin:0;padding:0;counter-reset:w;display:grid;grid-template-columns:repeat(3,1fr);gap:var(--gap)}
+.ways li{counter-increment:w;display:grid;gap:14px;align-content:start;padding-top:28px;border-top:1px solid var(--ink)}
+.ways li::before{content:counter(w,decimal-leading-zero);font:400 15px/1 var(--serif);letter-spacing:.08em;color:var(--oak)}
+.ways h3{font-size:clamp(20px, 1.8vw, 24px);letter-spacing:.02em}
+.ways p{color:var(--stone);font-size:16px;line-height:1.85}
+@media (max-width:900px){ .ways{grid-template-columns:1fr;gap:40px} }
+.owner{display:grid;grid-template-columns:minmax(0,340px) minmax(0,1fr);gap:clamp(40px, 7vw, 120px);align-items:center}
+.owner-photo{aspect-ratio:4/5;display:grid;place-items:center;text-align:center;border:1px dashed #A99C89;font:500 14px/1.7 var(--sans);color:var(--stone)}
+.owner-photo small{font-weight:400;font-size:12.5px}
+.owner-text{display:grid;gap:20px;max-width:560px}
+.owner-text .t-h2{line-height:1.5}
+.owner-text p{color:var(--stone)}
+.owner-todo{font:400 12.5px/1.6 var(--sans)}
+@media (max-width:768px){ .owner{grid-template-columns:1fr} .owner-photo{aspect-ratio:4/3} }
+
+/* ---------- 상담 문의: 공간 고르기 칸 ---------- */
+.chips{border:0;margin:0;padding:0;min-width:0}
+.chips legend{padding:0;margin-bottom:10px;font:500 14px/1.5 var(--sans);letter-spacing:.06em}
+.chips .opt{margin-left:8px;font-weight:400;font-size:12.5px;letter-spacing:0;color:var(--stone)}
+.chip-list{display:flex;flex-wrap:wrap;gap:8px}
+.chip{position:relative;cursor:pointer}
+.chip input{position:absolute;opacity:0;width:100%;height:100%;margin:0;cursor:pointer}
+.chip span{display:inline-flex;align-items:center;min-height:44px;padding:0 18px;border:1px solid #8A8175;background:var(--field);font:400 15px/1 var(--sans);color:var(--ink);transition:background .15s,color .15s}
+.chip input:checked + span{background:var(--ink);border-color:var(--ink);color:var(--paper)}
+.chip input:focus-visible + span{outline:2px solid var(--oak);outline-offset:2px}
+.chip:hover span{border-color:var(--ink)}
+.next p{color:var(--stone)}
+@media (max-width:768px){ body[data-page="contact"] .fab{display:none} }
+
+/* ---------- 사례 상세: 간격과 이전·다음 ---------- */
+.crumb-row + .section{padding-top:clamp(48px, 5vw, 72px)}
+.facts .ex dd{display:flex;align-items:baseline;gap:8px}
+.facts .ex small{font:500 11px/1 var(--sans);letter-spacing:.04em;padding:3px 6px;border:1px solid var(--line);color:var(--stone)}
+.materials{padding-block:clamp(56px, 6vw, 88px)}
+.spaces + .materials{margin-block:clamp(56px, 6vw, 88px)}
+.pn{margin-top:clamp(56px, 6vw, 88px)}
+.pn-prev,.pn-next{grid-template-columns:96px 1fr;column-gap:20px;align-items:center}
+.pn-prev .ph,.pn-next .ph{--ar:4/3;grid-row:1 / span 2}
+.pn-next{grid-template-columns:1fr 96px}
+.pn-next .ph{grid-column:2}
+.pn-next span,.pn-next b{grid-column:1}
+.pn-prev span,.pn-next span{align-self:end}
+.pn-prev b,.pn-next b{align-self:start}
+@media (max-width:768px){ .pn-prev,.pn-next{grid-template-columns:1fr} .pn-next{grid-template-columns:1fr} .pn-prev .ph,.pn-next .ph{grid-row:auto;grid-column:auto} }
