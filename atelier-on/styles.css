@@ -610,3 +610,26 @@ select.input{appearance:none;background:var(--field) url("data:image/svg+xml,%3C
 @media (max-width:768px){ .hs-track{padding:0 20px;scroll-padding-inline:20px} }
 
 .sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+
+/* ---------- 플로팅 버튼 ---------- */
+.fab{position:fixed;z-index:30;right:max(20px, env(safe-area-inset-right, 0px));bottom:max(20px, env(safe-area-inset-bottom, 0px));display:grid;justify-items:end;gap:10px}
+.fab-btn{position:relative;display:grid;place-items:center;width:52px;height:52px;border-radius:50%;border:0;padding:0;cursor:pointer;text-decoration:none;box-shadow:0 6px 20px rgba(30,24,18,.18);transition:transform .2s,box-shadow .2s,opacity .25s,visibility .25s}
+.fab-btn svg{width:24px;height:24px}
+.fab-btn:hover{transform:translateY(-2px);box-shadow:0 10px 24px rgba(30,24,18,.22)}
+.fab-btn:focus-visible{outline:2px solid var(--oak);outline-offset:3px}
+.fab-kakao{background:#FEE500;color:#191600}
+.fab-tel{background:var(--ink);color:var(--paper);box-shadow:0 0 0 1px rgba(244,240,230,.35),0 6px 20px rgba(30,24,18,.18)}
+.fab-top{background:var(--paper);color:var(--ink);box-shadow:0 0 0 1px var(--line),0 6px 20px rgba(30,24,18,.12);opacity:0;visibility:hidden;transform:translateY(8px)}
+.show-top .fab-top{opacity:1;visibility:visible;transform:none}
+.fab-label{position:absolute;right:62px;top:50%;transform:translateY(-50%);white-space:nowrap;padding:6px 12px;background:var(--ink);color:var(--paper);font:500 13px/1.4 var(--sans);opacity:0;pointer-events:none;transition:opacity .2s}
+.fab-btn:hover .fab-label,.fab-btn:focus-visible .fab-label{opacity:1}
+.fab-toast{position:absolute;right:62px;bottom:0;width:max-content;max-width:min(320px, 70vw);margin:0;padding:12px 16px;background:var(--ink);color:var(--paper);font:400 13.5px/1.6 var(--sans);opacity:0;visibility:hidden;transition:opacity .2s}
+.toast-on .fab-toast{opacity:1;visibility:visible}
+@media (max-width:768px){
+  .fab{gap:8px}
+  .fab-btn{width:48px;height:48px}
+  .fab-label{display:none}
+  .fab-toast{right:58px}
+}
+@media (prefers-reduced-motion:reduce){ .fab-btn{transition:none} }
+@media print{ .fab{display:none} }

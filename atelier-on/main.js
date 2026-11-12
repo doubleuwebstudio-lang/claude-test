@@ -3,6 +3,12 @@
   "use strict";
 
   /* ---- 프로젝트 데이터 (기획서 v2.0 표 기준; 모두 가상 프로젝트) ---- */
+  /* ---- 실제 업체 연락처: 값을 넣으면 플로팅 버튼이 바로 연결됩니다. 비워 두면 데모 안내만 나옵니다. ---- */
+  var CONTACT = {
+    kakao: "",   // 예: "https://pf.kakao.com/_xxxxx" (카카오톡 채널 채팅 주소)
+    tel: ""      // 예: "010-0000-0000"
+  };
+
   var PROJECTS = [
     {
       id: "p01", page: "project-30.html", thumb: "6933853", cover: "6933852", size: "30평대", scope: "전체 리모델링", style: "모던 내추럴",
@@ -614,5 +620,39 @@
     window.addEventListener("load", place);
     if ("ResizeObserver" in window) new ResizeObserver(place).observe(under);
     place();
+  })();
+
+  /* ---- 플로팅 버튼: 카카오톡 상담, 전화, 맨 위로 ---- */
+  (function () {
+    var box = document.createElement("aside");
+    box.className = "fab";
+    box.setAttribute("aria-label", "빠른 상담");
+    var telHref = CONTACT.tel ? "tel:" + CONTACT.tel.replace(/[^0-9+]/g, "") : "#";
+    box.innerHTML =
+      '<a class="fab-btn fab-kakao" href="' + (CONTACT.kakao || "#") + '"' + (CONTACT.kakao ? ' target="_blank" rel="noopener"' : ' data-demo="kakao"') + ' aria-label="카카오톡으로 상담하기">' +
+        '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4C7 4 3 7.1 3 11c0 2.5 1.7 4.7 4.2 5.9l-.9 3.4c-.1.3.3.6.6.4l4-2.6h1.1c5 0 9-3.1 9-7s-4-7.1-9-7.1z" fill="currentColor"/></svg>' +
+        '<span class="fab-label">카카오톡 상담</span></a>' +
+      '<a class="fab-btn fab-tel" href="' + telHref + '"' + (CONTACT.tel ? "" : ' data-demo="tel"') + ' aria-label="전화로 상담하기">' +
+        '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6.6 3.5l2.6.4c.4.1.7.4.8.8l.6 3c.1.4-.1.8-.4 1l-1.6 1.1a11 11 0 0 0 5.6 5.6l1.1-1.6c.2-.3.6-.5 1-.4l3 .6c.4.1.7.4.8.8l.4 2.6c.1.6-.4 1.1-1 1.1C10.9 20.5 3.5 13.1 3.5 4.5c0-.6.5-1.1 1.1-1z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>' +
+        '<span class="fab-label">' + (CONTACT.tel || "전화 상담") + "</span></a>" +
+      '<button type="button" class="fab-btn fab-top" aria-label="맨 위로">' +
+        '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 19V5M5.5 11.5L12 5l6.5 6.5" fill="none" stroke="currentColor" stroke-width="1.6"/></svg></button>' +
+      '<p class="fab-toast" role="status" aria-live="polite"></p>';
+    document.body.appendChild(box);
+    var top = box.querySelector(".fab-top"), toast = box.querySelector(".fab-toast"), t;
+    function onScroll() { box.classList.toggle("show-top", window.scrollY > window.innerHeight * 0.8); }
+    window.addEventListener("scroll", onScroll, { passive: true });
+    onScroll();
+    top.addEventListener("click", function () { toTop(true); var f = document.querySelector(".skip"); if (f) f.focus({ preventScroll: true }); });
+    box.querySelectorAll("[data-demo]").forEach(function (a) {
+      a.addEventListener("click", function (e) {
+        e.preventDefault();
+        toast.textContent = a.dataset.demo === "kakao" ?
+          "데모 사이트입니다. 실제 업체의 카카오톡 채널 상담으로 연결됩니다." :
+          "데모 사이트입니다. 실제 업체의 상담 전화로 연결됩니다.";
+        box.classList.add("toast-on");
+        clearTimeout(t); t = setTimeout(function () { box.classList.remove("toast-on"); }, 3200);
+      });
+    });
   })();
 })();
