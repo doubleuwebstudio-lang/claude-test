@@ -437,7 +437,7 @@
               return '<button type="button" class="space-card" data-space="' + k + '" aria-pressed="false">' + photo(SPACES[k].photos[0][0], "") + "<span>" + SPACES[k].name + "</span></button>";
             }).join("") +
           "</div>" +
-          '<p class="picker-sel" aria-live="polite"></p>' +
+          '<p class="picker-sel sr-only" aria-live="polite"></p>' +
         "</div>" +
         '<div class="picker-steps" hidden>' +
           '<h3 class="picker-steps-title">공사 순서</h3>' +
@@ -464,8 +464,8 @@
       var links = d.projects.map(function (id) { var p = project(id); return '<a class="link" href="' + p.page + '">' + (p.id === "p04" ? "주방·욕실" : p.size) + "</a>"; }).join("");
       var cta = full ? "전체 리모델링 상담하기" : d.name + " 상담하기";
       info.innerHTML =
-        '<h3 class="picker-name">' + d.name + "</h3>" +
         '<div class="picker-photo">' + (full ? photo(d.photos[0][0], d.photos[0][1]) : photo(d.photos[1][0], d.photos[1][1])) + "</div>" +
+        '<h3 class="picker-name">' + d.name + "</h3>" +
         "<p>" + d.desc + "</p>" +
         (full ? "" : '<p class="picker-meta"><span>많이 하는 공사</span>' + d.works.join(", ") + "</p>") +
         (full ? '<p class="picker-meta"><span>예시 기간</span>' + d.period + "</p>" : "") +
