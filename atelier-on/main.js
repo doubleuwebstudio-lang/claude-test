@@ -540,4 +540,63 @@
       }
     });
   });
+
+  /* ---- 홈: 시공 사례 가로 스크롤 ---- */
+  document.querySelectorAll("[data-hs]").forEach(function (track) {
+    track.innerHTML = PROJECTS.map(function (p, k) {
+      return '<a class="hs-card" href="' + p.page + '">' + photo(p.thumb || p.cover, "") +
+        '<div class="hs-info"><span class="hs-no" aria-hidden="true">' + String(k + 1).padStart(2, "0") + "</span>" +
+        '<h3 class="hs-title">' + esc(p.title) + "</h3>" +
+        '<p class="hs-desc">' + esc(p.oneLine) + "</p>" +
+        '<p class="hs-meta">' + [p.size, p.scope, p.style].join("  |  ") + "</p></div></a>";
+    }).join("");
+    var sec = track.closest(".hscroll"), sticky = sec.querySelector(".hs-sticky"), bar = sec.querySelector(".hs-bar i");
+    var mq = window.matchMedia("(min-width: 901px) and (min-height: 640px) and (prefers-reduced-motion: no-preference)");
+    var dist = 0;
+    function measure() {
+      if (!mq.matches) {
+        sec.classList.remove("hs-on"); sec.style.height = ""; track.style.transform = ""; return;
+      }
+      sec.classList.add("hs-on");
+      dist = Math.max(0, track.scrollWidth - document.documentElement.clientWidth);
+      sec.style.height = (sticky.offsetHeight + dist) + "px";
+      update();
+    }
+    function update() {
+      var prog;
+      if (sec.classList.contains("hs-on")) {
+        var top = sec.getBoundingClientRect().top - (document.querySelector(".site-header") || {offsetHeight: 0}).offsetHeight;
+        prog = Math.min(1, Math.max(0, -top / (dist || 1)));
+        track.style.transform = "translate3d(" + (-prog * dist).toFixed(1) + "px,0,0)";
+      } else {
+        var max = track.scrollWidth - track.clientWidth;
+        prog = max > 0 ? track.scrollLeft / max : 0;
+      }
+      bar.style.transform = "scaleX(" + (0.15 + prog * 0.85).toFixed(3) + ")";
+    }
+    window.addEventListener("scroll", update, { passive: true });
+    track.addEventListener("scroll", update, { passive: true });
+    window.addEventListener("resize", measure);
+    window.addEventListener("load", measure);
+    if (mq.addEventListener) mq.addEventListener("change", measure);
+    measure();
+    /* 키보드로 카드에 초점이 가면 그 카드가 보이는 위치까지 세로 스크롤 */
+    track.addEventListener("focusin", function (e) {
+      if (!sec.classList.contains("hs-on")) return;
+      var card = e.target.closest(".hs-card"); if (!card) return;
+      var x = Math.min(dist, Math.max(0, card.offsetLeft - 40));
+      var hh = (document.querySelector(".site-header") || {offsetHeight: 0}).offsetHeight;
+      window.scrollTo({ top: sec.getBoundingClientRect().top + window.scrollY - hh + x, behavior: "instant" });
+    });
+  });
+
+  /* ---- 홈: 약속·견적 구간에 들어오면 배경이 월넛으로 서서히 바뀜 ---- */
+  (function () {
+    var zone = document.querySelector(".dark-zone");
+    if (!zone || !("IntersectionObserver" in window) || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    document.documentElement.classList.add("dz-anim");
+    new IntersectionObserver(function (en) {
+      zone.classList.toggle("on", en[0].isIntersecting);
+    }, { rootMargin: "-35% 0px -35% 0px" }).observe(zone);
+  })();
 })();

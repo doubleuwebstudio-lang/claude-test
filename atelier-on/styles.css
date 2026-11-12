@@ -43,7 +43,7 @@ p,figcaption,li{text-wrap:pretty}
 @media (prefers-reduced-motion:no-preference){ html{scroll-behavior:smooth} }
 
 /* ---------- 글자 단계 ---------- */
-.sec-title{font-size:clamp(20px, 1.8vw, 24px);letter-spacing:var(--track);text-align:center;margin-bottom:64px}
+.sec-title{font-size:clamp(30px, 3.6vw, 56px);line-height:1.3;letter-spacing:-.005em;text-align:center;margin-bottom:64px}
 .t-h1{font-size:clamp(24px, 2.2vw, 30px);letter-spacing:.04em}
 .t-h2{font-size:clamp(22px, 2vw, 27px);letter-spacing:.02em}
 .t-h3{font-size:19px;letter-spacing:.04em}
@@ -441,7 +441,7 @@ main:focus{outline:none}
 /* ---------- 진행 과정 ---------- */
 .steps{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(5,1fr);counter-reset:s;border-top:1px solid var(--line)}
 .steps li{counter-increment:s;padding:28px 28px 0 0;display:grid;gap:10px;align-content:start}
-.steps li::before{content:counter(s,decimal-leading-zero);font:400 22px/1.2 var(--serif);letter-spacing:.08em;color:var(--oak)}
+.steps li::before{content:counter(s,decimal-leading-zero);font:400 clamp(40px, 4vw, 64px)/1 var(--serif);letter-spacing:.08em;color:var(--oak)}
 .steps h3{font-size:18px;letter-spacing:.06em}
 .steps p{font-size:15px;line-height:1.8;color:var(--stone)}
 @media (max-width:1024px){
@@ -517,7 +517,7 @@ select.input{appearance:none;background:var(--field) url("data:image/svg+xml,%3C
 
 /* ---------- 홈: 약속 한 줄 ---------- */
 .promise{padding-block:clamp(40px, 5vw, 72px) clamp(112px, 11vw, 168px);text-align:center}
-.promise-line{font:400 clamp(28px, 3.4vw, 50px)/1.45 var(--serif);letter-spacing:.01em;color:var(--ink);text-wrap:balance}
+.promise-line{font:400 clamp(40px, 6.4vw, 108px)/1.28 var(--serif);letter-spacing:.01em;color:var(--ink);text-wrap:balance}
 .promise-sub{margin-top:24px;color:var(--stone)}
 .promise-rule{display:block;width:1px;height:56px;margin:0 auto 40px;background:var(--oak)}
 
@@ -527,8 +527,8 @@ select.input{appearance:none;background:var(--field) url("data:image/svg+xml,%3C
 .estimate-side .sec-title{text-align:left;margin-bottom:0}
 .estimate-side p{color:var(--stone)}
 .estimate-steps{list-style:none;margin:8px 0 0;padding:0;counter-reset:es;display:grid;gap:14px}
-.estimate-steps li{counter-increment:es;display:grid;grid-template-columns:36px 1fr;gap:4px 8px}
-.estimate-steps li::before{content:counter(es,decimal-leading-zero);font:400 16px/1.7 var(--serif);color:var(--oak)}
+.estimate-steps li{counter-increment:es;display:grid;grid-template-columns:56px 1fr;gap:4px 8px}
+.estimate-steps li::before{content:counter(es,decimal-leading-zero);font:400 30px/1.1 var(--serif);color:var(--oak)}
 .estimate-steps b{font-weight:400;font-size:17px}
 .estimate-steps span{grid-column:2;font:400 14px/1.6 var(--sans);color:var(--stone)}
 .quote{border:1px solid var(--line);background:var(--field);padding:clamp(24px, 3vw, 40px)}
@@ -545,3 +545,48 @@ select.input{appearance:none;background:var(--field) url("data:image/svg+xml,%3C
 .quote-note{margin-top:14px;font:400 12.5px/1.6 var(--sans);color:var(--stone)}
 @media (max-width:900px){ .estimate{grid-template-columns:1fr} }
 @media (max-width:480px){ .quote td:nth-child(2),.quote th:nth-child(2){display:none} }
+
+/* ---------- 시공 사례 가로 스크롤 (홈) ---------- */
+.hscroll{position:relative;padding-top:var(--sec)}
+.hs-sticky{display:grid;grid-template-columns:minmax(0,1fr);gap:36px;align-content:start;padding-bottom:var(--sec)}
+.hs-track{min-width:0;width:100%}
+.hs-track{display:flex;gap:var(--gap);overflow-x:auto;scroll-snap-type:x mandatory;padding:0 max(40px, calc((100vw - 1440px) / 2));scroll-padding-inline:40px;scrollbar-width:none;overscroll-behavior-x:contain}
+.hs-track::-webkit-scrollbar{display:none}
+.hs-card{flex:none;width:min(78vw, 640px);scroll-snap-align:start;text-decoration:none;display:grid;gap:18px}
+.hs-card .ph{--ar:4/3}
+.hs-card .ph img{transition:transform 1s cubic-bezier(.2,.7,.2,1)}
+.hs-card:hover .ph img{transform:scale(1.04)}
+.hs-info{display:grid;grid-template-columns:auto 1fr;gap:4px 18px;align-items:baseline}
+.hs-no{grid-row:span 3;font:400 clamp(36px, 3.4vw, 54px)/1 var(--serif);color:var(--oak)}
+.hs-title{font:400 clamp(20px, 1.8vw, 26px)/1.4 var(--serif)}
+.hs-card:hover .hs-title{color:var(--oak)}
+.hs-desc{font-size:15px;color:var(--stone)}
+.hs-meta{font:500 12.5px/1.6 var(--sans);letter-spacing:var(--track-s);color:var(--stone)}
+.hs-foot{display:flex;align-items:center;gap:16px}
+.hs-bar{flex:1;max-width:280px;height:1px;background:var(--line);overflow:hidden}
+.hs-bar i{display:block;height:100%;background:var(--oak);transform:scaleX(.15);transform-origin:0 50%}
+.hs-hint{font:400 12.5px/1.5 var(--sans);color:var(--stone)}
+.hs-hint::after{content:" →"}
+@media (max-width:900px){ .hs-hint{display:none} }
+/* PC: 세로 스크롤에 맞춰 옆으로 흐름 */
+.hs-on .hs-sticky{position:sticky;top:var(--header);height:calc(100vh - var(--header));padding-block:clamp(24px, 4vh, 48px);gap:clamp(20px, 3vh, 32px);align-content:center;overflow:hidden}
+.hs-on.hscroll{padding-top:0}
+.hs-on .hs-track{overflow:visible;scroll-snap-type:none;will-change:transform}
+.hs-on .hs-card{width:clamp(420px, 44vw, 700px)}
+.hs-on .hs-card .ph{--ar:auto;aspect-ratio:auto;height:min(44vh, 480px)}
+.hs-on .hs-card:first-child{width:clamp(560px, 58vw, 920px)}
+
+/* ---------- 어두운 월넛 구간 (약속 + 견적) ---------- */
+.dark-zone{--walnut:#33291F;background:var(--walnut);color:var(--paper);transition:background-color .9s ease,color .9s ease}
+.dz-anim .dark-zone:not(.on){background:var(--paper);color:var(--ink)}
+.dark-zone .promise-sub,.dark-zone .estimate-side p,.dark-zone .estimate-steps span{color:#CBBFAE;transition:color .9s}
+.dark-zone .promise-rule,.dark-zone .sec-title::after{background:#D3B48C}
+.dark-zone .estimate-steps li::before{color:#D3B48C}
+.dz-anim .dark-zone:not(.on) .promise-sub,.dz-anim .dark-zone:not(.on) .estimate-side p,.dz-anim .dark-zone:not(.on) .estimate-steps span{color:var(--stone)}
+.dz-anim .dark-zone:not(.on) .promise-rule,.dz-anim .dark-zone:not(.on) .sec-title::after{background:var(--oak)}
+.dz-anim .dark-zone:not(.on) .estimate-steps li::before{color:var(--oak)}
+.dark-zone .quote{color:var(--ink);border-color:transparent}
+.dark-zone .promise-line{color:inherit}
+.dark-zone .promise{padding-block:clamp(120px, 14vw, 220px)}
+.dark-zone :focus-visible{outline-color:#D3B48C}
+@media (max-width:768px){ .hs-track{padding:0 20px;scroll-padding-inline:20px} }
