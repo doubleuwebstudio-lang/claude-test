@@ -384,7 +384,7 @@
     if ("IntersectionObserver" in window) {
       new IntersectionObserver(function (en) { visible = en[0].isIntersecting; schedule(STEP); }, { threshold: 0.3 }).observe(box);
     }
-    schedule(3600);   // 첫 화면 효과가 끝난 뒤 시작
+    schedule(6400);   // 첫 화면 효과(약 3초)가 끝난 뒤에도 거실 사진을 한 바퀴 분량(3.2초) 보여 준 다음 넘김
   });
 
   document.querySelectorAll("[data-final]").forEach(function (el) {
