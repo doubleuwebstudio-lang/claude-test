@@ -807,15 +807,26 @@ select.input{appearance:none;background:var(--field) url("data:image/svg+xml,%3C
 .dark-zone .quote{box-shadow:0 1px 0 rgba(0,0,0,.2),0 28px 50px -24px rgba(0,0,0,.55)}
 
 /* ---------- 자주 묻는 질문: 바로 물어보기 ---------- */
-.quick{align-self:stretch;width:100%;margin-top:clamp(24px, 3vw, 48px);border-top:1px solid var(--ink)}
-.quick-title{padding:16px 0 4px;font:500 12.5px/1.6 var(--sans);letter-spacing:var(--track-s);color:var(--stone)}
-.quick-row{display:grid;gap:2px;padding:16px 28px 16px 0;border-bottom:1px solid var(--line);text-decoration:none;position:relative}
-.quick-row::after{content:"";position:absolute;right:4px;top:50%;width:8px;height:8px;border-top:1px solid currentColor;border-right:1px solid currentColor;transform:translateY(-50%) rotate(45deg);transition:right .25s}
-.quick-row:hover::after{right:0}
-.quick-name{display:flex;align-items:center;gap:10px;font-size:18px;letter-spacing:.02em}
-.quick-row:hover .quick-name{color:var(--oak)}
-.quick-sub{font:400 13px/1.6 var(--sans);color:var(--stone)}
+/* 자주 묻는 질문: 위 굵은 선 하나에 왼쪽 제목과 오른쪽 첫 질문을 맞추고, 바로 물어보기는 질문 목록의 마지막 줄로 */
+.faq-split{border-top:1px solid var(--ink);padding-top:clamp(28px, 3vw, 40px);row-gap:0}
+.faq-split .qa-list{border-top:0}
+.faq-split .qa:first-child summary{padding-top:6px}
+.faq-split .faq-side .sec-title{line-height:1.15}
+.quick{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));align-items:center;column-gap:24px;border-bottom:1px solid var(--line)}
+.quick-title{font:500 12.5px/1.6 var(--sans);letter-spacing:var(--track-s);color:var(--stone)}
+.quick-row{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:24px 0;text-decoration:none;font-size:18px;letter-spacing:.03em}
+.quick-row::after{content:"";flex:none;width:8px;height:8px;border-top:1px solid currentColor;border-right:1px solid currentColor;transform:rotate(45deg);transition:transform .25s}
+.quick-row:hover{color:var(--oak)}
+.quick-row:hover::after{transform:translateX(3px) rotate(45deg)}
+.quick-row{padding-left:24px;border-left:1px solid var(--line)}
+.quick-name{display:flex;align-items:center;gap:10px}
+.quick-sub{display:none}
 .quick .kk{width:8px;height:8px;background:#FEE500;box-shadow:0 0 0 1px rgba(0,0,0,.12)}
-.faq-split > .quick{margin-top:0}
-@media (min-width:769px){ .faq-split{grid-template-rows:auto 1fr} .faq-split > .qa-list{grid-column:2;grid-row:1 / span 2} .faq-split > .quick{grid-column:1;grid-row:2;align-self:end;margin-top:40px} }
-@media (max-width:768px){ .faq-split > .quick{margin-top:12px} }
+@media (min-width:769px){ .faq-split > .qa-list{grid-column:2;grid-row:1} .faq-split > .quick{grid-column:2;grid-row:2} .faq-split > .faq-side{grid-row:1 / span 2} }
+@media (max-width:768px){
+  .quick{grid-template-columns:1fr 1fr}
+  .quick-title{grid-column:1 / -1;padding-top:24px}
+  .quick-row{padding:16px 0 20px 20px}
+  .quick-row:first-of-type{padding-left:0;border-left:0}
+}
+@media (max-width:768px){ .faq-split{row-gap:28px} }
