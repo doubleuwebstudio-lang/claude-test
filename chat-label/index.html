@@ -3,7 +3,7 @@
 <meta name="description" content="카톡 대화를 올리면 선톡 비율, 답장 속도, ㅋㅋ 지수, 궁합 지수를 성분표로 보여줍니다. 대화는 브라우저 밖으로 나가지 않습니다.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Do+Hyeon&family=Gothic+A1:wght@400;600;800&family=IBM+Plex+Mono:wght@500;600&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Do+Hyeon&family=Gothic+A1:wght@400;600;800&family=IBM+Plex+Mono:wght@500;600&family=Noto+Serif+KR:wght@600&display=swap">
 <style>
 /* Layout: 식품 성분표를 닮은 결과지. 위에 업로드 띠, 아래 왼쪽은 굵은 테두리 성분표(궁합 지수·추정 유형),
    오른쪽은 두 사람 비교 줄과 시간대 그래프. 좁은 화면에서는 한 줄로 쌓인다. 두 사람은 파랑(A)과 장미색(B)으로만 구분. */
@@ -176,6 +176,32 @@ details.paste textarea { width: 100%; min-height: 120px; margin-top: 8px; border
 .firsts .f .q { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 @media (max-width: 520px) { .firsts .f { grid-template-columns: 64px 1fr; } .firsts .f .q { grid-column: 2; white-space: normal; } }
 
+/* 사주 */
+.saju-in { display: flex; flex-wrap: wrap; gap: 12px 20px; }
+.saju-in label { display: grid; gap: 4px; font-size: 14px; font-weight: 600; }
+.saju-in input { border: 1px solid var(--line); border-radius: 8px; padding: 7px 10px; background: var(--bg); font-family: var(--f-num); }
+.vs { display: grid; grid-template-columns: 1fr 1fr; gap: 0; border: 3px solid var(--ink); }
+.vs > div { padding: 12px 14px; display: grid; gap: 2px; }
+.vs > div + div { border-left: 1px solid var(--ink); }
+.vs .k { font-size: 13px; color: var(--muted); font-weight: 600; }
+.vs .n { font-family: var(--f-num); font-size: 46px; font-weight: 600; line-height: 1; font-variant-numeric: tabular-nums; }
+.vs .n small { font-size: 16px; }
+.verdict h3 { font-size: 26px; }
+.pillars { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px; }
+.who { display: flex; gap: 6px; align-items: center; min-width: 0; overflow-wrap: anywhere; }
+.pillar { border: 1px solid var(--line); border-radius: 12px; padding: 14px; display: grid; gap: 4px; align-content: start; }
+.pillar .hz { font-family: "Noto Serif KR", "Noto Serif CJK KR", serif; font-size: 44px; line-height: 1.1; letter-spacing: 0.08em; }
+.pillar .sub { font-size: 13px; color: var(--muted); }
+.relparts { display: grid; gap: 8px; margin: 0; padding: 0; list-style: none; }
+.relparts li { display: grid; grid-template-columns: 96px 1fr; gap: 10px; font-size: 14px; align-items: baseline; }
+.relparts .tag { font-size: 12px; font-weight: 800; border: 1.5px solid var(--ink); border-radius: 999px; padding: 0 8px; width: fit-content; white-space: nowrap; }
+.relparts .tag.minus { border-style: dashed; }
+.luck { display: grid; gap: 10px; border-top: 6px solid var(--ink); padding-top: 12px; }
+.luck .row2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px; }
+.luck .key { font-family: var(--f-display); font-size: 24px; }
+.luck ul { margin: 0; padding-left: 18px; display: grid; gap: 4px; font-size: 14px; }
+@media (max-width: 520px) { .relparts li { grid-template-columns: 1fr; gap: 2px; } }
+
 /* 공유 카드 */
 .share { display: grid; gap: 16px; grid-template-columns: 1fr; align-items: start; }
 @media (min-width: 760px) { .share { grid-template-columns: 300px 1fr; } }
@@ -280,6 +306,18 @@ footer { font-size: 12.5px; color: var(--muted); display: grid; gap: 4px; border
       </div>
     </div>
 
+    <div class="panel" id="sajuPanel" style="gap:16px">
+      <div class="ecg-head">
+        <h2>사주로 본 우리 · 2027 정미년</h2>
+        <p>양력 생일로 일주(태어난 날의 간지)와 띠를 봐요. 태어난 시간은 쓰지 않아요.</p>
+      </div>
+      <div class="saju-in">
+        <label for="bdA"><span id="bdALabel">첫 번째 사람 생일</span><input type="date" id="bdA" min="1900-01-01" max="2026-12-31"></label>
+        <label for="bdB"><span id="bdBLabel">두 번째 사람 생일</span><input type="date" id="bdB" min="1900-01-01" max="2026-12-31"></label>
+      </div>
+      <div id="sajuOut" style="display:grid;gap:16px"></div>
+    </div>
+
     <div class="panel" style="gap:14px">
       <h2>공유 카드</h2>
       <div class="share">
@@ -328,6 +366,7 @@ footer { font-size: 12.5px; color: var(--muted); display: grid; gap: 4px; border
 </div>
 
 <script src="chatlab.js"></script>
+<script src="saju.js"></script>
 <script>
 (() => {
   const $ = (id) => document.getElementById(id);
@@ -488,6 +527,7 @@ footer { font-size: 12.5px; color: var(--muted); display: grid; gap: 4px; border
     $("words").innerHTML = wl(A, "a") + wl(B, "b");
 
     renderMoments();
+    renderSaju();
     drawCard();
   }
 
@@ -666,6 +706,82 @@ footer { font-size: 12.5px; color: var(--muted); display: grid; gap: 4px; border
     }).join("");
   }
 
+
+  // ---------- 사주 궁합 ----------
+  state.birth = {};
+  const SAMPLE_BIRTH = { "지민": "1998-05-12", "도윤": "1997-11-06" };
+
+  function sajuVerdict(s, k) {
+    if (s >= 75 && k >= 75) return ["하늘도 대화도 인정한 사이", "타고난 궁합에 대화 습관까지 잘 맞아요. 지금처럼만 하면 돼요."];
+    if (s >= 75) return ["타고난 인연, 대화가 아까운 사이", `사주는 잘 맞는데 대화가 ${s - k}점 못 따라가요. 먼저 연락 한 번이 차이를 만들어요.`];
+    if (k >= 75) return ["운명보다 노력이 센 사이", `실제 대화가 사주보다 ${k - s}점 더 잘 맞아요. 둘이 직접 만든 궁합이에요.`];
+    return ["아직 알아가는 중인 사이", "사주도 대화도 아직 평범해요. 같이 보낸 시간이 쌓이면 대화 점수는 바뀌어요."];
+  }
+
+  // 실제 대화 습관으로 2027년 관계 숙제를 고른다
+  function sajuTips() {
+    const an = state.analysis, mo = state.moments, [A, B] = an.people, tips = [];
+    if (mo && mo.cold.length) tips.push(`이번 기간 냉전 ${mo.cold.length}번, 가장 길게는 ${span(Math.max(...mo.cold.map((c) => c.ms)))}. 정미년엔 서운함을 이틀 넘기지 않기.`);
+    if (A.replyMedian != null && B.replyMedian != null) {
+      const [f, sl] = A.replyMedian <= B.replyMedian ? [A, B] : [B, A];
+      if (sl.replyMedian / Math.max(f.replyMedian, 0.5) >= 1.5) tips.push(`${josa(nm(sl.name), "은", "는")} 답장을 조금만 빨리. 지금은 보통 ${mins(sl.replyMedian)}, 상대는 ${mins(f.replyMedian)}이에요.`);
+    }
+    const more = A.initShare >= B.initShare ? A : B, less = more === A ? B : A;
+    if (more.initShare >= 0.6) tips.push(`선톡의 ${pct(more.initShare)}를 ${josa(nm(more.name), "이", "가")} 해요. 2027엔 ${josa(nm(less.name), "이", "가")} 먼저 연락하는 날을 늘려 보기.`);
+    if (A.affection + B.affection < 5) tips.push("애정 표현이 아주 적어요. '고마워' 한마디부터.");
+    if (!tips.length) tips.push("대화 습관은 이미 균형이 잘 맞아요. 지금 리듬을 지키는 게 숙제예요.");
+    return tips.slice(0, 3);
+  }
+
+  function renderSaju() {
+    const a = state.a, b = state.b;
+    if (state.sample) { state.birth[a] = state.birth[a] || SAMPLE_BIRTH[a] || ""; state.birth[b] = state.birth[b] || SAMPLE_BIRTH[b] || ""; }
+    $("bdALabel").textContent = `${nm(a)} 생일 (양력)`;
+    $("bdBLabel").textContent = `${nm(b)} 생일 (양력)`;
+    $("bdA").value = state.birth[a] || ""; $("bdB").value = state.birth[b] || "";
+    const CA = Saju.chart(state.birth[a]), CB = Saju.chart(state.birth[b]);
+    const out = $("sajuOut");
+    if (!CA || !CB) {
+      state.saju = null;
+      out.innerHTML = `<p class="muted" style="font-size:14px">두 사람 생일을 넣으면 사주 궁합과 카톡 궁합을 나란히 비교하고, 2027 정미년 관계 운세를 보여드려요. 생일은 이 기기 안에서만 계산해요.</p>`;
+      return;
+    }
+    const m = Saju.match(CA, CB, nm(a), nm(b));
+    const k = state.analysis.compat.score;
+    const [head, body] = sajuVerdict(m.score, k);
+    const la = Saju.yearLuck(CA), lb = Saju.yearLuck(CB);
+    const tips = sajuTips();
+    state.saju = { CA, CB, m, k, head, body, la, lb, tips };
+
+    const pillar = (C, n, cls) => `<div class="pillar">
+        <span class="who"><span class="dot ${cls}"></span><b>${esc(nm(n))}</b></span>
+        <span class="hz" lang="zh-Hant">${C.day.hanja}</span>
+        <span><b>${C.day.name}일주</b> · ${C.master.image}(${C.master.name})</span>
+        <span style="font-size:14px">${C.master.text}</span>
+        <span class="sub">${C.animal}띠 · ${C.year.name}년생 (입춘 기준)</span></div>`;
+    out.innerHTML = `
+      <div class="vs">
+        <div><span class="k">사주 궁합</span><span class="n">${m.score}<small>/100</small></span></div>
+        <div><span class="k">카톡 궁합</span><span class="n">${k}<small>/100</small></span></div>
+      </div>
+      <div class="verdict" style="display:grid;gap:4px"><h3>${head}</h3><p>${body}</p></div>
+      <div class="pillars">${pillar(CA, a, "a")}${pillar(CB, b, "b")}</div>
+      <ul class="relparts">${m.parts.map((p) => `<li><span class="tag${p.delta < 0 ? " minus" : ""}">${p.label}</span><span>${esc(p.text)}</span></li>`).join("")}</ul>
+      <div class="luck">
+        <h3 style="font-size:22px">2027 정미년(丁未年) 우리 관계 운세</h3>
+        <div class="row2">
+          ${[[CA, a, la, "a"], [CB, b, lb, "b"]].map(([C, n, L, cls]) => `<div style="display:grid;gap:2px"><span class="who"><span class="dot ${cls}"></span>${esc(nm(n))}</span><span class="key">${L.key}</span><span style="font-size:14px">${L.text}</span>${L.animal ? `<span class="sub muted" style="font-size:13px">${L.animal}</span>` : ""}</div>`).join("")}
+        </div>
+        <div><b style="font-size:14px">대화가 알려준 2027 숙제</b><ul>${tips.map((t) => `<li>${t}</li>`).join("")}</ul></div>
+      </div>
+      <p class="muted" style="font-size:12.5px">일주와 띠만 쓴 간단한 사주 궁합이에요. 월주·시주와 음력 생일은 반영하지 않아요. 재미로 봐 주세요.</p>`;
+  }
+  const onBirth = () => {
+    state.birth[state.a] = $("bdA").value; state.birth[state.b] = $("bdB").value;
+    renderSaju(); drawCard();
+  };
+  $("bdA").addEventListener("change", onBirth); $("bdB").addEventListener("change", onBirth);
+
   // ---------- 공유 카드 ----------
   const CARD = { bg: "#eef0f4", paper: "#ffffff", ink: "#14161b", muted: "#646a78", line: "#d9dce4", a: "#2d58e6", b: "#e2405f", aSoft: "#dfe6fc" };
   const FONT = { disp: '"Do Hyeon", "Apple SD Gothic Neo", sans-serif', body: '"Gothic A1", "Apple SD Gothic Neo", sans-serif', mono: '"IBM Plex Mono", monospace' };
@@ -676,12 +792,13 @@ footer { font-size: 12.5px; color: var(--muted); display: grid; gap: 4px; border
     { id: "rally", name: "최장 랠리", file: "최장랠리" },
     { id: "wait", name: "기다린 시간", file: "기다린시간" },
     { id: "firsts", name: "처음 순간들", file: "처음순간들" },
+    { id: "saju", name: "사주 vs 카톡", file: "사주vs카톡궁합" },
   ];
   state.cardKind = "label";
 
   function availableKinds() {
     const mo = state.moments;
-    return KINDS.filter((k) => k.id === "label" || (mo && (k.id === "ecg" || k.id === "wait" ||
+    return KINDS.filter((k) => k.id === "label" || (k.id === "saju" && state.saju) || (mo && (k.id === "ecg" || k.id === "wait" ||
       (k.id === "cold" && mo.cold.length) || (k.id === "rally" && mo.rally) || (k.id === "firsts" && mo.firsts.length))));
   }
   function renderKinds() {
@@ -883,6 +1000,32 @@ footer { font-size: 12.5px; color: var(--muted); display: grid; gap: 4px; border
       return k.c;
     },
 
+    saju() {
+      const S = state.saju, k = frame("사주 vs 카톡 궁합"), { g, L, R } = k, Y = 110;
+      const colW = (R - L) / 2;
+      [["사주 궁합", S.m.score], ["카톡 궁합", S.k]].forEach(([lab, v], i) => {
+        const x0 = L + i * colW + (i ? 30 : 0);
+        k.text(lab, x0, Y + 230, `40px ${FONT.disp}`, CARD.muted);
+        k.text(String(v), x0, Y + 380, `600 150px ${FONT.mono}`);
+        g.font = `600 150px ${FONT.mono}`; const w = g.measureText(String(v)).width;
+        k.text("/100", x0 + w + 8, Y + 380, `600 36px ${FONT.mono}`);
+      });
+      g.fillStyle = CARD.ink; g.fillRect(L + colW, Y + 190, 3, 210);
+      k.rule(Y + 420, 6);
+      const n = k.wrap(S.head, L, Y + 500, R - L, 66, 2, `58px ${FONT.disp}`);
+      k.wrap(S.body, L, Y + 500 + n * 66 + 4, R - L, 46, 2, `32px ${FONT.body}`, CARD.muted);
+      k.rule(Y + 700, 3);
+      [[S.CA, state.a, S.la, "a"], [S.CB, state.b, S.lb, "b"]].forEach(([C, nme, Lk, side], i) => {
+        const y = Y + 790 + i * 150;
+        k.dot(L + 14, y - 14, side, 14);
+        k.text(k.fit(nm(nme), `800 38px ${FONT.body}`, 230), L + 44, y, `800 38px ${FONT.body}`);
+        k.text(C.day.hanja, L + 300, y + 6, `600 64px "Noto Serif KR", serif`);
+        k.text(`${C.day.name}일주 · ${C.animal}띠`, L + 300, y + 52, `28px ${FONT.body}`, CARD.muted);
+        k.text(`2027 ${Lk.key}`, R, y, `40px ${FONT.disp}`, CARD.ink, "right");
+        if (!i) k.hair(y + 82);
+      });
+      return k.c;
+    },
     firsts(an, mo) {
       const k = frame("우리의 처음"), { L, R } = k, Y = 110, M = mo.msgs;
       const list = mo.firsts.slice(0, quoteOK() ? 6 : 8);

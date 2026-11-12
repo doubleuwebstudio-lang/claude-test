@@ -61,3 +61,15 @@ test("명장면: 랠리, 냉전, 첫 순간", () => {
   assert.equal(m.days.reduce((s, d) => s + d.n, 0), m.msgs.length);
   console.log(m.rally.turns, m.cold.map((x) => Math.round(x.ms / 36e5)), m.hottest.n, m.firsts.map((f) => f.label).join(","), Math.round(m.waited["지민"] / 6e4), Math.round(m.waited["도윤"] / 6e4));
 });
+
+const S = require("./saju.js");
+test("사주: 일주와 띠", () => {
+  assert.equal(S.chart("2000-01-01").day.name, "무오");       // 2000-01-01은 무오일
+  assert.equal(S.chart("2000-01-01").animal, "토끼");          // 입춘 전이라 1999년 기묘
+  assert.equal(S.chart("2000-02-10").animal, "용");
+  assert.equal(S.chart("2027-03-01").year.name, "정미");
+  assert.equal(S.chart("2023-02-30"), null);
+  const m = S.match(S.chart("1998-05-12"), S.chart("1997-11-03"), "지민", "도윤");
+  assert.ok(m.score >= 40 && m.score <= 98 && m.parts.length >= 2);
+  console.log(S.chart("1998-05-12").day.name, S.chart("1997-11-03").day.name, m.score, m.parts.map((p) => p.label));
+});
