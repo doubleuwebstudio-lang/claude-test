@@ -29,6 +29,8 @@
       '<dl class="facts">' +
         '<div><dt>공간</dt><dd>아파트</dd></div><div><dt>평형</dt><dd>' + p.size + '</dd></div>' +
         '<div><dt>공사 범위</dt><dd>' + p.scope + '</dd></div><div><dt>스타일</dt><dd>' + p.style + '</dd></div>' +
+        '<div class="todo"><dt>공사 기간</dt><dd>실제 업체 입력<small>예: ' + (p.id === "p04" ? "3주" : "6~8주") + '</small></dd></div>' +
+        '<div class="todo"><dt>예산 범위</dt><dd>실제 업체 입력<small>예: 상담 후 안내</small></dd></div>' +
       '</dl>' +
       '<div class="story-text"><h2 class="t-h2">' + p.oneLine + '</h2>' + p.intro.map(function (t) { return "<p>" + t + "</p>"; }).join("") + '</div>' +
     '</div></section>' +
@@ -36,7 +38,7 @@
       fig(G[0], "wide") +
       '<p class="flow-text">' + p.more + '</p>' +
       '<div class="pair">' + fig(G[1], "half") + fig(G[2], "half") + '</div>' +
-      fig(G[3], "wide") +
+      (G[3] ? fig(G[3], "wide") : "") +
       '<p class="credit">' + A.credit + '</p>' +
     '</section>' +
     '<nav class="wrap pn" aria-label="다른 시공 사례">' +

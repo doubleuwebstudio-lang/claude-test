@@ -14,10 +14,9 @@
       ],
       more: "식탁은 주방 아일랜드 바로 옆에 두어 요리하는 사람과 앉은 사람이 마주 볼 수 있게 했습니다. 거실 한쪽 벽은 우드 슬랫으로 마감해 흰 벽이 많은 집에 따뜻한 결을 더했습니다.",
       gallery: [
-        { room: "living", img: "6933855", name: "거실", note: "창 쪽에 소파, 맞은편 벽에 TV 수납장" },
+        { room: "kitchen", img: "6933853", name: "주방", note: "거실 쪽으로 열린 아일랜드" },
         { room: "dining", img: "6933854", name: "식탁", note: "주방 바로 옆 자리", pos: "45% 50%" },
-        { room: "living", img: "6933860", name: "거실 벽", note: "우드 슬랫 마감", pos: "40% 50%" },
-        { room: "kitchen", img: "6933853", name: "주방", note: "거실 쪽으로 열린 아일랜드" }
+        { room: "living", img: "6933855", name: "거실", note: "창 쪽에 소파, 맞은편 벽에 TV 수납장", pos: "35% 50%" }
       ]
     },
     {
@@ -343,8 +342,6 @@
 
   document.querySelectorAll("[data-picker]").forEach(function (root) {
     var state = { mode: "part", sel: ["kitchen"], cur: "kitchen" };
-    var planSvg = archPlan({ interactive: true, hatchId: "pick-hatch", label: "30평대 평면 예시. 공간을 눌러 고르세요",
-      roomAttrs: function (rm) { return ' role="button" tabindex="0" data-space="' + ROOM_SPACE[rm.id] + '" aria-label="' + esc(rm.label) + '"'; } });
     root.innerHTML =
       '<div class="picker-modes" role="radiogroup" aria-label="공사 방식">' +
         '<button type="button" role="radio" data-mode="part">부분 인테리어</button>' +
@@ -352,12 +349,12 @@
       "</div>" +
       '<div class="picker-body">' +
         '<div class="picker-plan">' +
-          planSvg +
-          '<div class="picker-chips" role="group" aria-label="공간 목록">' +
-            Object.keys(SPACES).map(function (k) { return '<button type="button" data-space="' + k + '">' + SPACES[k].name + "</button>"; }).join("") +
+          '<div class="picker-cards" role="group" aria-label="공간 목록">' +
+            Object.keys(SPACES).map(function (k) {
+              return '<button type="button" class="space-card" data-space="' + k + '" aria-pressed="false">' + photo(SPACES[k].photos[0][0], "") + "<span>" + SPACES[k].name + "</span></button>";
+            }).join("") +
           "</div>" +
           '<p class="picker-sel" aria-live="polite"></p>' +
-          '<p class="picker-note">30평대 평면 예시입니다. 실제 공사 범위는 현장 확인 후 정합니다.</p>' +
         "</div>" +
         '<div class="picker-steps" hidden>' +
           '<h3 class="picker-steps-title">공사 순서</h3>' +
@@ -375,15 +372,8 @@
       planBox.hidden = full;
       stepsBox.hidden = !full;
       root.querySelectorAll(".picker-modes button").forEach(function (b) { b.setAttribute("aria-checked", b.dataset.mode === state.mode); });
-      root.querySelectorAll(".room").forEach(function (g) {
-        var on = full || state.sel.indexOf(g.dataset.space) > -1;
-        g.classList.toggle("sel", on);
-        g.classList.toggle("cur", g.dataset.space === state.cur);
-        g.setAttribute("aria-pressed", on);
-      });
-      root.querySelectorAll(".picker-chips button").forEach(function (b) {
-        b.setAttribute("aria-pressed", full || state.sel.indexOf(b.dataset.space) > -1);
-        b.classList.toggle("cur", b.dataset.space === state.cur);
+      root.querySelectorAll(".space-card").forEach(function (b) {
+        b.setAttribute("aria-pressed", state.sel.indexOf(b.dataset.space) > -1);
       });
       selLine.textContent = full ? "집 전체가 공사 범위입니다." :
         "선택한 공간: " + names(state.sel).join(", ");
@@ -392,7 +382,7 @@
       var cta = full ? "전체 리모델링 상담하기" : d.name + " 상담하기";
       info.innerHTML =
         '<h3 class="picker-name">' + d.name + "</h3>" +
-        '<div class="picker-photos">' + d.photos.map(function (ph) { return photo(ph[0], ph[1]); }).join("") + "</div>" +
+        '<div class="picker-photo">' + (full ? photo(d.photos[0][0], d.photos[0][1]) : photo(d.photos[1][0], d.photos[1][1])) + "</div>" +
         "<p>" + d.desc + "</p>" +
         (full ? "" : '<p class="picker-meta"><span>많이 하는 공사</span>' + d.works.join(", ") + "</p>") +
         (full ? '<p class="picker-meta"><span>예시 기간</span>' + d.period + "</p>" : "") +
@@ -409,11 +399,7 @@
       state.cur = space;
       render();
     }
-    root.querySelectorAll(".room").forEach(function (g) {
-      g.addEventListener("click", function () { pick(g.dataset.space); });
-      g.addEventListener("keydown", function (e) { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); pick(g.dataset.space); } });
-    });
-    root.querySelectorAll(".picker-chips button").forEach(function (b) { b.addEventListener("click", function () { pick(b.dataset.space); }); });
+    root.querySelectorAll(".space-card").forEach(function (b) { b.addEventListener("click", function () { pick(b.dataset.space); }); });
     root.querySelectorAll(".picker-modes button").forEach(function (b) {
       b.addEventListener("click", function () {
         state.mode = b.dataset.mode;
