@@ -181,6 +181,10 @@ details.paste textarea { width: 100%; min-height: 120px; margin-top: 8px; border
 @media (min-width: 760px) { .share { grid-template-columns: 300px 1fr; } }
 .share img { width: 100%; max-width: 300px; border: 1px solid var(--line); border-radius: 8px; display: block; }
 .share .row { display: flex; flex-wrap: wrap; gap: 10px; }
+.chips { display: flex; flex-wrap: wrap; gap: 8px; }
+.chip { border: 1.5px solid var(--line); border-radius: 999px; padding: 6px 14px; font-size: 14px; font-weight: 600; cursor: pointer; background: var(--surface); }
+.chip:hover { border-color: var(--ink); }
+.chip[aria-pressed="true"] { background: var(--ink); color: var(--surface); border-color: var(--ink); }
 footer { font-size: 12.5px; color: var(--muted); display: grid; gap: 4px; border-top: 1px solid var(--line); padding-top: 14px; }
 @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
 </style>
@@ -281,7 +285,9 @@ footer { font-size: 12.5px; color: var(--muted); display: grid; gap: 4px; border
       <div class="share">
         <img id="cardImg" alt="대화 성분표 공유 카드 미리보기">
         <div style="display:grid;gap:10px;align-content:start">
-          <p>인스타 스토리 비율(4:5) 이미지예요. 이름 가리기를 켜면 카드에도 가려진 이름이 들어갑니다.</p>
+          <div class="chips" id="cardKinds" aria-label="카드 종류"></div>
+          <label style="display:inline-flex;gap:6px;align-items:center;font-size:14px"><input type="checkbox" id="quoteOn"> 카드에 실제 메시지 넣기</label>
+          <p class="muted" style="font-size:13px">인스타 피드 비율(4:5) 이미지예요. 메시지는 기본으로 빼 두었어요. 상대에게 허락받고 넣어 주세요. 이름 가리기를 켜면 카드에도 가려진 이름이 들어갑니다.</p>
           <div class="row">
             <button class="btn" id="saveCard" type="button">카드 저장하기</button>
           </div>
@@ -661,63 +667,254 @@ footer { font-size: 12.5px; color: var(--muted); display: grid; gap: 4px; border
   }
 
   // ---------- 공유 카드 ----------
+  const CARD = { bg: "#eef0f4", paper: "#ffffff", ink: "#14161b", muted: "#646a78", line: "#d9dce4", a: "#2d58e6", b: "#e2405f", aSoft: "#dfe6fc" };
+  const FONT = { disp: '"Do Hyeon", "Apple SD Gothic Neo", sans-serif', body: '"Gothic A1", "Apple SD Gothic Neo", sans-serif', mono: '"IBM Plex Mono", monospace' };
+  const KINDS = [
+    { id: "label", name: "성분표", file: "대화성분표" },
+    { id: "ecg", name: "심전도", file: "관계심전도" },
+    { id: "cold", name: "냉전", file: "우리의냉전" },
+    { id: "rally", name: "최장 랠리", file: "최장랠리" },
+    { id: "wait", name: "기다린 시간", file: "기다린시간" },
+    { id: "firsts", name: "처음 순간들", file: "처음순간들" },
+  ];
+  state.cardKind = "label";
+
+  function availableKinds() {
+    const mo = state.moments;
+    return KINDS.filter((k) => k.id === "label" || (mo && (k.id === "ecg" || k.id === "wait" ||
+      (k.id === "cold" && mo.cold.length) || (k.id === "rally" && mo.rally) || (k.id === "firsts" && mo.firsts.length))));
+  }
+  function renderKinds() {
+    const ks = availableKinds();
+    if (!ks.some((k) => k.id === state.cardKind)) state.cardKind = "label";
+    $("cardKinds").innerHTML = ks.map((k) => `<button type="button" class="chip" data-kind="${k.id}" aria-pressed="${k.id === state.cardKind}">${k.name}</button>`).join("");
+  }
+  $("cardKinds").addEventListener("click", (e) => {
+    const b = e.target.closest(".chip"); if (!b) return;
+    state.cardKind = b.dataset.kind; renderKinds(); drawCard();
+  });
+  $("quoteOn").addEventListener("change", () => drawCard());
+
+  // 공통 틀: 회색 바탕 위 굵은 테두리 성분표 종이, 제목과 굵은 줄, 아래 꼬리말
+  function frame(title) {
+    const c = document.createElement("canvas"); c.width = 1080; c.height = 1350;
+    const g = c.getContext("2d");
+    g.fillStyle = CARD.bg; g.fillRect(0, 0, 1080, 1350);
+    const X = 110, Y = 110, Wd = 860, Ht = 1130;
+    g.fillStyle = CARD.paper; g.fillRect(X, Y, Wd, Ht);
+    g.strokeStyle = CARD.ink; g.lineWidth = 8; g.strokeRect(X, Y, Wd, Ht);
+    const L = X + 40, R = X + Wd - 40;
+    g.textBaseline = "alphabetic"; g.fillStyle = CARD.ink; g.font = `${title.length > 7 ? 80 : 96}px ${FONT.disp}`;
+    g.fillText(title, L, Y + 125);
+    const k = {
+      c, g, L, R, top: Y + 172, bottom: Y + 1040,
+      rule(y, w) { g.fillStyle = CARD.ink; g.fillRect(L, y, R - L, w); },
+      hair(y) { g.fillStyle = CARD.line; g.fillRect(L, y, R - L, 2); },
+      text(t, x, y, font, color = CARD.ink, align = "left") { g.font = font; g.fillStyle = color; g.textAlign = align; g.fillText(t, x, y); g.textAlign = "left"; },
+      row(y, key, val, vf = `600 34px ${FONT.mono}`) { k.text(key, L, y, `34px ${FONT.body}`); k.text(val, R, y, vf, CARD.ink, "right"); },
+      dot(x, y, side, r = 12) { g.fillStyle = side === "a" ? CARD.a : CARD.b; g.beginPath(); g.arc(x, y, r, 0, Math.PI * 2); g.fill(); },
+      fit(t, font, maxW) { g.font = font; let s = t; while (g.measureText(s).width > maxW && s.length > 1) s = s.slice(0, -1); return s === t ? s : s.slice(0, -1) + "…"; },
+      wrap(t, x, y, maxW, lh, maxLines, font, color = CARD.ink) {
+        g.font = font; g.fillStyle = color;
+        const chars = [...String(t).replace(/\s*\n\s*/g, " ")]; let line = "", n = 0;
+        for (let i = 0; i < chars.length; i++) {
+          const test = line + chars[i];
+          if (g.measureText(test).width > maxW && line) {
+            if (n === maxLines - 1) { g.fillText(line.slice(0, -1) + "…", x, y + n * lh); return n + 1; }
+            g.fillText(line, x, y + n * lh); n++; line = chars[i].trimStart();
+          } else line = test;
+        }
+        if (line) { g.fillText(line, x, y + n * lh); n++; }
+        return n;
+      },
+    };
+    k.rule(Y + 150, 22);
+    k.rule(Y + 1040, 12);
+    k.text("우리 대화 성분표 · 대화 습관으로 본 재미용 결과", L, Y + 1095, `28px ${FONT.body}`, CARD.muted);
+    return k;
+  }
+  const sideName = (n) => (n === state.a ? "a" : "b");
+  const quoteOK = () => $("quoteOn").checked;
+  const yy = (t) => { const d = new Date(t); return `${d.getFullYear()}.${String(d.getMonth() + 1).padStart(2, "0")}.${String(d.getDate()).padStart(2, "0")}`; };
+
+  const DRAW = {
+    label(an) {
+      const [A, B] = an.people;
+      const k = frame("대화 성분표"), { g, L, R } = k, Y = 110;
+      k.text("궁합 지수", L, Y + 225, `56px ${FONT.disp}`);
+      k.text("/100", R, Y + 300, `600 44px ${FONT.mono}`, CARD.ink, "right");
+      k.text(String(an.compat.score), R - 90, Y + 300, `600 150px ${FONT.mono}`, CARD.ink, "right");
+      k.rule(Y + 330, 12);
+      const colW = (R - L) / 2;
+      [[A, "a"], [B, "b"]].forEach(([p, side], i) => {
+        const x0 = L + i * colW + (i ? 28 : 0);
+        k.dot(x0 + 12, Y + 388, side);
+        k.text(k.fit(nm(p.name), `800 38px ${FONT.body}`, colW - 70), x0 + 36, Y + 401, `800 38px ${FONT.body}`);
+        k.text(p.type.letters, x0, Y + 495, `600 84px ${FONT.mono}`);
+      });
+      g.fillStyle = CARD.ink; g.fillRect(L + colW, Y + 350, 3, 170);
+      k.rule(Y + 530, 3);
+      const lines = [
+        ["선톡 비율", `${pct(A.initShare)} : ${pct(B.initShare)}`],
+        ["답장 속도(보통)", `${mins(A.replyMedian)} : ${mins(B.replyMedian)}`],
+        ["ㅋㅋ 지수", `${pct(A.laughRate)} : ${pct(B.laughRate)}`],
+        ["메시지 수", `${A.count} : ${B.count}`],
+        ["애정 표현", `${A.affection} : ${B.affection}`],
+        ["제일 활발한 시간", hourName(an.peakHour)],
+      ];
+      lines.forEach(([key, v], i) => { const y = Y + 600 + i * 78; k.row(y, key, v); if (i < lines.length - 1) k.hair(y + 28); });
+      return k.c;
+    },
+
+    ecg(an, mo) {
+      const k = frame("우리 관계 심전도"), { g, L, R } = k, Y = 110;
+      const hot = mo.hottest;
+      k.text("가장 뜨거웠던 날", L, Y + 228, `40px ${FONT.disp}`);
+      k.text(`${dlabel(hot.t)}`, L, Y + 280, `600 34px ${FONT.body}`, CARD.muted);
+      k.text(`${hot.n}`, R - 60, Y + 290, `600 120px ${FONT.mono}`, CARD.ink, "right");
+      k.text("개", R, Y + 290, `40px ${FONT.disp}`, CARD.ink, "right");
+      k.rule(Y + 320, 6);
+      // 심전도 종이
+      let pts = mo.days, scale = 1;
+      if (pts.length > 400) { scale = 7; const w = []; for (let i = 0; i < pts.length; i += 7) w.push({ n: pts.slice(i, i + 7).reduce((s, d) => s + d.n, 0) }); pts = w; }
+      const cx0 = L, cx1 = R, cy0 = Y + 360, cy1 = Y + 760;
+      g.strokeStyle = "#f3c9d2"; g.lineWidth = 1;
+      for (let x = cx0; x <= cx1; x += 20) { g.lineWidth = (x - cx0) % 100 ? 1 : 2; g.beginPath(); g.moveTo(x, cy0); g.lineTo(x, cy1); g.stroke(); }
+      for (let y = cy0; y <= cy1; y += 20) { g.lineWidth = (y - cy0) % 100 ? 1 : 2; g.beginPath(); g.moveTo(cx0, y); g.lineTo(cx1, y); g.stroke(); }
+      const n = pts.length, step = n > 1 ? (cx1 - cx0) / (n - 1) : 0, max = Math.max(...pts.map((d) => d.n), 1);
+      const X = (i) => cx0 + i * step, Yv = (v) => cy1 - 10 - (v / max) * (cy1 - cy0 - 50);
+      const at = (day) => Math.min(n - 1, Math.floor(day / scale));
+      mo.cold.forEach((c) => {
+        const x1 = X(at(c.fromDay)), x2 = X(at(c.toDay));
+        g.fillStyle = "rgba(45,88,230,0.14)"; g.fillRect(x1, cy0, Math.max(x2 - x1, 4), cy1 - cy0);
+        if (x2 - x1 > 110) k.text("냉전", (x1 + x2) / 2, cy0 + 40, `30px ${FONT.disp}`, CARD.a, "center");
+      });
+      g.strokeStyle = CARD.b; g.lineWidth = 5; g.lineJoin = "round"; g.beginPath();
+      pts.forEach((d, i) => (i ? g.lineTo(X(i), Yv(d.n)) : g.moveTo(X(i), Yv(d.n)))); g.stroke();
+      const hx = X(at(hot.day)), hy = Yv(pts[at(hot.day)].n);
+      g.fillStyle = CARD.ink; g.beginPath(); g.arc(hx, hy, 11, 0, Math.PI * 2); g.fill();
+      k.text(yy(mo.days[0].t), cx0, cy1 + 40, `26px ${FONT.mono}`, CARD.muted);
+      k.text(yy(mo.days[mo.days.length - 1].t), cx1, cy1 + 40, `26px ${FONT.mono}`, CARD.muted, "right");
+      const talked = mo.days.filter((d) => d.n).length;
+      const rows = [
+        ["대화한 날", `${talked} / ${mo.days.length}일`],
+        ["하루 평균", `${mo.avg.toFixed(1)}개`],
+        ["냉전", mo.cold.length ? `${mo.cold.length}번 · 최장 ${span(Math.max(...mo.cold.map((c) => c.ms)))}` : "없음"],
+      ];
+      rows.forEach(([key, v], i) => { const y = Y + 880 + i * 64; k.row(y, key, v); if (i < rows.length - 1) k.hair(y + 24); });
+      return k.c;
+    },
+
+    cold(an, mo) {
+      const c = mo.cold.reduce((x, y) => (y.ms > x.ms ? y : x));
+      const M = mo.msgs, last = M[c.from], back = M[c.to];
+      const k = frame(mo.cold.length > 1 ? "우리의 가장 긴 냉전" : "우리의 냉전"), { g, L, R } = k, Y = 110;
+      k.text(span(c.ms).replace(/일$/, ""), L, Y + 330, `600 170px ${FONT.mono}`);
+      g.font = `600 170px ${FONT.mono}`; const w = g.measureText(span(c.ms).replace(/일$/, "")).width;
+      k.text(/일$/.test(span(c.ms)) ? "일 동안 침묵" : "동안 침묵", L + w + 16, Y + 330, `56px ${FONT.disp}`);
+      k.text(`${dlabel(last.t)} → ${dlabel(back.t)}`, L, Y + 395, `600 32px ${FONT.body}`, CARD.muted);
+      k.rule(Y + 430, 6);
+      const block = (y, label, m) => {
+        k.text(label, L, y, `30px ${FONT.body}`, CARD.muted);
+        k.dot(L + 14, y + 52, sideName(m.name), 14);
+        k.text(k.fit(nm(m.name), `800 46px ${FONT.body}`, R - L - 60), L + 44, y + 68, `800 46px ${FONT.body}`);
+        if (quoteOK()) k.wrap(`“${m.text}”`, L, y + 132, R - L, 48, 2, `36px ${FONT.body}`);
+      };
+      block(Y + 495, "마지막 말", last);
+      k.hair(Y + (quoteOK() ? 740 : 650));
+      const by = Y + (quoteOK() ? 800 : 710);
+      block(by, "먼저 손 내민 사람", back);
+      if (!quoteOK()) k.wrap(`${josa(nm(back.name), "이", "가")} ${span(c.ms)} 만에 먼저 연락했어요.`, L, by + 150, R - L, 50, 2, `38px ${FONT.disp}`);
+      return k.c;
+    },
+
+    rally(an, mo) {
+      const r = mo.rally, M = mo.msgs;
+      const k = frame("최장 랠리"), { g, L, R } = k, Y = 110;
+      k.text(String(r.turns), L, Y + 330, `600 170px ${FONT.mono}`);
+      g.font = `600 170px ${FONT.mono}`; const w = g.measureText(String(r.turns)).width;
+      k.text("번 주고받음", L + w + 16, Y + 330, `56px ${FONT.disp}`);
+      k.text(`${dlabel(M[r.from].t)} ${clock(M[r.from].t)} · ${span(Math.max(r.ms, 60000))} 동안 2분 안에 계속 답장`, L, Y + 395, `600 30px ${FONT.body}`, CARD.muted);
+      k.rule(Y + 430, 6);
+      // 탁구 랠리: 두 줄 사이를 오가는 지그재그
+      const laneA = Y + 500, laneB = Y + 640, turns = [];
+      for (let i = r.from; i <= r.to; i++) if (i === r.from || M[i].name !== M[i - 1].name) turns.push(M[i]);
+      const shown = turns.slice(0, 40), stepX = (R - L - 120) / Math.max(1, shown.length - 1);
+      k.text(k.fit(nm(state.a), `800 28px ${FONT.body}`, 100), L, laneA + 10, `800 28px ${FONT.body}`, CARD.a);
+      k.text(k.fit(nm(state.b), `800 28px ${FONT.body}`, 100), L, laneB + 10, `800 28px ${FONT.body}`, CARD.b);
+      g.strokeStyle = CARD.line; g.lineWidth = 2;
+      [laneA, laneB].forEach((y) => { g.beginPath(); g.moveTo(L + 110, y); g.lineTo(R, y); g.stroke(); });
+      g.strokeStyle = CARD.ink; g.lineWidth = 3; g.beginPath();
+      shown.forEach((m, i) => { const x = L + 120 + i * stepX, y = m.name === state.a ? laneA : laneB; i ? g.lineTo(x, y) : g.moveTo(x, y); }); g.stroke();
+      shown.forEach((m, i) => k.dot(L + 120 + i * stepX, m.name === state.a ? laneA : laneB, sideName(m.name), 10));
+      if (turns.length > shown.length) k.text(`+${turns.length - shown.length}`, R, laneB + 50, `26px ${FONT.mono}`, CARD.muted, "right");
+      k.hair(Y + 700);
+      if (quoteOK()) {
+        let y = Y + 770;
+        M.slice(r.from, r.from + 5).forEach((m) => {
+          k.dot(L + 12, y - 12, sideName(m.name), 10);
+          k.text(k.fit(`${nm(m.name)}  ${m.text.replace(/\s*\n\s*/g, " ")}`, `34px ${FONT.body}`, R - L - 40), L + 36, y, `34px ${FONT.body}`);
+          y += 56;
+        });
+      } else {
+        const lead = turns.filter((m) => m.name === state.a).length >= turns.filter((m) => m.name === state.b).length ? state.a : state.b;
+        k.wrap(`핑퐁처럼 쉬지 않고 주고받았어요. 랠리를 더 이어간 쪽은 ${nm(lead)}.`, L, Y + 790, R - L, 56, 3, `44px ${FONT.disp}`);
+      }
+      return k.c;
+    },
+
+    wait(an, mo) {
+      const k = frame("답장을 기다린 시간"), { g, L, R } = k, Y = 110;
+      const wa = mo.waited[state.a], wb = mo.waited[state.b], max = Math.max(wa, wb, 1);
+      const movie = 2 * 3600e3;
+      const block = (y, who, other, ms, side) => {
+        k.dot(L + 14, y - 14, side, 14);
+        k.text(k.fit(`${josa(nm(who), "이", "가")} ${nm(other)}의 답장을`, `600 34px ${FONT.body}`, R - L - 50), L + 44, y, `600 34px ${FONT.body}`);
+        k.text(span(ms), L, y + 120, `600 104px ${FONT.mono}`);
+        g.fillStyle = CARD.line; g.fillRect(L, y + 160, R - L, 26);
+        g.fillStyle = side === "a" ? CARD.a : CARD.b; g.fillRect(L, y + 160, Math.max(8, (R - L) * ms / max), 26);
+        k.text(ms >= movie ? `영화 ${(ms / movie).toFixed(1)}편 볼 시간` : `라면 ${Math.max(1, Math.round(ms / 180e3))}개 끓일 시간`, L, y + 236, `34px ${FONT.disp}`, CARD.muted);
+      };
+      block(Y + 250, state.a, state.b, wa, "a");
+      k.hair(Y + 530);
+      block(Y + 610, state.b, state.a, wb, "b");
+      const more = wa >= wb ? state.a : state.b, ratio = Math.max(wa, wb) / Math.max(1, Math.min(wa, wb));
+      k.wrap(ratio >= 1.3 ? `${josa(nm(more), "이", "가")} ${ratio.toFixed(1)}배 더 기다렸어요.` : "기다린 시간이 거의 같아요.", L, Y + 960, R - L, 50, 1, `44px ${FONT.disp}`);
+      return k.c;
+    },
+
+    firsts(an, mo) {
+      const k = frame("우리의 처음"), { L, R } = k, Y = 110, M = mo.msgs;
+      const list = mo.firsts.slice(0, quoteOK() ? 6 : 8);
+      const gap = quoteOK() ? 138 : 104;
+      list.forEach((f, i) => {
+        const m = M[f.i], y = Y + 250 + i * gap;
+        k.text(yy(m.t), L, y, `600 30px ${FONT.mono}`, CARD.muted);
+        k.text(f.label, L + 220, y, `40px ${FONT.disp}`);
+        k.dot(R - 16, y - 12, sideName(m.name), 12);
+        k.text(k.fit(nm(m.name), `800 32px ${FONT.body}`, 200), R - 40, y, `800 32px ${FONT.body}`, CARD.ink, "right");
+        if (quoteOK()) k.text(k.fit(`“${m.text.replace(/\s*\n\s*/g, " ")}”`, `30px ${FONT.body}`, R - L - 220), L + 220, y + 48, `30px ${FONT.body}`, CARD.muted);
+        if (i < list.length - 1) k.hair(y + gap - 50);
+      });
+      return k.c;
+    },
+  };
+
   async function drawCard() {
     const an = state.analysis; if (!an) return;
     try { await document.fonts.ready; } catch (e) {}
-    const [A, B] = an.people;
-    const c = document.createElement("canvas"); c.width = 1080; c.height = 1350;
-    const g = c.getContext("2d");
-    const paper = "#ffffff", ink = "#14161b", muted = "#646a78", ca = "#2d58e6", cb = "#e2405f";
-    g.fillStyle = "#eef0f4"; g.fillRect(0, 0, 1080, 1350);
-    const X = 110, Y = 110, Wd = 860;
-    g.fillStyle = paper; g.fillRect(X, Y, Wd, 1130);
-    g.strokeStyle = ink; g.lineWidth = 8; g.strokeRect(X, Y, Wd, 1130);
-    const L = X + 40, R = X + Wd - 40;
-    const disp = '"Do Hyeon", "Apple SD Gothic Neo", sans-serif', body = '"Gothic A1", "Apple SD Gothic Neo", sans-serif', mono = '"IBM Plex Mono", monospace';
-    const rule = (y, w) => { g.fillStyle = ink; g.fillRect(L, y, R - L, w); };
-    g.fillStyle = ink; g.font = `96px ${disp}`; g.textBaseline = "alphabetic"; g.fillText("대화 성분표", L, Y + 125);
-    rule(Y + 150, 22);
-    const row = (y, k, v, kf = `34px ${body}`, vf = `600 34px ${mono}`) => {
-      g.fillStyle = ink; g.font = kf; g.textAlign = "left"; g.fillText(k, L, y);
-      g.font = vf; g.textAlign = "right"; g.fillText(v, R, y); g.textAlign = "left";
-    };
-    row(Y + 225, "궁합 지수", "", `56px ${disp}`);
-    g.font = `600 150px ${mono}`; g.textAlign = "right"; g.fillText(String(an.compat.score), R - 90, Y + 300); g.font = `600 44px ${mono}`; g.fillText("/100", R, Y + 300); g.textAlign = "left";
-    rule(Y + 330, 12);
-    const colW = (R - L) / 2;
-    [[A, ca], [B, cb]].forEach(([p, col], i) => {
-      const x0 = L + i * colW + (i ? 28 : 0);
-      g.fillStyle = col; g.beginPath(); g.arc(x0 + 12, Y + 388, 12, 0, Math.PI * 2); g.fill();
-      g.fillStyle = ink; g.font = `800 38px ${body}`;
-      let name = nm(p.name); while (g.measureText(name).width > colW - 70 && name.length > 1) name = name.slice(0, -1);
-      g.fillText(name, x0 + 36, Y + 401);
-      g.font = `600 84px ${mono}`; g.fillText(p.type.letters, x0, Y + 495);
-    });
-    g.fillStyle = ink; g.fillRect(L + colW, Y + 350, 3, 170);
-    rule(Y + 530, 3);
-    const lines = [
-      ["선톡 비율", `${pct(A.initShare)} : ${pct(B.initShare)}`],
-      ["답장 속도(보통)", `${mins(A.replyMedian)} : ${mins(B.replyMedian)}`],
-      ["ㅋㅋ 지수", `${pct(A.laughRate)} : ${pct(B.laughRate)}`],
-      ["메시지 수", `${A.count} : ${B.count}`],
-      ["애정 표현", `${A.affection} : ${B.affection}`],
-      ["제일 활발한 시간", hourName(an.peakHour)],
-    ];
-    lines.forEach(([k, v], i) => {
-      const y = Y + 600 + i * 78;
-      row(y, k, v);
-      if (i < lines.length - 1) { g.fillStyle = "#d9dce4"; g.fillRect(L, y + 28, R - L, 2); }
-    });
-    rule(Y + 1040, 12);
-    g.fillStyle = muted; g.font = `28px ${body}`; g.fillText("대화 습관으로 추정한 재미용 결과예요", L, Y + 1095);
+    renderKinds();
+    const kind = state.cardKind;
+    const c = DRAW[kind](an, state.moments);
     $("cardImg").src = c.toDataURL("image/png");
+    $("cardImg").alt = `${KINDS.find((k) => k.id === kind).name} 공유 카드 미리보기`;
     state.cardCanvas = c;
   }
 
   async function saveCard() {
     const c = state.cardCanvas; if (!c) return;
     const blob = await new Promise((r) => c.toBlob(r, "image/png"));
-    const file = new File([blob], "대화성분표.png", { type: "image/png" });
+    const file = new File([blob], KINDS.find((k) => k.id === state.cardKind).file + ".png", { type: "image/png" });
     try {
       if (navigator.canShare && navigator.canShare({ files: [file] })) { await navigator.share({ files: [file], title: "우리 대화 성분표" }); return; }
     } catch (e) { if (e && e.name === "AbortError") return; }
