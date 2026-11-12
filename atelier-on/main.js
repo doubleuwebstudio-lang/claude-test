@@ -355,8 +355,10 @@
     function shown() { return el.offsetParent !== null; }
     function restartBar() { bar.classList.remove("run"); void bar.offsetWidth; if (timer) bar.classList.add("run"); }
     function stop() { clearTimeout(timer); timer = null; bar.classList.remove("run"); }
+    var t0 = Date.now(), FIRST = 6400;   // 첫 화면 효과(약 3초) + 거실 사진을 한 바퀴(3.2초) 보여 준 뒤 넘김
     function schedule(delay) {
       stop();
+      delay = Math.max(delay, FIRST - (Date.now() - t0));
       if (!playing || hold || !visible || document.hidden || !shown()) return;
       timer = setTimeout(function () {
         var n = ORDER[(ORDER.indexOf(current) + 1) % ORDER.length];
@@ -384,7 +386,7 @@
     if ("IntersectionObserver" in window) {
       new IntersectionObserver(function (en) { visible = en[0].isIntersecting; schedule(STEP); }, { threshold: 0.3 }).observe(box);
     }
-    schedule(6400);   // 첫 화면 효과(약 3초)가 끝난 뒤에도 거실 사진을 한 바퀴 분량(3.2초) 보여 준 다음 넘김
+    schedule(FIRST);
   });
 
   document.querySelectorAll("[data-final]").forEach(function (el) {
