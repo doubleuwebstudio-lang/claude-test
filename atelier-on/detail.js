@@ -13,7 +13,6 @@
         return '<figure>' + A.photo(ph[0], s.name + ": " + ph[1] + (ph[3] ? " (다른 집 참고 사진)" : ""), { pos: ph[2] || undefined }) + '<figcaption>' + ph[1] + (ph[3] ? '<span class="ref-mark">참고 사진 (다른 집)</span>' : "") + '</figcaption></figure>';
       }).join("") + '</div></section>';
   }
-  var half = Math.ceil(p.spaces.length / 2);
   var i = list.indexOf(p);
   var prev = list[(i + list.length - 1) % list.length], next = list[(i + 1) % list.length];
 
@@ -40,7 +39,8 @@
       '</div>' +
     '</div></section>' +
     '<section class="wrap spaces" aria-label="공간별 사진">' +
-      p.spaces.slice(0, half).map(spaceBlock).join("") +
+      p.spaces.map(spaceBlock).join("") +
+      '<p class="credit">' + A.credit + '</p>' +
     '</section>' +
     '<section class="wrap materials" aria-labelledby="mat-title">' +
       '<div class="materials-head"><h2 class="t-h2" id="mat-title">공간별 자재</h2><p>이 사례에 쓴 마감재 조합입니다. 같은 자재가 궁금하시면 상담 때 샘플을 보여 드립니다.</p></div>' +
@@ -49,15 +49,12 @@
       '</tbody></table></div>' +
       '<p class="mat-note">가상 사례라 브랜드와 품번은 적지 않았습니다. 실제 업체 납품 시 자재명을 채웁니다.</p>' +
     '</section>' +
-    '<section class="wrap spaces" aria-label="공간별 사진 (계속)">' +
-      p.spaces.slice(half).map(function (s, k) { return spaceBlock(s, k + half); }).join("") +
-      '<p class="credit">' + A.credit + '</p>' +
-    '</section>' +
     '<nav class="wrap pn" aria-label="다른 시공 사례">' +
       '<a class="pn-prev" href="' + prev.page + '">' + A.photo(prev.thumb || prev.cover, "") + '<span>이전 사례</span><b>' + prev.title + '</b></a>' +
       '<a class="pn-all link" href="projects.html">전체 시공 사례</a>' +
       '<a class="pn-next" href="' + next.page + '">' + A.photo(next.thumb || next.cover, "") + '<span>다음 사례</span><b>' + next.title + '</b></a>' +
     '</nav>' +
-    A.finalCta(p.spaces[1].photos[0][0], p.spaces[1].photos[0][1], "비슷한 인테리어를 계획 중이시라면 " + p.size + " 아파트의 " + p.scope + "에 대해 궁금한 점을 남겨 주세요.");
+    A.finalCta(p.ctaImg, p.title + " 사진", "비슷한 인테리어를 계획 중이시라면 " + p.size + " 아파트의 " + p.scope + "에 대해 궁금한 점을 남겨 주세요.");
 
+  A.ctaReveal();
 })();

@@ -11,7 +11,7 @@
 
   var PROJECTS = [
     {
-      id: "p01", page: "project-30.html", thumb: "6933853", cover: "6933852", size: "30평대", scope: "전체 리모델링", style: "모던 내추럴",
+      id: "p01", ctaImg: "6933855", page: "project-30.html", thumb: "6933853", cover: "6933852", size: "30평대", scope: "전체 리모델링", style: "모던 내추럴",
       title: "30평대 아파트 전체 리모델링",
       oneLine: "거실과 주방을 하나로 이은 밝은 집",
       intro: [
@@ -39,7 +39,7 @@
       ]
     },
     {
-      id: "p02", page: "project-20.html", cover: "6890394", size: "20평대", scope: "전체 인테리어", style: "화이트 우드",
+      id: "p02", ctaImg: "6890414", page: "project-20.html", cover: "6890394", size: "20평대", scope: "전체 인테리어", style: "화이트 우드",
       title: "20평대 아파트 전체 인테리어",
       oneLine: "흰 벽과 밝은 우드 가구로 넓어 보이게 한 집",
       intro: [
@@ -69,7 +69,7 @@
       ]
     },
     {
-      id: "p03", page: "project-40.html", cover: "7005297", size: "40평대", scope: "전체 리모델링", style: "웜 모던",
+      id: "p03", ctaImg: "7005291", page: "project-40.html", cover: "7005297", size: "40평대", scope: "전체 리모델링", style: "웜 모던",
       title: "40평대 아파트 전체 리모델링",
       oneLine: "수납을 넉넉히 둔 베이지 톤의 넓은 집",
       intro: [
@@ -97,7 +97,7 @@
       ]
     },
     {
-      id: "p04", page: "project-partial.html", crumb: "30평대 부분 인테리어", kind: "part", thumb: "7046000", cover: "7045995", size: "30평대", scope: "주방·욕실 부분 인테리어", style: "화이트 클래식",
+      id: "p04", ctaImg: "7046005", page: "project-partial.html", crumb: "30평대 부분 인테리어", kind: "part", thumb: "7046000", cover: "7045995", size: "30평대", scope: "주방·욕실 부분 인테리어", style: "화이트 클래식",
       title: "30평대 아파트 부분 인테리어",
       oneLine: "거실과 방은 그대로 두고 주방과 욕실만 바꾼 집",
       intro: [
@@ -202,11 +202,13 @@
   function finalCta(img, alt, text) {
     return '<section class="cta-final" aria-labelledby="final-title">' +
       '<div class="cta-final-photo">' + photo(img || "6890403", alt || "창가에 붙박이 선반을 짜 넣은 밝은 거실") + "</div>" +
-      '<div class="cta-final-text">' +
+      '<div class="wrap cta-final-inner"><div class="cta-card">' +
+        '<p class="cta-label"><span>상담 안내</span></p>' +
         '<h2 class="cta-final-title" id="final-title">우리 집 이야기,<br>평면도부터 같이 봐요.</h2>' +
-        "<p>" + esc(text || "원하시는 공간과 공사 계획을 알려주시면 상담을 통해 필요한 내용을 안내해 드립니다.") + "</p>" +
-        '<a class="btn btn-solid" href="contact.html">인테리어 상담하기</a>' +
-      "</div></section>";
+        '<p class="cta-text">' + esc(text || "원하시는 공간과 공사 계획을 알려주시면 상담을 통해 필요한 내용을 안내해 드립니다.") + "</p>" +
+        '<div class="cta-actions"><a class="cta-go" href="contact.html">상담 신청하기<svg viewBox="0 0 32 12" aria-hidden="true"><path d="M0 6h30M25 1l5 5-5 5" fill="none" stroke="currentColor" stroke-width="1.2"/></svg></a>' +
+        '<span class="cta-aside">평면도가 없어도 괜찮습니다</span></div>' +
+      "</div></div></section>";
   }
   window.ATELIER.finalCta = finalCta;
   window.ATELIER.esc = esc;
@@ -387,6 +389,16 @@
   document.querySelectorAll("[data-final]").forEach(function (el) {
     el.outerHTML = finalCta(el.getAttribute("data-final"), el.getAttribute("data-alt"), el.getAttribute("data-text"));
   });
+  /* 상담 영역 사진: 화면에 들어오면 천천히 제자리로 (한 번만) */
+  window.ATELIER.ctaReveal = function () {
+    var els = document.querySelectorAll(".cta-final:not(.seen)");
+    if (!("IntersectionObserver" in window)) { els.forEach(function (e) { e.classList.add("seen"); }); return; }
+    var io = new IntersectionObserver(function (en) {
+      en.forEach(function (e) { if (e.isIntersecting) { e.target.classList.add("seen"); io.unobserve(e.target); } });
+    }, { threshold: 0.25 });
+    els.forEach(function (e) { io.observe(e); });
+  };
+  window.ATELIER.ctaReveal();
 
   /* ---- 시공 사례 목록: 공사 방식으로 거르기 ---- */
   document.querySelectorAll("[data-filter]").forEach(function (bar) {
