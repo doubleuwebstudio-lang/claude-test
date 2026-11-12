@@ -885,3 +885,13 @@ select.input{appearance:none;background:var(--field) url("data:image/svg+xml,%3C
 /* ---------- 섹션 구분: 공간 고르기 섹션만 한 단계 진한 리넨색 ---------- */
 section.stack-under{background:var(--paper-2)}
 section.stack-under .picker-modes button:not([aria-checked="true"]){background:transparent}
+
+/* ---------- 홈 섹션 여백 통일: 모든 섹션 위·아래 var(--sec) (PC 112~168px, 모바일 80px) ---------- */
+.hscroll,.hs-on.hscroll{padding-top:var(--sec);padding-bottom:var(--sec)}
+.hs-sticky,.hs-on .hs-sticky{padding-top:0;padding-bottom:0}
+.hs-on .hs-sticky{height:auto;align-content:start}
+.hscroll + .stack > .stack-under,section.stack-under{padding-top:var(--sec);padding-bottom:var(--sec)}
+/* 같은 어두운 판 안의 약속·견적은 사이 여백을 한 번만 */
+.dark-zone .promise{padding-top:var(--sec);padding-bottom:0}
+.dark-zone .promise + .section{padding-top:var(--sec);padding-bottom:var(--sec)}
+.stack-cover > .section{padding-block:var(--sec)}

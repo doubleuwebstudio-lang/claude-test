@@ -655,20 +655,22 @@
     }).join("");
     var sec = track.closest(".hscroll"), sticky = sec.querySelector(".hs-sticky"), bar = sec.querySelector(".hs-bar i");
     var mq = window.matchMedia("(min-width: 901px) and (min-height: 640px) and (prefers-reduced-motion: no-preference)");
-    var dist = 0, RUN = 0.6;   // 세로로 60%만 내려도 카드가 끝까지 넘어감 (멈춰 있는 구간을 짧게)
+    var dist = 0, padT = 0, RUN = 0.6;   // 세로로 60%만 내려도 카드가 끝까지 넘어감 (멈춰 있는 구간을 짧게)
     function measure() {
       if (!mq.matches) {
         sec.classList.remove("hs-on"); sec.style.height = ""; track.style.transform = ""; return;
       }
       sec.classList.add("hs-on");
       dist = Math.max(0, track.scrollWidth - document.documentElement.clientWidth);
-      sec.style.height = (sticky.offsetHeight + dist * RUN) + "px";
+      var cs = getComputedStyle(sec);
+      padT = parseFloat(cs.paddingTop) || 0;
+      sec.style.height = (padT + sticky.offsetHeight + dist * RUN + (parseFloat(cs.paddingBottom) || 0)) + "px";
       update();
     }
     function update() {
       var prog;
       if (sec.classList.contains("hs-on")) {
-        var top = sec.getBoundingClientRect().top - (document.querySelector(".site-header") || {offsetHeight: 0}).offsetHeight;
+        var top = sec.getBoundingClientRect().top + padT - (document.querySelector(".site-header") || {offsetHeight: 0}).offsetHeight;
         prog = Math.min(1, Math.max(0, -top / ((dist * RUN) || 1)));
         track.style.transform = "translate3d(" + (-prog * dist).toFixed(1) + "px,0,0)";
       } else {
@@ -689,7 +691,7 @@
       var card = e.target.closest(".hs-card"); if (!card) return;
       var x = Math.min(dist, Math.max(0, card.offsetLeft - 40)) * RUN;
       var hh = (document.querySelector(".site-header") || {offsetHeight: 0}).offsetHeight;
-      window.scrollTo({ top: sec.getBoundingClientRect().top + window.scrollY - hh + x, behavior: "instant" });
+      window.scrollTo({ top: sec.getBoundingClientRect().top + padT + window.scrollY - hh + x, behavior: "instant" });
     });
   });
 
