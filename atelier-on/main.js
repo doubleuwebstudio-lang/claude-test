@@ -157,7 +157,7 @@
   }
 
   /* ---- 공통 헤더·푸터 ---- */
-  var NAV = [["index.html", "홈", "home"], ["projects.html", "시공 사례", "projects"], ["about.html", "업체 소개", "about"], ["contact.html", "상담 문의", "contact"]];
+  var NAV = [["index.html", "홈", "home"], ["projects.html", "인테리어 제안", "projects"], ["about.html", "업체 소개", "about"], ["contact.html", "상담 문의", "contact"]];
   var LOGO = '<svg viewBox="0 0 28 28" aria-hidden="true"><path d="M3 25V3h22" fill="none" stroke="currentColor" stroke-width="2.4"/><path d="M3 25h9" fill="none" stroke="currentColor" stroke-width="2.4"/><path d="M12 25a13 13 0 0 1 13-13" fill="none" stroke="currentColor" stroke-width="1.2"/><path d="M25 12v13" stroke="currentColor" stroke-width="1.2"/></svg>';
   function navLinks(page) {
     return NAV.map(function (n) { return '<a href="' + n[0] + '"' + (n[2] === page ? ' aria-current="page"' : "") + ">" + n[1] + "</a>"; }).join("");
@@ -171,8 +171,9 @@
   header.innerHTML = '<div class="wrap header-inner"><a class="logo" href="index.html" aria-label="아틀리에 온 홈">' + LOGO +
     '<span class="logo-word">ATELIER ON</span><span class="logo-ko">아틀리에 온</span></a>' +
     '<nav class="nav" aria-label="주 메뉴">' + navLinks(page) + "</nav>" +
+    '<div class="header-end">' + (page === "contact" ? "" : '<a class="head-cta" href="contact.html">상담 신청</a>') +
     '<button class="menu-btn" type="button" aria-expanded="false" aria-controls="mobile-menu" aria-label="메뉴 열기">' +
-    '<svg width="22" height="22" viewBox="0 0 22 22" aria-hidden="true"><path class="m1" d="M2 6h18M2 16h18" stroke="currentColor" stroke-width="1.6"/></svg></button></div>' +
+    '<svg width="22" height="22" viewBox="0 0 22 22" aria-hidden="true"><path class="m1" d="M2 6h18M2 16h18" stroke="currentColor" stroke-width="1.6"/></svg></button></div></div>' +
     '<nav id="mobile-menu" class="mobile-menu" aria-label="모바일 메뉴">' + navLinks(page) + "</nav>";
   document.body.prepend(header);
   if (marker && marker.hasAttribute("data-hero")) {
@@ -211,7 +212,7 @@
   footer.innerHTML = '<div class="wrap foot"><div><a class="logo" href="index.html">' + LOGO + '<span class="logo-word">ATELIER ON</span></a>' +
     "<p>아파트와 주거 공간을 중심으로 인테리어를 제안하는 스튜디오입니다.</p></div>" +
     '<nav aria-label="하단 메뉴">' + navLinks("") + '<a href="contact.html#faq">자주 묻는 질문</a></nav>' +
-    '<div class="foot-note"><p>이 사이트는 홈페이지 제작 포트폴리오용 데모입니다. 소개된 시공 사례는 모두 가상 프로젝트이며, 사업자 정보는 표시하지 않습니다. 사진은 Pexels(Max Vakhtbovych)의 무료 이미지입니다.</p><p>© ATELIER ON 데모</p></div></div>';
+    '<div class="foot-note"><p>이 사이트는 홈페이지 제작 포트폴리오용 데모입니다. 소개된 인테리어 제안는 모두 가상 프로젝트이며, 사업자 정보는 표시하지 않습니다. 사진은 Pexels(Max Vakhtbovych)의 무료 이미지입니다.</p><p>© ATELIER ON 데모</p></div></div>';
   document.body.append(footer);
 
   function project(id) { return PROJECTS.filter(function (p) { return p.id === id; })[0]; }
@@ -238,11 +239,11 @@
     all:     { img: "6933852", name: "거실과 주방", alt: "거실과 주방 전경", pos: "58% 50%" },
     living:  { img: "6933855", name: "거실", alt: "창 쪽에 소파를 둔 거실" },
     kitchen: { img: "6933853", name: "주방·식탁", alt: "거실 쪽으로 열린 아일랜드 주방과 식탁" },
-    bed1:    { img: "6890398", name: "안방", from: "20평대 사례", alt: "흰 침구와 우드 가구의 침실" },
-    bed2:    { img: "6890412", name: "침실", from: "20평대 사례", alt: "벽 선반과 침대 양옆 조명" },
-    bed3:    { img: "7005285", name: "침실 수납", from: "40평대 사례", alt: "선반과 서랍으로 나눈 붙박이 수납" },
-    bath:    { img: "7046000", name: "욕실", from: "부분 인테리어 사례", alt: "샤워부스와 우드 패턴 타일 벽" },
-    entry:   { img: "7005286", name: "현관", from: "40평대 사례", alt: "낮은 수납장과 둥근 거울을 둔 현관", pos: "35% 50%" }
+    bed1:    { img: "6890398", name: "안방", from: "20평대 제안", alt: "흰 침구와 우드 가구의 침실" },
+    bed2:    { img: "6890412", name: "침실", from: "20평대 제안", alt: "벽 선반과 침대 양옆 조명" },
+    bed3:    { img: "7005285", name: "침실 수납", from: "40평대 제안", alt: "선반과 서랍으로 나눈 붙박이 수납" },
+    bath:    { img: "7046000", name: "욕실", from: "부분 인테리어 제안", alt: "샤워부스와 우드 패턴 타일 벽" },
+    entry:   { img: "7005286", name: "현관", from: "40평대 제안", alt: "낮은 수납장과 둥근 거울을 둔 현관", pos: "35% 50%" }
   };
   document.querySelectorAll("[data-hero-plan]").forEach(function (el) {
     el.innerHTML = archPlan({ draw: true, interactive: true, fill: [],
@@ -349,7 +350,7 @@
     bed:     { name: "안방·침실", rooms: ["bed1", "bed2", "bed3"], photos: [["6890398", "20평대 침실"], ["6890412", "20평대 침실 벽면"]], projects: ["p02"],
                works: ["붙박이장", "조명", "도배", "바닥"],
                desc: "붙박이장으로 수납을 벽 안에 넣으면 방이 넓어 보이고 정리가 쉬워집니다." },
-    bath:    { name: "욕실", rooms: ["bath"], photos: [["7046000", "주방·욕실 부분 인테리어 사례의 욕실"], ["6890407", "20평대 욕실 샤워 공간"]], projects: ["p04", "p02"],
+    bath:    { name: "욕실", rooms: ["bath"], photos: [["7046000", "주방·욕실 부분 인테리어 제안의 욕실"], ["6890407", "20평대 욕실 샤워 공간"]], projects: ["p04", "p02"],
                works: ["타일", "방수", "세면대·수납장", "욕조 또는 샤워부스"],
                desc: "타일을 바꿀 때 방수를 새로 하는지 꼭 확인해야 합니다. 욕조와 샤워부스 중 무엇을 쓸지도 함께 정합니다." },
     entry:   { name: "현관", rooms: ["entry"], photos: [["7005286", "40평대 현관"], ["7005294", "40평대 현관 붙박이장"]], projects: ["p03"],
@@ -420,7 +421,7 @@
         "<p>" + d.desc + "</p>" +
         (full ? "" : '<p class="picker-meta"><span>많이 하는 공사</span>' + d.works.join(", ") + "</p>") +
         (full ? '<p class="picker-meta"><span>예시 기간</span>' + d.period + "</p>" : "") +
-        '<p class="picker-meta picker-links"><span>' + (full ? "사례" : "관련 사례") + "</span>" + links + "</p>" +
+        '<p class="picker-meta picker-links"><span>' + (full ? "제안" : "관련 제안") + "</span>" + links + "</p>" +
         '<a class="btn picker-cta" href="contact.html">' + cta + "</a>";
       info.querySelector(".picker-cta").addEventListener("click", function () {
         try {

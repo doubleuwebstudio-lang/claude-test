@@ -77,14 +77,17 @@ main:focus{outline:none}
 .nav a{font:500 14px var(--sans);letter-spacing:var(--track-s);text-decoration:none;padding:10px 0;border-bottom:1px solid transparent}
 .nav a:hover{border-color:currentColor}
 .nav a[aria-current="page"]{border-color:currentColor}
-.menu-btn{display:none;justify-self:end;width:44px;height:44px;margin-right:-10px;border:0;background:none;color:inherit;cursor:pointer}
+.header-end{justify-self:end;display:flex;align-items:center;gap:16px}
+.head-cta{display:inline-flex;align-items:center;min-height:40px;padding:0 20px;border:1px solid currentColor;font:500 13.5px/1 var(--sans);letter-spacing:.04em;text-decoration:none;transition:background .2s,color .2s}
+.head-cta:hover{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+.menu-btn{display:none;width:44px;height:44px;margin-right:-10px;border:0;background:none;color:inherit;cursor:pointer}
 .menu-btn svg{margin:auto}
 .mobile-menu{position:fixed;inset:var(--header) 0 0 0;background:var(--paper);color:var(--ink);padding:24px 20px;display:flex;flex-direction:column;
   transform:translateY(-8px);opacity:0;visibility:hidden;transition:opacity .2s,transform .2s,visibility 0s .2s}
 .mobile-menu.open{transform:none;opacity:1;visibility:visible;transition:opacity .2s,transform .2s}
 .mobile-menu a{font:400 20px var(--serif);letter-spacing:.04em;min-height:44px;padding:16px 0;border-bottom:1px solid var(--line);text-decoration:none}
 .mobile-menu a[aria-current="page"]{color:var(--oak)}
-@media (max-width:900px){ .nav{display:none} .menu-btn{display:block} .header-inner{grid-template-columns:1fr auto} }
+@media (max-width:900px){ .nav{display:none} .menu-btn{display:block} .header-inner{grid-template-columns:1fr auto} .head-cta{min-height:36px;padding:0 14px;font-size:13px} }
 @media (max-width:768px){ .logo-ko{display:none} }
 
 /* ---------- 사진 ---------- */
@@ -472,3 +475,34 @@ select.input{appearance:none;background:var(--field) url("data:image/svg+xml,%3C
 .title-motion .cta .sec-title::after,.title-motion .sec-head .t-h2::after{margin-left:auto;transform-origin:50% 50%}
 .title-motion .in .tt>span{transform:none}
 .title-motion .in::after{transform:scaleX(1)}
+
+/* ---------- 홈: 약속 한 줄 ---------- */
+.promise{padding-block:clamp(40px, 5vw, 72px) clamp(112px, 11vw, 168px);text-align:center}
+.promise-line{font:400 clamp(28px, 3.4vw, 50px)/1.45 var(--serif);letter-spacing:.01em;color:var(--ink);text-wrap:balance}
+.promise-sub{margin-top:24px;color:var(--stone)}
+.promise-rule{display:block;width:1px;height:56px;margin:0 auto 40px;background:var(--oak)}
+
+/* ---------- 홈: 견적 ---------- */
+.estimate{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.3fr);gap:clamp(40px, 6vw, 120px);align-items:start}
+.estimate-side{display:grid;gap:18px;justify-items:start}
+.estimate-side .sec-title{text-align:left;margin-bottom:0}
+.estimate-side p{color:var(--stone)}
+.estimate-steps{list-style:none;margin:8px 0 0;padding:0;counter-reset:es;display:grid;gap:14px}
+.estimate-steps li{counter-increment:es;display:grid;grid-template-columns:36px 1fr;gap:4px 8px}
+.estimate-steps li::before{content:counter(es,decimal-leading-zero);font:400 16px/1.7 var(--serif);color:var(--oak)}
+.estimate-steps b{font-weight:400;font-size:17px}
+.estimate-steps span{grid-column:2;font:400 14px/1.6 var(--sans);color:var(--stone)}
+.quote{border:1px solid var(--line);background:var(--field);padding:clamp(24px, 3vw, 40px)}
+.quote-head{display:flex;justify-content:space-between;align-items:baseline;gap:16px;padding-bottom:16px;border-bottom:1px solid var(--ink)}
+.quote-head b{font:400 19px var(--serif);letter-spacing:.02em}
+.quote-head span{font:400 12.5px var(--sans);color:var(--stone)}
+.quote table{width:100%;border-collapse:collapse;font:400 14.5px/1.5 var(--sans)}
+.quote th{font-weight:500;font-size:12.5px;color:var(--stone);text-align:left;padding:14px 8px 10px 0;border-bottom:1px solid var(--line)}
+.quote td{padding:13px 8px 13px 0;border-bottom:1px solid var(--line);vertical-align:top}
+.quote td:first-child{white-space:nowrap;color:var(--ink)}
+.quote td:last-child,.quote th:last-child{text-align:right;padding-right:0;white-space:nowrap}
+.quote td.blank{color:#A69D90;letter-spacing:.2em}
+.quote-total td{border-bottom:0;padding-top:18px;font-weight:500}
+.quote-note{margin-top:14px;font:400 12.5px/1.6 var(--sans);color:var(--stone)}
+@media (max-width:900px){ .estimate{grid-template-columns:1fr} }
+@media (max-width:480px){ .quote td:nth-child(2),.quote th:nth-child(2){display:none} }

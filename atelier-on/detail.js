@@ -1,4 +1,4 @@
-/* ATELIER ON — 시공 사례 상세 페이지 (공통 템플릿). 페이지의 body data-project 값으로 프로젝트를 고릅니다. */
+/* ATELIER ON — 인테리어 제안 상세 페이지 (공통 템플릿). 페이지의 body data-project 값으로 프로젝트를 고릅니다. */
 (function () {
   var A = window.ATELIER, list = A.projects;
   var id = document.body.getAttribute("data-project");
@@ -24,7 +24,7 @@
         '<p class="meta-tag">가상 프로젝트</p>' +
       '</div>' +
     '</section>' +
-    '<div class="wrap crumb-row"><nav class="crumb" aria-label="현재 위치"><a href="projects.html">시공 사례</a><span aria-hidden="true">/</span><span aria-current="page">' + (p.crumb || p.size) + '</span></nav></div>' +
+    '<div class="wrap crumb-row"><nav class="crumb" aria-label="현재 위치"><a href="projects.html">인테리어 제안</a><span aria-hidden="true">/</span><span aria-current="page">' + (p.crumb || p.size) + '</span></nav></div>' +
     '<section class="section"><div class="wrap story">' +
       '<dl class="facts">' +
         '<div><dt>공간</dt><dd>아파트</dd></div><div><dt>평형</dt><dd>' + p.size + '</dd></div>' +
@@ -41,10 +41,10 @@
       (G[3] ? fig(G[3], "wide") : "") +
       '<p class="credit">' + A.credit + '</p>' +
     '</section>' +
-    '<nav class="wrap pn" aria-label="다른 시공 사례">' +
-      '<a class="pn-prev" href="' + prev.page + '"><span>이전 사례</span><b>' + prev.title + '</b></a>' +
-      '<a class="pn-all link" href="projects.html">전체 시공 사례</a>' +
-      '<a class="pn-next" href="' + next.page + '"><span>다음 사례</span><b>' + next.title + '</b></a>' +
+    '<nav class="wrap pn" aria-label="다른 인테리어 제안">' +
+      '<a class="pn-prev" href="' + prev.page + '"><span>이전 제안</span><b>' + prev.title + '</b></a>' +
+      '<a class="pn-all link" href="projects.html">전체 제안</a>' +
+      '<a class="pn-next" href="' + next.page + '"><span>다음 제안</span><b>' + next.title + '</b></a>' +
     '</nav>' +
     '<section class="section band"><div class="wrap cta">' +
       '<h2 class="sec-title">상담 문의</h2>' +
