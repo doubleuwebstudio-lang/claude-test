@@ -291,13 +291,19 @@ main:focus{outline:none}
   .plan.draw .ap-view circle{opacity:0;transform-box:fill-box;transform-origin:center;animation:dot .4s cubic-bezier(.3,1.6,.5,1) 1.35s forwards}
   .plan.draw .ap-view path{transform-box:view-box;transform-origin:var(--vx) var(--vy);transform:scale(0);animation:spread .6s cubic-bezier(.3,.7,.2,1) 1.6s forwards}
   @media (min-width:901px){
-    .home-hero-photo .ph{clip-path:inset(0 100% 0 0);animation:reveal 1.1s cubic-bezier(.6,0,.2,1) 2s forwards}
-    .home-hero-photo .ph img{transform:translateX(-3%);animation:settle 1.4s cubic-bezier(.3,.7,.2,1) 2s forwards}
+    /* 사진: 서 있는 자리(아래 가운데)에서 시야가 부채꼴로 펼쳐지며 열림 */
+    .home-hero-photo{clip-path:polygon(50% 108%,50% 108%,50% 108%,50% 108%,50% 108%);animation:fan 1.5s cubic-bezier(.55,0,.15,1) 1.9s forwards}
+    .home-hero-photo .hero-shot.on img{transform:scale(1.08);animation:settle 1.9s cubic-bezier(.2,.7,.2,1) 1.9s forwards}
+    .home-hero-photo .hero-shot-name{opacity:0;animation:fade .5s ease 3.3s forwards}
   }
 }
 @keyframes dot{from{opacity:0;transform:scale(0)}to{opacity:1;transform:scale(1)}}
 @keyframes spread{to{transform:scale(1)}}
-@keyframes reveal{to{clip-path:inset(0 0 0 0)}}
+@keyframes fan{
+  0%{clip-path:polygon(50% 108%,50% 108%,50% -8%,50% -8%,50% 108%)}
+  55%{clip-path:polygon(50% 108%,50% 108%,4% -8%,96% -8%,50% 108%)}
+  100%{clip-path:polygon(50% 108%,-8% 108%,-8% -8%,108% -8%,108% 108%)}
+}
 @keyframes settle{to{transform:none}}
 @keyframes draw{to{stroke-dashoffset:0}}
 @keyframes fade{to{opacity:1}}
@@ -313,11 +319,22 @@ main:focus{outline:none}
 .home-hero-plan figcaption{display:flex;align-items:center;gap:8px;font:400 12.5px/1.5 var(--sans);color:var(--stone)}
 .home-hero-plan figcaption i{flex:none;width:8px;height:8px;border-radius:50%;background:var(--oak)}
 .home-hero-photo{position:relative;min-height:100%}
+.home-hero-photo .hero-shot{position:absolute;inset:0;opacity:0;transition:opacity .6s ease}
+.home-hero-photo .hero-shot.on{opacity:1}
 .home-hero-photo .ph{position:absolute;inset:0;aspect-ratio:auto}
+.hero-shot-name{position:absolute;left:24px;bottom:22px;margin:0;padding:6px 14px;background:rgba(244,240,230,.92);font:500 13px/1.4 var(--sans);letter-spacing:var(--track-s);color:var(--ink)}
+.home-hero-plan [data-view]{cursor:pointer;outline:none}
+.home-hero-plan [data-view] .ap-fill{transition:fill .25s}
+.home-hero-plan [data-view]:hover .ap-fill,.home-hero-plan [data-view].cur .ap-fill{fill:rgba(205,184,154,.35)}
+.home-hero-plan [data-view]:focus-visible .ap-fill{stroke:var(--oak);stroke-width:2}
+.home-hero-plan [data-view] text{fill:var(--oak)}
+.plan .ap-view path,.plan .ap-view circle{transition:d .5s cubic-bezier(.3,.7,.2,1),cx .5s cubic-bezier(.3,.7,.2,1),cy .5s cubic-bezier(.3,.7,.2,1)}
 @media (max-width:900px){
   .home-hero{grid-template-columns:1fr;min-height:0}
   .home-hero-photo{order:-1;min-height:0}
-  .home-hero-photo .ph{position:relative;aspect-ratio:4/3}
+  .home-hero-photo{aspect-ratio:4/3}
+  .home-hero-photo .hero-shot:not(.on){display:none}
+  .hero-shot-name{display:none}
   .home-hero-copy{padding:40px 20px 8px;gap:40px}
   .home-hero-plan{max-width:none}
   .home-hero-plan [data-hero-plan],.home-hero-plan figcaption{display:none}
