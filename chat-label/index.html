@@ -71,6 +71,8 @@ header.top p { max-width: 60ch; color: var(--muted); }
 details.paste summary { cursor: pointer; font-size: 13px; color: var(--muted); }
 details.paste textarea { width: 100%; min-height: 120px; margin-top: 8px; border: 1px solid var(--line); border-radius: 10px; padding: 10px; background: var(--bg); font-family: var(--f-num); font-size: 12px; }
 .howto { padding: 4px 2px; display: grid; gap: 8px; font-size: 14px; }
+.howto ol[hidden] { display: none; }
+@media (max-width: 819px) { .howto { order: -1; } }
 .howto h3 { font-size: 20px; }
 .howto ol { margin: 0; padding-left: 20px; display: grid; gap: 4px; }
 .howto b { font-weight: 800; }
@@ -228,10 +230,10 @@ footer { font-size: 12.5px; color: var(--muted); display: grid; gap: 4px; border
     <div class="drop" id="drop">
       <div class="row">
         <label class="btn" for="file">대화 파일 고르기</label>
-        <input id="file" type="file" accept=".txt,.csv,text/plain,text/csv" hidden>
+        <input id="file" type="file" accept=".txt,.csv,.zip,text/plain,text/csv,application/zip" hidden>
         <button class="btn ghost" id="sampleBtn" type="button">예시 다시 보기</button>
       </div>
-      <p class="muted" style="font-size:14px">.txt 또는 .csv 파일을 여기로 끌어다 놓아도 됩니다.</p>
+      <p class="muted" style="font-size:14px">.txt, .csv, .zip 파일을 여기로 끌어다 놓아도 됩니다.</p>
       <p class="lock"><svg width="14" height="14" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 2a5 5 0 0 0-5 5v3H5v12h14V10h-2V7a5 5 0 0 0-5-5Zm-3 8V7a3 3 0 1 1 6 0v3H9Z"/></svg>
         <span>대화는 이 기기 브라우저 안에서만 읽고 계산합니다. 서버로 보내거나 저장하지 않아요.</span></p>
       <details class="paste">
@@ -242,13 +244,28 @@ footer { font-size: 12.5px; color: var(--muted); display: grid; gap: 4px; border
       <p class="status" id="status" role="status"></p>
     </div>
     <div class="howto">
-      <h3>대화 파일 꺼내는 법</h3>
-      <ol>
-        <li><b>휴대폰</b>: 채팅방 오른쪽 위 메뉴 → 설정 → <b>대화 내용 내보내기</b> → 텍스트만 보내기 → 파일 저장</li>
-        <li><b>PC</b>: 채팅방 메뉴 → <b>대화 내보내기</b> → .txt 저장</li>
-        <li>저장한 파일을 왼쪽에 올리면 끝.</li>
+      <h3>대화 파일 꺼내는 법 <span class="muted" style="font-size:14px;font-family:var(--f-body)">메일 없이</span></h3>
+      <div class="chips" id="howTabs" role="group" aria-label="기기 고르기">
+        <button type="button" class="chip" data-os="android" aria-pressed="false">안드로이드</button>
+        <button type="button" class="chip" data-os="ios" aria-pressed="false">아이폰</button>
+        <button type="button" class="chip" data-os="pc" aria-pressed="false">PC</button>
+      </div>
+      <ol data-os="android">
+        <li>채팅방 오른쪽 위 <b>≡ 메뉴</b> → 아래 <b>⚙ 설정</b></li>
+        <li><b>대화 내용 내보내기</b> → <b>모든 메시지 내부저장소에 저장</b></li>
+        <li>여기서 <b>대화 파일 고르기</b> → 내 파일 → <b>KakaoTalk → Chats</b> → KakaoTalk_Chats로 시작하는 폴더 안의 <b>.txt 파일</b></li>
       </ol>
-      <p class="muted" style="font-size:13px">단체방도 됩니다. 비교할 두 사람을 고를 수 있어요.</p>
+      <ol data-os="ios" hidden>
+        <li>채팅방 오른쪽 위 <b>≡ 메뉴</b> → 아래 <b>⚙ 설정</b></li>
+        <li><b>대화 내용 내보내기</b> → <b>모든 메시지 도큐멘트로 저장하기</b></li>
+        <li>여기서 <b>대화 파일 고르기</b> → 파일 앱에서 방금 저장한 파일. <b>.zip 압축 파일도 그대로</b> 올리면 됩니다.</li>
+      </ol>
+      <ol data-os="pc" hidden>
+        <li>PC 카카오톡에서 채팅방을 열고 <b>Ctrl+S</b> (맥은 ⌘+S)</li>
+        <li>또는 채팅방 메뉴 → <b>대화 내보내기</b></li>
+        <li>저장된 <b>.txt 파일</b>을 왼쪽으로 끌어다 놓기</li>
+      </ol>
+      <p class="muted" style="font-size:13px">메뉴 이름은 카카오톡 버전마다 조금 다를 수 있어요. 사진이 같이 저장돼도 괜찮아요, 대화 글만 읽어요. 단체방도 됩니다.</p>
     </div>
   </section>
 
@@ -426,7 +443,7 @@ footer { font-size: 12.5px; color: var(--muted); display: grid; gap: 4px; border
 
   function setStatus(msg, err) { const s = $("status"); s.textContent = msg; s.classList.toggle("err", !!err); }
 
-  function load(text, isSample) {
+  function load(text, isSample, via) {
     const parsed = ChatLab.parse(text);
     if (parsed.messages.length < 10) {
       if (!isSample) track("upload-fail", parsed.format);
@@ -439,7 +456,7 @@ footer { font-size: 12.5px; color: var(--muted); display: grid; gap: 4px; border
     state.a = sp[0].name; state.b = sp[1].name;
     fillPickers();
     $("sampleFlag").hidden = !isSample;
-    if (!isSample) { setStatus(`메시지 ${parsed.messages.length.toLocaleString()}개를 읽었어요.`); track("upload", `${parsed.format}-${sizeBucket(parsed.messages.length)}${sp.length > 2 ? "-단체방" : ""}`); }
+    if (!isSample) { setStatus(`메시지 ${parsed.messages.length.toLocaleString()}개를 읽었어요.`); track("upload", `${via ? via + "-" : ""}${parsed.format}-${sizeBucket(parsed.messages.length)}${sp.length > 2 ? "-단체방" : ""}`); }
     render();
     if (!isSample) $("out").scrollIntoView({ behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth" });
   }
@@ -1105,8 +1122,52 @@ footer { font-size: 12.5px; color: var(--muted); display: grid; gap: 4px; border
   }
 
   // ---------- 입력 ----------
+  // 압축 파일(.zip)이면 안에서 가장 큰 .txt/.csv 하나만 푼다. 사진·동영상은 열지 않는다.
+  // 외부 라이브러리 없이 zip 목차를 직접 읽고, 압축은 브라우저 내장 DecompressionStream 으로 푼다.
+  async function unzipText(f) {
+    const tailLen = Math.min(f.size, 65557);
+    const tail = new DataView(await f.slice(f.size - tailLen).arrayBuffer());
+    let eocd = -1;
+    for (let i = tailLen - 22; i >= 0; i--) if (tail.getUint32(i, true) === 0x06054b50) { eocd = i; break; }
+    if (eocd < 0) throw new Error("not-zip");
+    const count = tail.getUint16(eocd + 10, true), cdSize = tail.getUint32(eocd + 12, true), cdOff = tail.getUint32(eocd + 16, true);
+    const cd = new DataView(await f.slice(cdOff, cdOff + cdSize).arrayBuffer());
+    const dec = new TextDecoder();
+    let best = null;
+    for (let i = 0, o = 0; i < count && o + 46 <= cd.byteLength; i++) {
+      if (cd.getUint32(o, true) !== 0x02014b50) break;
+      const method = cd.getUint16(o + 10, true), csize = cd.getUint32(o + 20, true), usize = cd.getUint32(o + 24, true);
+      const nlen = cd.getUint16(o + 28, true), elen = cd.getUint16(o + 30, true), clen = cd.getUint16(o + 32, true), local = cd.getUint32(o + 42, true);
+      const name = dec.decode(new Uint8Array(cd.buffer, cd.byteOffset + o + 46, nlen));
+      if (/\.(txt|csv)$/i.test(name) && !/(^|\/)__MACOSX\//.test(name) && (!best || usize > best.usize)) best = { method, csize, usize, local };
+      o += 46 + nlen + elen + clen;
+    }
+    if (!best) return null;
+    const lh = new DataView(await f.slice(best.local, best.local + 30).arrayBuffer());
+    const start = best.local + 30 + lh.getUint16(26, true) + lh.getUint16(28, true);
+    const raw = f.slice(start, start + best.csize);
+    if (best.method === 0) return await raw.text();
+    if (best.method !== 8 || typeof DecompressionStream === "undefined") throw new Error("unsupported");
+    return await new Response(raw.stream().pipeThrough(new DecompressionStream("deflate-raw"))).text();
+  }
+  async function readZip(f) {
+    setStatus("압축 파일에서 대화를 찾는 중…");
+    try {
+      const text = await unzipText(f);
+      if (text == null) { track("upload-fail", "zip-no-text"); setStatus("압축 파일 안에 대화 글(.txt)이 없어요. 다시 내보내 주세요.", true); return; }
+      load(text, false, "zip");
+    } catch (e) {
+      track("upload-fail", "zip-broken");
+      setStatus("압축 파일을 열지 못했어요. 파일 앱에서 압축을 풀고 안에 있는 .txt 파일을 올려 주세요.", true);
+    }
+  }
   function readFile(f) {
     if (!f) return;
+    const isZip = /\.zip$/i.test(f.name) || /zip/.test(f.type);
+    if (isZip) {
+      if (f.size > 400 * 1024 * 1024) { setStatus("압축 파일이 너무 커요(400MB 넘음). 압축을 풀어 .txt 파일만 올려 주세요.", true); return; }
+      readZip(f); return;
+    }
     if (f.size > 60 * 1024 * 1024) { setStatus("파일이 너무 커요(60MB 넘음). 기간을 줄여서 다시 내보내 주세요.", true); return; }
     setStatus("읽는 중…");
     const r = new FileReader();
@@ -1114,6 +1175,15 @@ footer { font-size: 12.5px; color: var(--muted); display: grid; gap: 4px; border
     r.onerror = () => setStatus("파일을 열지 못했어요. 다시 골라 주세요.", true);
     r.readAsText(f, "utf-8");
   }
+
+  // 기기별 안내: 처음엔 지금 쓰는 기기로 연다
+  function showOS(os) {
+    document.querySelectorAll("#howTabs .chip").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.os === os)));
+    document.querySelectorAll(".howto ol[data-os]").forEach((ol) => (ol.hidden = ol.dataset.os !== os));
+  }
+  const ua = navigator.userAgent;
+  showOS(/iPhone|iPad|iPod/.test(ua) || (/Macintosh/.test(ua) && navigator.maxTouchPoints > 1) ? "ios" : /Android/.test(ua) ? "android" : "pc");
+  $("howTabs").addEventListener("click", (e) => { const b = e.target.closest(".chip"); if (b) { showOS(b.dataset.os); track("howto", b.dataset.os); } });
   $("file").addEventListener("change", (e) => readFile(e.target.files[0]));
   const drop = $("drop");
   ["dragenter", "dragover"].forEach((t) => drop.addEventListener(t, (e) => { e.preventDefault(); drop.classList.add("over"); }));
