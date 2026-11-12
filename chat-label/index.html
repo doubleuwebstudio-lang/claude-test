@@ -139,7 +139,9 @@ details.paste textarea { width: 100%; min-height: 120px; margin-top: 8px; border
 .paid h3 { font-size: 21px; }
 .paid .blur { filter: blur(4px); user-select: none; font-size: 13px; color: var(--muted); }
 .paid .tag { font-size: 12px; font-weight: 800; border: 1.5px solid var(--ink); border-radius: 999px; padding: 1px 10px; width: fit-content; }
-.paid .price { font-family: var(--f-num); font-size: 14px; }
+.paid .price { font-family: var(--f-num); font-size: 15px; font-weight: 600; display: grid; gap: 2px; }
+.paid .price .muted { font-family: var(--f-body); font-size: 12.5px; font-weight: 400; }
+.paid .po { justify-self: start; margin-top: 4px; }
 
 
 /* 관계 심전도 */
@@ -335,36 +337,52 @@ footer { font-size: 12.5px; color: var(--muted); display: grid; gap: 4px; border
     </div>
 
     <div style="display:grid;gap:12px">
-      <h2 style="font-size:24px">더 깊은 분석 <span class="muted" style="font-size:16px">준비 중</span></h2>
+      <div class="ecg-head">
+        <h2 style="font-size:24px">출시 예정</h2>
+        <p>사전 예약하면 출시 알림과 함께 예약가로 열어 드려요.</p>
+      </div>
       <div class="paid">
+        <article>
+          <span class="tag">카드 팩</span>
+          <h3>2026 우리 카톡 결산</h3>
+          <p class="blur">스토리 비율 9:16 카드 12장. 올해의 단어, 가장 뜨거웠던 달, 첫 냉전과 화해까지 넘겨 보는 연말 결산</p>
+          <span class="price">1,900원 <span class="muted">사전 예약가 · 정가 2,900원</span></span>
+          <button class="btn ghost po" type="button" data-product="wrap-pack">사전 예약하기</button>
+        </article>
         <article>
           <span class="tag">썸 판독</span>
           <h3>이 사람, 나한테 관심 있을까?</h3>
           <p class="blur">답장 속도가 저녁 9시 이후 눈에 띄게 빨라지고, 대화를 먼저 끝내는 일이 거의 없습니다. 질문으로 대화를 이어가는 비율도</p>
-          <span class="price">5,900원 예정</span>
+          <span class="price">3,900원 <span class="muted">사전 예약가 · 정가 5,900원</span></span>
+          <button class="btn ghost po" type="button" data-product="crush">사전 예약하기</button>
         </article>
         <article>
           <span class="tag">관계 리포트</span>
           <h3>우리가 서운해지는 순간</h3>
           <p class="blur">한쪽이 긴 메시지를 보낸 뒤 짧은 답이 오면 대화가 끊기는 패턴이 반복됩니다. 특히 평일 오후에</p>
-          <span class="price">3,900원 예정</span>
+          <span class="price">2,900원 <span class="muted">사전 예약가 · 정가 3,900원</span></span>
+          <button class="btn ghost po" type="button" data-product="report">사전 예약하기</button>
         </article>
         <article>
           <span class="tag">다음 한마디</span>
           <h3>지금 보내면 좋은 메시지</h3>
           <p class="blur">상대가 자주 꺼내는 주제와 반응이 좋았던 말투를 바탕으로 다음에 보낼 메시지 세 가지를 골라</p>
-          <span class="price">2,900원 예정</span>
+          <span class="price">1,900원 <span class="muted">사전 예약가 · 정가 2,900원</span></span>
+          <button class="btn ghost po" type="button" data-product="next-line">사전 예약하기</button>
         </article>
       </div>
+      <p class="status" id="poMsg" role="status"></p>
     </div>
   </section>
 
   <footer>
     <p>성격 유형은 대화 습관으로 추정한 재미용 결과이며, 공식 성격검사가 아닙니다.</p>
-    <p>대화 파일은 업로드한 기기에서만 처리되고, 창을 닫으면 사라집니다.</p>
+    <p>대화 파일과 생일은 업로드한 기기에서만 처리되고, 창을 닫으면 사라집니다.</p>
+    <p><a href="privacy.html" style="color:inherit">개인정보 처리 안내</a></p>
   </footer>
 </div>
 
+<script src="config.js"></script>
 <script src="chatlab.js"></script>
 <script src="saju.js"></script>
 <script>
@@ -391,11 +409,27 @@ footer { font-size: 12.5px; color: var(--muted); display: grid; gap: 4px; border
   const dstr = (t) => { const d = new Date(t); return `${d.getFullYear()}.${String(d.getMonth() + 1).padStart(2, "0")}.${String(d.getDate()).padStart(2, "0")}`; };
   const hourName = (h) => (h < 12 ? "오전 " : "오후 ") + (h % 12 || 12) + "시";
 
+  // ---------- 통계 (대화 내용·생일은 보내지 않고 이벤트 이름만) ----------
+  const CFG = window.CHAT_LABEL_CONFIG || {};
+  if (CFG.goatcounter) {
+    const sc = document.createElement("script");
+    sc.async = true; sc.src = "https://gc.zgo.at/count.js"; sc.dataset.goatcounter = CFG.goatcounter;
+    document.head.appendChild(sc);
+  }
+  function track(name, detail) {
+    try {
+      if (window.goatcounter && window.goatcounter.count)
+        window.goatcounter.count({ path: "event/" + name + (detail ? "/" + detail : ""), title: name, event: true });
+    } catch (e) {}
+  }
+  const sizeBucket = (n) => (n < 1000 ? "1k미만" : n < 10000 ? "1만미만" : n < 100000 ? "10만미만" : "10만이상");
+
   function setStatus(msg, err) { const s = $("status"); s.textContent = msg; s.classList.toggle("err", !!err); }
 
   function load(text, isSample) {
     const parsed = ChatLab.parse(text);
     if (parsed.messages.length < 10) {
+      if (!isSample) track("upload-fail", parsed.format);
       setStatus("대화를 읽지 못했어요. 카카오톡 '대화 내용 내보내기'로 저장한 .txt 또는 .csv 파일인지 확인해 주세요.", true);
       return;
     }
@@ -405,7 +439,7 @@ footer { font-size: 12.5px; color: var(--muted); display: grid; gap: 4px; border
     state.a = sp[0].name; state.b = sp[1].name;
     fillPickers();
     $("sampleFlag").hidden = !isSample;
-    if (!isSample) setStatus(`메시지 ${parsed.messages.length.toLocaleString()}개를 읽었어요.`);
+    if (!isSample) { setStatus(`메시지 ${parsed.messages.length.toLocaleString()}개를 읽었어요.`); track("upload", `${parsed.format}-${sizeBucket(parsed.messages.length)}${sp.length > 2 ? "-단체방" : ""}`); }
     render();
     if (!isSample) $("out").scrollIntoView({ behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth" });
   }
@@ -779,6 +813,7 @@ footer { font-size: 12.5px; color: var(--muted); display: grid; gap: 4px; border
   const onBirth = () => {
     state.birth[state.a] = $("bdA").value; state.birth[state.b] = $("bdB").value;
     renderSaju(); drawCard();
+    if (state.saju && !state.sample) track("saju");
   };
   $("bdA").addEventListener("change", onBirth); $("bdB").addEventListener("change", onBirth);
 
@@ -808,9 +843,9 @@ footer { font-size: 12.5px; color: var(--muted); display: grid; gap: 4px; border
   }
   $("cardKinds").addEventListener("click", (e) => {
     const b = e.target.closest(".chip"); if (!b) return;
-    state.cardKind = b.dataset.kind; renderKinds(); drawCard();
+    state.cardKind = b.dataset.kind; renderKinds(); drawCard(); track("card-view", b.dataset.kind);
   });
-  $("quoteOn").addEventListener("change", () => drawCard());
+  $("quoteOn").addEventListener("change", () => { drawCard(); if ($("quoteOn").checked) track("quote-on"); });
 
   // 공통 틀: 회색 바탕 위 굵은 테두리 성분표 종이, 제목과 굵은 줄, 아래 꼬리말
   function frame(title) {
@@ -1056,10 +1091,11 @@ footer { font-size: 12.5px; color: var(--muted); display: grid; gap: 4px; border
 
   async function saveCard() {
     const c = state.cardCanvas; if (!c) return;
+    track("card-save", state.cardKind);
     const blob = await new Promise((r) => c.toBlob(r, "image/png"));
     const file = new File([blob], KINDS.find((k) => k.id === state.cardKind).file + ".png", { type: "image/png" });
     try {
-      if (navigator.canShare && navigator.canShare({ files: [file] })) { await navigator.share({ files: [file], title: "우리 대화 성분표" }); return; }
+      if (navigator.canShare && navigator.canShare({ files: [file] })) { await navigator.share({ files: [file], title: "우리 대화 성분표", text: CFG.siteUrl ? `우리 대화 성분표 ${CFG.siteUrl}` : undefined }); return; }
     } catch (e) { if (e && e.name === "AbortError") return; }
     const a = document.createElement("a");
     a.href = URL.createObjectURL(blob); a.download = file.name;
@@ -1084,7 +1120,7 @@ footer { font-size: 12.5px; color: var(--muted); display: grid; gap: 4px; border
   ["dragleave", "drop"].forEach((t) => drop.addEventListener(t, (e) => { e.preventDefault(); drop.classList.remove("over"); }));
   drop.addEventListener("drop", (e) => readFile(e.dataTransfer.files[0]));
   $("pasteBtn").addEventListener("click", () => load($("pasteBox").value, false));
-  $("sampleBtn").addEventListener("click", () => { setStatus(""); load(ChatLab.makeSample(), true); });
+  $("sampleBtn").addEventListener("click", () => { setStatus(""); load(ChatLab.makeSample(), true); track("sample"); });
   $("mask").addEventListener("change", () => { fillPickers(); render(); });
   const pick = () => {
     const a = $("pickA").value, b = $("pickB").value;
@@ -1093,6 +1129,20 @@ footer { font-size: 12.5px; color: var(--muted); display: grid; gap: 4px; border
   };
   $("pickA").addEventListener("change", pick); $("pickB").addEventListener("change", pick);
   $("saveCard").addEventListener("click", saveCard);
+
+  // 사전 예약: 누르는 것 자체가 '살 의향' 신호라 먼저 기록하고 폼을 연다
+  document.querySelectorAll(".po").forEach((btn) => btn.addEventListener("click", () => {
+    const product = btn.dataset.product, name = btn.closest("article").querySelector("h3").textContent;
+    track("preorder", product);
+    const msg = $("poMsg");
+    if (CFG.preorderUrl) {
+      const url = CFG.preorderUrl + (CFG.preorderUrl.includes("?") ? "&" : "?") + "product=" + encodeURIComponent(product);
+      msg.innerHTML = `'${esc(name)}' 사전 예약 폼을 새 창으로 열었어요. 안 열렸다면 <a href="${esc(url)}" target="_blank" rel="noopener">여기를 누르세요</a>.`;
+      window.open(url, "_blank", "noopener");
+    } else {
+      msg.textContent = `'${name}' 상품은 아직 준비 중이에요. 관심 가져 주셔서 고마워요. 곧 열게요.`;
+    }
+  }));
 
   load(ChatLab.makeSample(), true);
 })();
