@@ -5,7 +5,7 @@
   /* ---- 프로젝트 데이터 (기획서 v2.0 표 기준; 모두 가상 프로젝트) ---- */
   var PROJECTS = [
     {
-      id: "p01", page: "project-30.html", cover: "6933852", size: "30평대", scope: "전체 리모델링", style: "모던 내추럴",
+      id: "p01", page: "project-30.html", thumb: "6933853", cover: "6933852", size: "30평대", scope: "전체 리모델링", style: "모던 내추럴",
       title: "30평대 아파트 전체 리모델링",
       oneLine: "거실과 주방을 하나로 이은 밝은 집",
       intro: [
@@ -118,11 +118,11 @@
   function card(p, level) {
     var h = "h" + (level || 3);
     return '<a class="card" href="' + p.page + '">' +
-      photo(p.cover, "") +
+      photo(p.thumb || p.cover, "") +
       '<div class="card-body"><' + h + ' class="card-title">' + esc(p.title) + "</" + h + ">" +
       '<p class="card-desc">' + esc(p.oneLine) + "</p>" +
       '<dl class="card-meta"><dt>평형</dt><dd>' + p.size + "</dd><dt>공사 범위</dt><dd>" + p.scope + "</dd><dt>스타일</dt><dd>" + p.style + "</dd></dl>" +
-      '<span class="tag">가상 프로젝트</span></div></a>';
+      "</div></a>";
   }
 
   /* ---- 공통 헤더·푸터 ---- */
@@ -225,7 +225,7 @@
     living:  { name: "거실", rooms: ["living"], photos: [["6933855", "30평대 거실"], ["6890403", "20평대 거실"]], projects: ["p01", "p02", "p03"],
                works: ["바닥재", "벽 마감", "간접조명", "TV 벽", "발코니 확장"],
                desc: "가족이 가장 오래 머무는 곳이라 바닥과 조명을 바꾸는 것만으로도 집의 인상이 크게 달라집니다." },
-    kitchen: { name: "주방", rooms: ["kitchen"], photos: [["6933853", "30평대 주방"], ["7005291", "40평대 주방"]], projects: ["p01", "p02", "p03"],
+    kitchen: { name: "주방", rooms: ["kitchen"], photos: [["7005291", "40평대 주방"], ["6890396", "20평대 주방"]], projects: ["p01", "p02", "p03"],
                works: ["상하부장", "상판", "싱크·후드", "아일랜드", "동선"],
                desc: "자주 쓰는 물건의 위치와 요리하는 순서에 맞춰 수납과 동선을 다시 짭니다." },
     dining:  { name: "식탁", rooms: ["dining"], photos: [["6933854", "30평대 식탁"], ["7005300", "40평대 식탁"]], projects: ["p01", "p03"],
@@ -241,7 +241,7 @@
                works: ["중문", "신발장", "바닥 타일"],
                desc: "중문을 달면 소음과 찬바람이 줄고, 신발장을 천장까지 올리면 수납이 크게 늘어납니다." }
   };
-  var FULL = { name: "전체 리모델링", photos: [["6933852", "30평대 거실과 주방"], ["7005297", "40평대 거실"]], projects: ["p01", "p02", "p03"],
+  var FULL = { name: "전체 리모델링", photos: [["6933855", "30평대 거실"], ["6890394", "20평대 거실"]], projects: ["p01", "p02", "p03"],
                works: ["바닥", "벽", "주방", "욕실", "조명", "수납", "창호", "배관"],
                period: "6~8주 (공사 범위와 관리사무실 공사 가능 시간에 따라 달라집니다)",
                desc: "바닥, 벽, 주방, 욕실, 조명, 수납까지 집 전체를 하나의 계획으로 진행합니다. 지은 지 오래된 아파트처럼 배관·창호·욕실까지 손봐야 할 때 알맞습니다." };

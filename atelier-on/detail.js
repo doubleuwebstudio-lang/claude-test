@@ -20,7 +20,8 @@
     '<section class="hero phero">' + A.photo(p.cover, p.title + " 대표 사진", { eager: true }) +
       '<div class="hero-copy">' +
         '<h1 class="hero-title">' + p.title + '</h1>' +
-        '<p class="meta-line"><span>' + p.size + '</span><span>' + p.scope + '</span><span>' + p.style + '</span><span>가상 프로젝트</span></p>' +
+        '<p class="meta-line"><span>' + p.size + '</span><span>' + p.scope + '</span><span>' + p.style + '</span></p>' +
+        '<p class="meta-tag">가상 프로젝트</p>' +
       '</div>' +
     '</section>' +
     '<div class="wrap crumb-row"><nav class="crumb" aria-label="현재 위치"><a href="projects.html">시공 사례</a><span aria-hidden="true">/</span><span aria-current="page">' + p.size + '</span></nav></div>' +
