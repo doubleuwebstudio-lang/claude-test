@@ -13,6 +13,7 @@
         return '<figure>' + A.photo(ph[0], s.name + ": " + ph[1] + (ph[3] ? " (다른 집 참고 사진)" : ""), { pos: ph[2] || undefined }) + '<figcaption>' + ph[1] + (ph[3] ? '<span class="ref-mark">참고 사진 (다른 집)</span>' : "") + '</figcaption></figure>';
       }).join("") + '</div></section>';
   }
+  var half = Math.ceil(p.spaces.length / 2);
   var i = list.indexOf(p);
   var prev = list[(i + list.length - 1) % list.length], next = list[(i + 1) % list.length];
 
@@ -38,6 +39,9 @@
         '<div class="story-part"><h3>핵심 결정</h3><ol class="decisions">' + p.decisions.map(function (t) { return "<li>" + t + "</li>"; }).join("") + '</ol></div>' +
       '</div>' +
     '</div></section>' +
+    '<section class="wrap spaces" aria-label="공간별 사진">' +
+      p.spaces.slice(0, half).map(spaceBlock).join("") +
+    '</section>' +
     '<section class="wrap materials" aria-labelledby="mat-title">' +
       '<div class="materials-head"><h2 class="sec-title" id="mat-title">공간별 자재</h2><p>이 사례에 쓴 마감재 조합입니다. 같은 자재가 궁금하시면 상담 때 샘플을 보여 드립니다.</p></div>' +
       '<div class="mat-wrap"><table class="mat-table"><thead><tr><th scope="col">공간</th><th scope="col">바닥</th><th scope="col">벽</th><th scope="col">가구·조명</th></tr></thead><tbody>' +
@@ -45,8 +49,8 @@
       '</tbody></table></div>' +
       '<p class="mat-note">가상 사례라 브랜드와 품번은 적지 않았습니다. 실제 업체 납품 시 자재명을 채웁니다.</p>' +
     '</section>' +
-    '<section class="wrap spaces" aria-label="공간별 사진">' +
-      p.spaces.map(spaceBlock).join("") +
+    '<section class="wrap spaces" aria-label="공간별 사진 (계속)">' +
+      p.spaces.slice(half).map(function (s, k) { return spaceBlock(s, k + half); }).join("") +
       '<p class="credit">' + A.credit + '</p>' +
     '</section>' +
     '<nav class="wrap pn" aria-label="다른 시공 사례">' +

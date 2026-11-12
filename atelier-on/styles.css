@@ -368,7 +368,8 @@ main:focus{outline:none}
 .decisions li::before{content:counter(dc,decimal-leading-zero);font:400 15px/1.9 var(--serif);color:var(--oak)}
 
 /* 공간별 자재 표 */
-.materials{display:grid;gap:28px;max-width:1040px;padding-bottom:var(--sec)}
+.materials{display:grid;gap:28px;max-width:1040px;padding-block:clamp(96px, 9vw, 140px)}
+.spaces + .materials{border-top:1px solid var(--line);border-bottom:1px solid var(--line);margin-block:clamp(72px, 8vw, 120px)}
 .materials-head{display:grid;gap:12px}
 .materials-head .sec-title{text-align:left;margin-bottom:0}
 .materials-head p{color:var(--stone);max-width:36em}

@@ -512,4 +512,18 @@
       io.observe(t);
     });
   })();
+
+  /* ---- 메뉴로 페이지를 옮기면 항상 맨 위부터 (같은 페이지면 맨 위로 이동) ---- */
+  if ("scrollRestoration" in history) history.scrollRestoration = "manual";
+  if (!location.hash) window.scrollTo(0, 0);
+  document.querySelectorAll(".nav a, .mobile-menu a, .foot nav a, .logo").forEach(function (a) {
+    a.addEventListener("click", function (e) {
+      var url = new URL(a.href, location.href);
+      if (url.pathname === location.pathname && !url.hash) {
+        e.preventDefault();
+        window.scrollTo({ top: 0, behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth" });
+        var mm = document.querySelector(".mobile-menu.open"); if (mm) document.querySelector(".menu-btn").click();
+      }
+    });
+  });
 })();
