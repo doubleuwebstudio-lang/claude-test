@@ -180,6 +180,31 @@ details.paste textarea { width: 100%; min-height: 120px; margin-top: 8px; border
 .firsts .f .q { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 @media (max-width: 520px) { .firsts .f { grid-template-columns: 64px 1fr; } .firsts .f .q { grid-column: 2; white-space: normal; } }
 
+/* 시상식 */
+.awards { display: grid; gap: 12px; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); }
+.award { border: 2px solid var(--ink); border-radius: 4px; padding: 14px 16px; display: grid; gap: 6px; align-content: start; background: var(--surface); min-width: 0; position: relative; }
+.award::after { content: ""; position: absolute; inset: 4px; border: 1px solid var(--line); pointer-events: none; }
+.award .t { font-family: var(--f-display); font-size: 25px; line-height: 1.15; }
+.award .winner { display: flex; gap: 6px; align-items: center; font-weight: 800; font-size: 14px; }
+.award .winner .lab { font-size: 11px; letter-spacing: .06em; color: var(--muted); font-weight: 600; }
+.award .stat { font-family: var(--f-num); font-size: 26px; font-weight: 600; line-height: 1.15; overflow-wrap: anywhere; }
+.award .note { font-size: 14px; }
+.award .quote { font-size: 13.5px; border-left: 3px solid var(--line); padding: 2px 0 2px 10px; display: grid; gap: 3px; overflow-wrap: anywhere; color: var(--ink); }
+.award .quote .gap { color: var(--muted); font-size: 12.5px; }
+
+/* 판결문 */
+.court { background: var(--surface); border: 1px solid var(--line); padding: 26px 22px; display: grid; gap: 14px; font-family: "Noto Serif KR", "Nanum Myeongjo", serif; max-width: 760px; width: 100%; justify-self: center; box-shadow: 0 1px 0 var(--line), 0 6px 0 -3px var(--surface), 0 7px 0 -3px var(--line); }
+.court .no { font-size: 13px; color: var(--muted); font-family: var(--f-num); }
+.court h2 { font-family: "Noto Serif KR", serif; font-weight: 600; font-size: 30px; text-align: center; letter-spacing: .3em; padding-left: .3em; }
+.court dl { display: grid; grid-template-columns: 72px 1fr; gap: 4px 12px; margin: 0; font-size: 15px; }
+.court dt { color: var(--muted); }
+.court dd { margin: 0; font-weight: 600; }
+.court h3 { font-family: "Noto Serif KR", serif; font-weight: 600; font-size: 18px; text-align: center; letter-spacing: .4em; padding-left: .4em; }
+.court ol { margin: 0; padding-left: 22px; display: grid; gap: 6px; font-size: 15.5px; line-height: 1.7; }
+.court .order li { font-weight: 600; }
+.court .sign { text-align: right; font-size: 14px; line-height: 1.8; }
+.court .seal { display: inline-grid; place-items: center; width: 54px; height: 54px; border: 3px solid var(--b); color: var(--b); border-radius: 6px; font-weight: 600; font-size: 13px; line-height: 1.15; transform: rotate(-8deg); margin-left: 8px; vertical-align: middle; text-align: center; }
+
 /* 사주 */
 .saju-in { display: flex; flex-wrap: wrap; gap: 12px 20px; }
 .saju-in label { display: grid; gap: 4px; font-size: 14px; font-weight: 600; }
@@ -297,6 +322,18 @@ footer { font-size: 12.5px; color: var(--muted); display: grid; gap: 4px; border
           <div class="words" id="words"></div>
         </div>
       </div>
+    </div>
+
+    <div style="display:grid;gap:12px" id="awardsWrap">
+      <div class="ecg-head">
+        <h2 style="font-size:28px">우리 대화 시상식</h2>
+        <p>실제 대화에서 찾은 기록으로 시상합니다. 이의 신청은 받지 않습니다.</p>
+      </div>
+      <div class="awards" id="awards"></div>
+    </div>
+
+    <div style="display:grid;gap:12px" id="courtWrap">
+      <div class="court" id="court"></div>
     </div>
 
     <div class="panel" style="gap:14px" id="ecgPanel">
@@ -578,6 +615,7 @@ footer { font-size: 12.5px; color: var(--muted); display: grid; gap: 4px; border
     $("words").innerHTML = wl(A, "a") + wl(B, "b");
 
     renderMoments();
+    renderFun();
     renderSaju();
     drawCard();
   }
@@ -758,6 +796,124 @@ footer { font-size: 12.5px; color: var(--muted); display: grid; gap: 4px; border
   }
 
 
+
+  // ---------- 시상식과 판결문 ----------
+  const KIND_LABEL = { photo: "(사진)", emoticon: "(이모티콘)", video: "(동영상)", deleted: "(삭제된 메시지)", call: "(통화)", file: "(파일)", link: "(링크)" };
+  const said1 = (m) => KIND_LABEL[m.kind] || m.text;
+  const q1 = (m, n = 50) => (m ? (KIND_LABEL[m.kind] ? `<span class="gap">${KIND_LABEL[m.kind]}</span>` : `“${esc(clip(m.text, n))}”`) : "");
+  function buildAwards() {
+    const f = ChatLab.funStats(state.parsed.messages, state.a, state.b);
+    const A = f.people[state.a], B = f.people[state.b];
+    const other = (p) => (p === A ? B : A);
+    const best = (fn) => (fn(A) >= fn(B) ? A : B);
+    const list = [];
+    const add = (o) => list.push(o);
+
+    let w = best((p) => (p.ignored ? p.ignored.ms : 0));
+    if (w.ignored && w.ignored.ms >= 60 * 60e3) add({ id: "ignore", title: "읽씹 올림픽 금메달", who: w, stat: span(w.ignored.ms),
+      note: `${esc(nm(other(w).name))}의 질문에 답하기까지 걸린 최장 시간. 그동안 상대는 폰만 봤다고 전해집니다.`,
+      quote: `<div>${q1(w.ignored.q)} <span class="gap">· ${esc(nm(w.ignored.q.name))}</span></div><div class="gap">… ${span(w.ignored.ms)} 뒤 …</div><div>${q1(w.ignored.reply)} <span class="gap">· ${esc(nm(w.name))}</span></div>`,
+      card: [`“${clip(w.ignored.q.text, 22)}”`, `질문에 ${span(w.ignored.ms)} 뒤 답장`] });
+
+    w = best((p) => (p.mono ? p.mono.n : 0));
+    if (w.mono && w.mono.n >= 6) {
+      const ms = w.mono.msgs, tx = ms.filter((m) => m.kind === "text"), pool = tx.length >= 2 ? tx : ms;
+      const shown = pool.length > 4 ? [pool[0], pool[1], pool[pool.length - 2], pool[pool.length - 1]] : pool;
+      add({ id: "mono", title: "독백 연기대상", who: w, stat: `${w.mono.n}개 연속`,
+        note: `상대 답 없이 혼자 보낸 최장 기록. 이 정도면 1인극이에요.`,
+        quote: shown.map((m, k) => (ms.length > 4 && k === 2 ? `<div class="gap">… ${ms.length - 4}개 더 …</div>` : "") + `<div>${q1(m, 36)}</div>`).join(""),
+        card: [`“${clip(said1(pool[0]), 12)}” … “${clip(said1(pool[pool.length - 1]), 12)}”`, "상대 답 없이 혼자 보낸 기록"] });
+    }
+
+    w = best((p) => p.kk);
+    if (w.kk >= 30) add({ id: "kk", title: "ㅋ 대량생산상", who: w, stat: `ㅋ ${w.kk.toLocaleString()}개`,
+      note: `한 줄로 이으면 약 ${(w.kk * 0.004).toFixed(w.kk < 2500 ? 1 : 0)}m.${other(w).kk ? ` 상대보다 ${(w.kk / Math.max(1, other(w).kk)).toFixed(1)}배 많이 웃었어요.` : ""}`,
+      card: [`한 줄로 이으면 약 ${(w.kk * 0.004).toFixed(1)}m`] });
+
+    w = best((p) => p.shortTotal);
+    if (w.shortTotal >= 10 && w.short) add({ id: "short", title: "단답 장인상", who: w, stat: `'${w.short.w}' ${w.short.c}번`,
+      note: `단답만 모두 ${w.shortTotal}번. 성의는 아쉽지만 꾸준함은 인정합니다.`, card: [`단답 총 ${w.shortTotal}번`] });
+
+    w = best((p) => (p.phrase ? p.phrase.c : 0));
+    if (w.phrase && w.phrase.c >= 5) add({ id: "phrase", title: "입버릇 특별상", who: w, stat: `'${clip(w.phrase.w, 16)}' ${w.phrase.c}번`,
+      note: "같은 말을 이만큼 했으면 시그니처 대사예요.", card: ["시그니처 대사"] });
+
+    w = best((p) => p.late);
+    if (w.late >= 3) add({ id: "late", title: "새벽 감성상", who: w, stat: `새벽 ${w.late}개`,
+      note: "새벽 2~5시에 보낸 메시지 수. 대표작은 아래와 같습니다.", quote: w.lateQuote ? `<div>${q1(w.lateQuote, 70)}</div>` : "", card: ["새벽 2~5시 메시지"] });
+
+    const pctFood = Math.round(f.foodShare * 100);
+    w = best((p) => p.food);
+    if (w.food >= 8) add({ id: "food", title: "먹방 진행자상", who: w, stat: `음식 얘기 ${w.food}번`,
+      note: pctFood >= 10 ? `대화의 ${pctFood}%가 먹는 얘기. 이 관계의 8할은 메뉴 선정입니다.` : `대화의 ${pctFood}%가 먹는 얘기. 배고플 때 제일 먼저 생각나는 사람.`, card: [`대화의 ${pctFood}%가 먹는 얘기`] });
+
+    w = best((p) => p.sorry);
+    if (w.sorry >= 3) add({ id: "sorry", title: "사과 장인상", who: w, stat: `'미안' ${w.sorry}번`, note: "잘못한 게 많았거나, 마음이 약하거나.", card: ["잘못이 많았거나 착하거나"] });
+
+    w = best((p) => (p.text ? p.questions / p.text : 0));
+    if (w.questions >= 20) add({ id: "ask", title: "질문 폭격기상", who: w, stat: `물음표 ${w.questions}개`, note: "인터뷰 진행자 수준. 대답하느라 상대가 바빴어요.", card: ["인터뷰 진행자 수준"] });
+
+    w = best((p) => p.emoticon);
+    if (w.emoticon >= 10) add({ id: "emo", title: "이모티콘 수집가상", who: w, stat: `이모티콘 ${w.emoticon}개`, note: "말보다 그림이 빠른 사람.", card: ["말보다 그림이 빠름"] });
+
+    w = best((p) => p.night);
+    if (w.night >= 3) add({ id: "night", title: "잘 자 요정상", who: w, stat: `'잘 자' ${w.night}번`, note: "하루 마무리 담당. 덕분에 상대는 잘 잤습니다.", card: ["하루 마무리 담당"] });
+
+    return { f, list: list.slice(0, 8) };
+  }
+
+  function buildVerdict() {
+    const an = state.analysis, mo = state.moments, fs = state.fun.f;
+    const [A, B] = an.people;
+    if (A.replyMedian == null || B.replyMedian == null) return null;
+    const [plain, def] = A.replyMedian <= B.replyMedian ? [A, B] : [B, A];
+    const ratio = def.replyMedian / Math.max(plain.replyMedian, 0.5);
+    const waited = mo ? mo.waited[plain.name] : 0;
+    const F = fs.people[def.name];
+    const caseNo = `2026가단${10000 + (an.total * 37) % 90000}`;
+    const guilty = ratio >= 1.3;
+    let portions = Math.max(1, Math.min(30, Math.round(waited / 3600e3 / 3)));
+    const mercy = Math.min(portions - 1, Math.floor((def.affection || 0) / 10) + (F.sorry >= 3 ? 1 : 0));
+    const reasons = [];
+    reasons.push(`피고의 답장 시간은 보통 ${mins(def.replyMedian)}으로, 원고(${mins(plain.replyMedian)})의 ${ratio.toFixed(1)}배에 이른다.`);
+    if (waited) reasons.push(`원고가 피고의 답장을 기다린 시간은 모두 ${span(waited)}이다. 영화 ${(waited / 7200e3).toFixed(1)}편을 볼 수 있는 시간이다.`);
+    if (F.ignored && F.ignored.ms >= 30 * 60e3) reasons.push(`특히 원고의 “${esc(clip(F.ignored.q.text, 30))}”라는 질문에 피고는 ${span(F.ignored.ms)} 만에 답하였다.`);
+    if (F.short) reasons.push(`피고는 '${esc(F.short.w)}' 같은 단답을 ${F.shortTotal}번 사용하여 성의 부족이 인정된다.`);
+    const mitig = [];
+    if (F.sorry) mitig.push(`'미안'이라고 ${F.sorry}번 말한 점`);
+    if (def.affection) mitig.push(`애정 표현을 ${def.affection}번 한 점`);
+    if (mitig.length) reasons.push(`다만 피고가 ${mitig.join(", ")}을 참작하여 ${mercy ? `${mercy}인분을 감한다` : "형을 정한다"}.`);
+    return { caseNo, plain, def, guilty, portions: portions - mercy, reasons, ratio };
+  }
+
+  function renderFun() {
+    state.fun = buildAwards();
+    const L = state.fun.list;
+    $("awardsWrap").hidden = !L.length;
+    $("awards").innerHTML = L.map((a) => `<article class="award">
+        <span class="winner"><span class="lab">수상</span><span class="dot ${sideOf(a.who.name)}"></span>${esc(nm(a.who.name))}</span>
+        <span class="t">${a.title}</span>
+        <span class="stat">${esc(a.stat)}</span>
+        <span class="note">${esc(a.note)}</span>
+        ${a.quote ? `<div class="quote">${a.quote}</div>` : ""}</article>`).join("");
+
+    const v = state.verdict = buildVerdict();
+    $("courtWrap").hidden = !v;
+    if (!v) return;
+    const d = new Date();
+    $("court").innerHTML = `
+      <span class="no">사건 ${v.caseNo} 답장 지연 청구</span>
+      <h2>판 결</h2>
+      <dl><dt>원고</dt><dd>${esc(nm(v.plain.name))}</dd><dt>피고</dt><dd>${esc(nm(v.def.name))}</dd></dl>
+      <h3>주 문</h3>
+      <ol class="order">${v.guilty
+        ? `<li>피고는 원고에게 떡볶이 ${v.portions}인분을 제공하라.</li><li>피고는 앞으로 답장을 지금보다 빨리 하라.</li><li>소송비용(음료 포함)은 피고가 부담한다.</li>`
+        : `<li>피고는 무죄.</li><li>두 사람 모두 답장이 빨라 이 사건은 성립하지 않는다.</li><li>소송비용은 둘이 반반 낸다.</li>`}</ol>
+      <h3>이 유</h3>
+      <ol>${v.reasons.map((r) => `<li>${r}</li>`).join("")}</ol>
+      <p class="sign">${d.getFullYear()}. ${d.getMonth() + 1}. ${d.getDate()}.<br>우리 대화 성분표 지방법원 재미부<br>판사 성분표 <span class="seal">재미<br>전용</span></p>`;
+  }
+
   // ---------- 사주 궁합 ----------
   state.birth = {};
   const SAMPLE_BIRTH = { "지민": "1998-05-12", "도윤": "1997-11-06" };
@@ -845,12 +1001,14 @@ footer { font-size: 12.5px; color: var(--muted); display: grid; gap: 4px; border
     { id: "wait", name: "기다린 시간", file: "기다린시간" },
     { id: "firsts", name: "처음 순간들", file: "처음순간들" },
     { id: "saju", name: "사주 vs 카톡", file: "사주vs카톡궁합" },
+    { id: "awards", name: "시상식", file: "우리대화시상식" },
+    { id: "verdict", name: "판결문", file: "답장지연판결문" },
   ];
   state.cardKind = "label";
 
   function availableKinds() {
     const mo = state.moments;
-    return KINDS.filter((k) => k.id === "label" || (k.id === "saju" && state.saju) || (mo && (k.id === "ecg" || k.id === "wait" ||
+    return KINDS.filter((k) => k.id === "label" || (k.id === "saju" && state.saju) || (k.id === "awards" && state.fun && state.fun.list.length) || (k.id === "verdict" && state.verdict) || (mo && (k.id === "ecg" || k.id === "wait" ||
       (k.id === "cold" && mo.cold.length) || (k.id === "rally" && mo.rally) || (k.id === "firsts" && mo.firsts.length))));
   }
   function renderKinds() {
@@ -1049,6 +1207,52 @@ footer { font-size: 12.5px; color: var(--muted); display: grid; gap: 4px; border
       block(Y + 610, state.b, state.a, wb, "b");
       const more = wa >= wb ? state.a : state.b, ratio = Math.max(wa, wb) / Math.max(1, Math.min(wa, wb));
       k.wrap(ratio >= 1.3 ? `${josa(nm(more), "이", "가")} ${ratio.toFixed(1)}배 더 기다렸어요.` : "기다린 시간이 거의 같아요.", L, Y + 960, R - L, 50, 1, `44px ${FONT.disp}`);
+      return k.c;
+    },
+
+    awards() {
+      const k = frame("우리 대화 시상식"), { g, L, R } = k, Y = 110;
+      const list = state.fun.list.slice(0, 4);
+      const rowH = 205;
+      list.forEach((a, i) => {
+        const y = Y + 250 + i * rowH;
+        k.text(a.title, L, y, `46px ${FONT.disp}`);
+        k.dot(R - 12, y - 12, sideName(a.who.name), 12);
+        k.text(k.fit(nm(a.who.name), `800 34px ${FONT.body}`, 260), R - 36, y, `800 34px ${FONT.body}`, CARD.ink, "right");
+        k.text(k.fit(a.stat, `600 50px ${FONT.mono}`, R - L), L, y + 70, `600 50px ${FONT.mono}`);
+        const plain = a.card.filter((c) => !c.startsWith("“")), quoted = a.card.filter((c) => c.startsWith("“"));
+        const sub = quoteOK() && quoted.length ? quoted[0] + (plain[0] ? "  " + plain[0] : "") : (plain[0] || "");
+        if (sub) k.text(k.fit(sub, `30px ${FONT.body}`, R - L), L, y + 120, `30px ${FONT.body}`, CARD.muted);
+        if (i < list.length - 1) k.hair(y + 155);
+      });
+      return k.c;
+    },
+
+    verdict() {
+      const v = state.verdict, k = frame("답장 지연 판결문"), { g, L, R } = k, Y = 110;
+      const serif = '"Noto Serif KR", serif';
+      k.text(`사건 ${v.caseNo}`, L, Y + 222, `26px ${FONT.mono}`, CARD.muted);
+      k.text(`원고  ${nm(v.plain.name)}`, L, Y + 280, `600 38px ${serif}`);
+      k.text(`피고  ${nm(v.def.name)}`, L, Y + 334, `600 38px ${serif}`);
+      k.rule(Y + 372, 4);
+      k.text("주    문", (L + R) / 2, Y + 440, `600 42px ${serif}`, CARD.ink, "center");
+      const order = v.guilty ? `피고는 원고에게 떡볶이 ${v.portions}인분을 제공하라.` : "피고는 무죄. 둘 다 답장이 빠르다.";
+      const n = k.wrap(order, L, Y + 520, R - L, 66, 3, `600 52px ${serif}`);
+      let y = Y + 520 + n * 66 + 40;
+      k.hair(y - 30);
+      const facts = [
+        [`피고 답장 보통`, mins(v.def.replyMedian)],
+        [`원고 답장 보통`, mins(v.plain.replyMedian)],
+        [`원고가 기다린 시간`, state.moments ? span(state.moments.waited[v.plain.name]) : "–"],
+      ];
+      const ig = state.fun.f.people[v.def.name].ignored;
+      if (ig && ig.ms >= 30 * 60e3) facts.push([`가장 늦은 답장`, span(ig.ms)]);
+      facts.forEach(([a, b]) => { k.row(y + 20, a, b); y += 60; });
+      g.save(); g.translate(R - 52, Y + 978); g.rotate(-0.14);
+      g.strokeStyle = CARD.b; g.lineWidth = 5; g.strokeRect(-46, -46, 92, 92);
+      k.text("재미", 0, -4, `600 28px ${serif}`, CARD.b, "center"); k.text("전용", 0, 30, `600 28px ${serif}`, CARD.b, "center");
+      g.restore();
+      k.text("우리 대화 성분표 지방법원 재미부", L, Y + 980, `30px ${serif}`, CARD.muted);
       return k.c;
     },
 

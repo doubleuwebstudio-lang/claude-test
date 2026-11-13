@@ -317,6 +317,66 @@
     };
   }
 
+
+  // ---------- 웃음 포인트: 시상식과 판결문 재료 ----------
+  const SHORT = new Set(["ㅇㅇ", "ㅇㅇㅇ", "ㅇ", "ㅇㅋ", "ㅇㅋㅇㅋ", "응", "응응", "웅", "웅웅", "엉", "어", "네", "넹", "넵", "오키", "오케이", "ㄱㄱ", "ㄴㄴ", "그래", "알겠어", "ㅇㅈ", "ㅎㅇ"]);
+  const FOOD = /먹|배고|배불|맛있|맛집|치킨|떡볶이|피자|라면|마라|국밥|삼겹|고기|초밥|햄버거|커피|카페|디저트|빵|술|맥주|소주|배달|메뉴|야식|점심|저녁|아침밥/;
+  const SORRY = /미안|죄송|ㅈㅅ|쏘리/;
+  const NIGHT = /잘\s?자(?![료가])|굿밤|굿나잇|잘\s?자요/;
+
+  function funStats(allMessages, a, b) {
+    const msgs = allMessages.filter((m) => m.name === a || m.name === b);
+    const P = {};
+    for (const n of [a, b]) P[n] = { name: n, kk: 0, hh: 0, short: new Map(), phrases: new Map(), food: 0, sorry: 0, night: 0, late: 0, lateQuote: null, questions: 0, emoticon: 0, photo: 0, text: 0, count: 0, mono: null, ignored: null };
+    let run = null;
+    for (let i = 0; i < msgs.length; i++) {
+      const m = msgs[i], p = P[m.name], prev = msgs[i - 1];
+      p.count++;
+      if (m.kind === "emoticon") p.emoticon++;
+      if (m.kind === "photo") p.photo++;
+      const h = new Date(m.t).getHours();
+      if (m.kind === "text") {
+        const t = m.text.trim(), norm = t.replace(/\s+/g, " ");
+        p.text++;
+        p.kk += (t.match(/ㅋ/g) || []).length;
+        p.hh += (t.match(/ㅎ/g) || []).length;
+        if (SHORT.has(norm)) p.short.set(norm, (p.short.get(norm) || 0) + 1);
+        else if (norm.length >= 2 && norm.length <= 20 && !/^[ㅋㅎㅠㅜ\s.!?~]+$/.test(norm)) p.phrases.set(norm, (p.phrases.get(norm) || 0) + 1);
+        if (FOOD.test(t)) p.food++;
+        if (SORRY.test(t)) p.sorry++;
+        if (NIGHT.test(t)) p.night++;
+        if (/\?/.test(t)) p.questions++;
+        if (h >= 2 && h < 5) { p.late++; if (!p.lateQuote || t.length > p.lateQuote.text.length) p.lateQuote = m; }
+      } else if (h >= 2 && h < 5) p.late++;
+
+      // 독백: 상대 답 없이 혼자 연달아 보낸 최장 기록 (하루 넘게 끊기면 새로 센다)
+      if (run && run.name === m.name && m.t - prev.t < 864e5) { run.n++; run.to = i; }
+      else run = { name: m.name, n: 1, from: i, to: i };
+      if (!P[m.name].mono || run.n > P[m.name].mono.n) P[m.name].mono = { ...run };
+
+      // 읽씹: 상대의 질문에 답하기까지 걸린 최장 시간 (이틀 넘으면 냉전이라 뺀다)
+      if (prev && prev.name !== m.name && prev.kind === "text" && /\?/.test(prev.text)) {
+        const gap = m.t - prev.t;
+        if (gap < 2 * 864e5 && (!p.ignored || gap > p.ignored.ms)) p.ignored = { ms: gap, q: prev, reply: m };
+      }
+    }
+    const out = {};
+    for (const n of [a, b]) {
+      const p = P[n];
+      const top = (map) => { let best = null; for (const [w, c] of map) if (!best || c > best.c) best = { w, c }; return best; };
+      out[n] = {
+        name: n, count: p.count, text: p.text, kk: p.kk, hh: p.hh,
+        short: top(p.short), shortTotal: [...p.short.values()].reduce((s, v) => s + v, 0),
+        phrase: top(p.phrases), food: p.food, sorry: p.sorry, night: p.night, late: p.late, lateQuote: p.lateQuote,
+        questions: p.questions, emoticon: p.emoticon, photo: p.photo,
+        mono: p.mono && { ...p.mono, msgs: msgs.slice(p.mono.from, p.mono.to + 1) },
+        ignored: p.ignored,
+      };
+    }
+    const foodAll = out[a].food + out[b].food, textAll = out[a].text + out[b].text;
+    return { a, b, people: out, foodShare: textAll ? foodAll / textAll : 0 };
+  }
+
   // ---------- 예시 대화 (가상의 두 사람) ----------
   function makeSample() {
     let seed = 7;
@@ -357,6 +417,18 @@
         if (t.getDate() !== base.getDate()) break;
       }
       if (day === 21) lines.push(`${fmt(new Date(base.getTime() + 8.5 * 3600e3))}, ${B} : 미안 요즘 회사 일 때문에 정신이 하나도 없었어 ㅠㅠ 연락 못 한 거 계속 마음에 걸렸는데 막상 하려니까 너무 늦은 것 같아서 더 못 했어. 주말에 맛있는 거 사줄게 진짜로`);
+      if (day === 13) {
+        let mt = new Date(base.getTime() + 13.1 * 3600e3);
+        ["야", "야야", "도윤아", "뭐해", "나 지금 엄청 웃긴 거 봤는데", "아 말해주고 싶다", "언제 봐", "자니?", "설마 자?", "점심시간인데 자는 거 아니지", "ㅋㅋㅋㅋ 혼잣말 중", "답장 기다리는 중", "이모티콘"].forEach((txt) => { lines.push(`${fmt(mt)}, ${A} : ${txt}`); mt = new Date(mt.getTime() + 50e3); });
+        mt = new Date(mt.getTime() + 3.4 * 3600e3);
+        lines.push(`${fmt(mt)}, ${B} : 아 미안 회의였어 ㅠㅠ 뭔데`);
+      }
+      if (day === 24) {
+        lines.push(`${fmt(new Date(base.getTime() + 15 * 3600e3))}, ${A} : 오늘 저녁 뭐 먹을까?`);
+        lines.push(`${fmt(new Date(base.getTime() + 20.6 * 3600e3))}, ${B} : 치킨 ㄱㄱ`);
+        lines.push(`${fmt(new Date(base.getTime() + 20.7 * 3600e3))}, ${A} : 이미 먹었어 ㅋㅋㅋㅋㅋ 5시간 반 걸렸네`);
+        lines.push(`${fmt(new Date(base.getTime() + 27.2 * 3600e3))}, ${A} : 새벽에 갑자기 드는 생각인데 우리 처음 만났을 때 너 진짜 말 없었던 거 알아?`);
+      }
       if (day === 9) {
         let rt = new Date(base.getTime() + 21.2 * 3600e3);
         rally.forEach((txt, k) => { lines.push(`${fmt(rt)}, ${k % 2 ? B : A} : ${txt}`); rt = new Date(rt.getTime() + 35e3); });
@@ -366,5 +438,5 @@
     return lines.join("\n");
   }
 
-  return { parse, analyze, moments, speakers, estimateType, compat, makeSample, kindOf };
+  return { parse, analyze, moments, funStats, speakers, estimateType, compat, makeSample, kindOf };
 });

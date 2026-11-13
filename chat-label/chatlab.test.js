@@ -73,3 +73,15 @@ test("사주: 일주와 띠", () => {
   assert.ok(m.score >= 40 && m.score <= 98 && m.parts.length >= 2);
   console.log(S.chart("1998-05-12").day.name, S.chart("1997-11-03").day.name, m.score, m.parts.map((p) => p.label));
 });
+
+test("웃음 포인트: 독백, 읽씹, 단답", () => {
+  const r = L.parse(L.makeSample());
+  const f = L.funStats(r.messages, "지민", "도윤");
+  const ji = f.people["지민"], dy = f.people["도윤"];
+  assert.ok(ji.mono.n >= 13, "지민의 13연속 독백");
+  assert.ok(dy.ignored.ms >= 5 * 3600e3, "도윤이 '뭐 먹을까?'에 5시간 넘게");
+  assert.match(dy.ignored.q.text, /\?/);
+  assert.ok(ji.kk > 50 && ji.short && ji.short.w);
+  assert.ok(f.foodShare > 0);
+  console.log(ji.mono.n, Math.round(dy.ignored.ms / 6e4), ji.short, dy.phrase, ji.late, f.foodShare.toFixed(2));
+});
