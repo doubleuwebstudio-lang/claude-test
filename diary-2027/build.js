@@ -1,5 +1,7 @@
 // 2027 디지털 다이어리(굿노트·노타빌리티용 PDF) 생성기
-// 사용법: node diary-2027/build.js ENFP   → diary-2027/out/2027-diary-ENFP.pdf 와 미리보기 PNG
+// 사용법: node diary-2027/build.js ENFP [ipad|galaxy]
+//   ipad   → out/2027-diary-ENFP.pdf (3:4, 기본값)
+//   galaxy → out/2027-diary-ENFP-galaxy.pdf (갤럭시탭 10:16)
 // MBTI 글자 4개가 각각 속지 모듈을 정한다:
 //   E/I  하루 칸 표시(기분 날씨+만난 사람 / 에너지 배터리) · 부록(사람 기록 / 충전 노트)
 //   N/S  부록(아이디어 주차장 / 월별 가계부)
@@ -37,7 +39,10 @@ const SECTIONS = [
 ];
 
 const YEAR = 2027;
-const W = 768, H = 1024;                     // 아이패드 세로 비율(3:4)
+const DEVICE = (process.argv[3] || "ipad").toLowerCase();
+if (!["ipad", "galaxy"].includes(DEVICE)) { console.error("기기는 ipad 또는 galaxy 로 넣어 주세요."); process.exit(1); }
+const [W, H] = DEVICE === "galaxy" ? [800, 1280] : [768, 1024];   // 갤럭시탭 10:16 / 아이패드 3:4
+const SUFFIX = DEVICE === "galaxy" ? "-galaxy" : "";
 const WEEK0 = new Date(YEAR - 1, 11, 28);    // 2027년 첫 주의 월요일 (12월 28일)
 const DAY = 864e5;
 const HOLIDAYS = { "1-1": "신정", "3-1": "삼일절", "5-5": "어린이날", "6-6": "현충일", "8-15": "광복절", "10-3": "개천절", "10-9": "한글날", "12-25": "성탄절" };
@@ -60,6 +65,30 @@ function tabs(active) {
 }
 const page = (id, active, body, cls = "") => `<section class="page ${cls}" id="${id}">${body}${active === null ? "" : tabs(active)}</section>`;
 const head = (kicker, title, word, kickerHref) => `<header class="ph row"><div>${kickerHref ? `<a class="kicker" href="#${kickerHref}">${kicker} ←</a>` : `<span class="kicker">${kicker}</span>`}<h1>${title}</h1></div>${word ? `<p class="word">${word}</p>` : ""}</header>`;
+
+
+// 앱별 사용법: 기기에 맞는 앱만 보여 준다. 메뉴 이름은 앱 버전마다 조금 다를 수 있다.
+const APPS = {
+  ipad: [
+    ["굿노트", ["파일 앱에서 PDF를 길게 누르고 공유 → 굿노트를 고르거나, 굿노트에서 + → 가져오기로 불러와요.", "링크가 안 눌리면 펜 도구를 잠깐 끄고(읽기 모드) 눌러 보세요."]],
+    ["노타빌리티", ["노타빌리티에서 + → 가져오기 → 파일로 PDF를 불러와요.", "링크는 펜이 아닌 손가락으로 톡 누르면 이동해요."]],
+  ],
+  galaxy: [
+    ["삼성노트", ["삼성노트 첫 화면 오른쪽 위 메뉴에서 PDF 가져오기를 골라 불러와요.", "링크는 읽기 모드에서 눌러야 이동해요. 오른쪽 위 읽기 모드 아이콘을 켠 뒤 탭을 눌러 보세요."]],
+    ["플렉슬", ["플렉슬에서 문서 추가 → 파일로 PDF를 불러와요.", "링크는 필기 도구를 끈 상태에서 누르면 이동해요."]],
+    ["노트쉘프", ["노트쉘프에서 + → 가져오기로 PDF를 불러와요.", "링크는 손가락으로 톡 누르면 이동해요."]],
+  ],
+};
+function apps() {
+  return page("apps", "", `
+    ${head(DEVICE === "galaxy" ? "갤럭시탭용" : "아이패드용", "앱에서 쓰는 법", "다이어리 칸은 그대로, 링크로 이동하며 써요.")}
+    <div class="apps">${APPS[DEVICE].map(([name, steps]) => `<div class="app"><h2>${name}</h2><ol>${steps.map((t) => `<li>${t}</li>`).join("")}</ol></div>`).join("")}</div>
+    <div class="map"><h2>링크가 안 눌릴 때</h2><ul>
+      <li>펜이나 필기 도구가 켜져 있으면 링크 대신 필기가 돼요. <b>읽기 모드</b>나 손가락 터치로 눌러 보세요.</li>
+      <li>PDF를 다른 앱에서 '이미지로' 내보냈다 다시 가져오면 링크가 사라져요. <b>받은 PDF 그대로</b> 가져오세요.</li>
+      <li>메뉴 이름은 앱 버전마다 조금 다를 수 있어요.</li></ul></div>
+    <a class="jump next" href="#year">연간 달력으로 →</a>`);
+}
 
 // ---------- 앞부분 ----------
 function cover() {
@@ -87,7 +116,7 @@ function guide() {
     <div class="map"><h2>이렇게 이동해요</h2><ul>
       <li>오른쪽 <b>탭</b>을 누르면 연간 · 목표 · 월 · 습관 · 부록 · 메모로 바로 가요.</li>
       <li>월간 달력에서 <b>날짜</b>를 누르면 그 주의 주간 페이지로 가요.</li>
-      <li>주간 페이지 위쪽 <b>월 이름</b>을 누르면 다시 월간으로 돌아가요.</li></ul></div>`);
+      <li>주간 페이지 위쪽 <b>월 이름</b>을 누르면 다시 월간으로 돌아가요.</li></ul><a class="jump" href="#apps">앱별 사용법 보기 →</a></div>`);
 }
 
 function miniMonth(m) {
@@ -287,6 +316,9 @@ h2 { font-size: 12.5px; font-weight: 800; color: var(--acc); letter-spacing: .02
 .pg b { font-family: "IBM Plex Mono", monospace; font-size: 24px; color: var(--acc); line-height: 1; }
 .pg span { font-size: 12px; font-weight: 600; }
 .map { margin-top: auto; border: 1.5px solid var(--ink); border-radius: 16px; padding: 14px 18px; display: grid; gap: 8px; }
+.apps { display: grid; gap: 14px; }
+.app { background: var(--soft); border-radius: 16px; padding: 16px 18px; display: grid; gap: 8px; }
+.app h2 { font-size: 18px; } .app ol { padding-left: 20px; display: grid; gap: 6px; font-size: 13.5px; line-height: 1.6; }
 .map ul { padding-left: 18px; display: grid; gap: 4px; font-size: 13px; line-height: 1.5; }
 
 /* 연간 */
@@ -402,7 +434,7 @@ h2 { font-size: 12.5px; font-weight: 800; color: var(--acc); letter-spacing: .02
 `;
 
 function html() {
-  const pages = [cover(), guide(), year(), goals()];
+  const pages = [cover(), guide(), apps(), year(), goals()];
   for (let m = 0; m < 12; m++) pages.push(month(m));
   for (let w = 0; w < WEEKS; w++) pages.push(week(w));
   for (let m = 0; m < 12; m++) pages.push(habit(m));
@@ -413,7 +445,7 @@ function html() {
 <style>${CSS}</style></head><body>${pages.join("\n")}</body></html>` };
 }
 
-module.exports = { html, W, H, TYPE, SECTIONS };
+module.exports = { html, W, H, TYPE, SECTIONS, DEVICE, SUFFIX };
 
 // 직접 실행할 때만 PDF를 만든다 (example.js 가 html() 만 빌려 쓸 수 있게)
 if (require.main === module) (async () => {
@@ -424,11 +456,11 @@ if (require.main === module) (async () => {
   const p = await b.newPage({ viewport: { width: W, height: H } });
   await p.setContent(doc, { waitUntil: "networkidle" });
   await p.evaluate(() => document.fonts.ready);
-  const pdf = path.join(out, `2027-diary-${TYPE}.pdf`);
+  const pdf = path.join(out, `2027-diary-${TYPE}${SUFFIX}.pdf`);
   await p.pdf({ path: pdf, width: `${W}px`, height: `${H}px`, printBackground: true, preferCSSPageSize: true });
   // 상세페이지용 미리보기
-  const shots = ["cover", "guide", "year", "goals", "m1", "w1", "h1", ...SECTIONS.map((s) => `${s.id}1`)];
-  const dir = path.join(out, `preview-${TYPE}`);
+  const shots = ["cover", "guide", "apps", "year", "goals", "m1", "w1", "h1", ...SECTIONS.map((s) => `${s.id}1`)];
+  const dir = path.join(out, `preview-${TYPE}${SUFFIX}`);
   fs.rmSync(dir, { recursive: true, force: true });
   fs.mkdirSync(dir, { recursive: true });
   const p2 = await b.newPage({ viewport: { width: W, height: H }, deviceScaleFactor: 2 });
@@ -436,5 +468,5 @@ if (require.main === module) (async () => {
   await p2.evaluate(() => document.fonts.ready);
   for (const [i, id] of shots.entries()) await (await p2.$(`#${id}`)).screenshot({ path: path.join(dir, `${String(i + 1).padStart(2, "0")}-${id}.png`) });
   await b.close();
-  console.log(`${pdf} (${count}쪽, ${WEEKS}주) / 미리보기 ${shots.length}장`);
+  console.log(`${pdf} (${count}쪽, ${W}×${H}, ${WEEKS}주) / 미리보기 ${shots.length}장`);
 })();

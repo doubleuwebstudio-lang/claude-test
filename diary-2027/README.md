@@ -3,12 +3,14 @@
 굿노트·노타빌리티용 하이퍼링크 PDF 다이어리 생성기입니다.
 
 ```bash
-node diary-2027/build.js ENFP        # PDF + 속지 미리보기
+node diary-2027/build.js ENFP        # 아이패드용(3:4) PDF + 속지 미리보기
+node diary-2027/build.js ENFP galaxy # 갤럭시탭용(10:16) PDF
 node diary-2027/example.js ENFP      # 손글씨로 채운 사용 예시 5장
 node diary-2027/compare.js ENFP ISTJ # 두 유형 비교 이미지
 ```
 
-- `out/2027-diary-<유형>.pdf`: 판매용 파일. 저장소에는 올리지 않습니다.
+- `out/2027-diary-<유형>.pdf`, `out/2027-diary-<유형>-galaxy.pdf`: 판매용 파일. 저장소에는 올리지 않습니다.
+- 사용법 다음 장에 기기별 **앱에서 쓰는 법**이 들어갑니다. 아이패드는 굿노트·노타빌리티, 갤럭시탭은 삼성노트(읽기 모드에서 링크)·플렉슬·노트쉘프입니다.
 - `out/preview-<유형>/`, `out/example-<유형>/`, `out/compare-*.png`: 상세페이지용 이미지
 
 ## 글자 4개가 속지를 바꾼다
@@ -25,5 +27,6 @@ node diary-2027/compare.js ENFP ISTJ # 두 유형 비교 이미지
 구성은 글자로 자동으로 정해지므로 `types.js`에 표지 문구와 월별 한마디 12줄만 넣으면 됩니다. 색은 성향 묶음으로 맞춥니다: NF 초록, NT 보라, SJ 파랑, SP 노랑.
 
 ## 판매 전에 확인할 것
+- **실기기 확인**: 갤럭시탭 삼성노트에서 PDF를 가져와 읽기 모드에서 탭·날짜 링크가 이동하는지 한 번 확인하세요. 앱별 사용법의 메뉴 이름도 실제 화면과 맞춰 주세요.
 - **공휴일**: 날짜가 고정된 공휴일만 표시했습니다. 설날·추석·부처님오신날(음력)과 대체공휴일은 2027년 공식 달력을 확인한 뒤 `build.js`의 `HOLIDAYS`에 추가하세요.
 - **상표**: MBTI는 The Myers-Briggs Company의 등록상표입니다. 상품명에는 "ENFP 다이어리"처럼 유형 이름만 쓰고, 공식 상품처럼 보이지 않게 하세요.
