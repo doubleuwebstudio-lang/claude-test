@@ -299,7 +299,10 @@ function html() {
 <style>${CSS}</style></head><body>${pages.join("\n")}</body></html>` };
 }
 
-(async () => {
+module.exports = { html, W, H, TYPE };
+
+// 직접 실행할 때만 PDF를 만든다 (example.js 가 html() 만 빌려 쓸 수 있게)
+if (require.main === module) (async () => {
   const out = path.join(__dirname, "out");
   fs.mkdirSync(out, { recursive: true });
   const { doc, count } = html();
