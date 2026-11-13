@@ -385,21 +385,24 @@
     const msgs = all;
     const sp = speakers(msgs);
     const P = {};
-    for (const { name } of sp) P[name] = { name, count: 0, text: 0, kk: 0, short: new Map(), shortTotal: 0, phrases: new Map(), questions: 0, unanswered: 0, unansweredQ: null, late: 0, lateQuote: null, emoticon: 0, photo: 0, inits: 0, kills: 0, killQuote: null, repliesGot: 0, mono: null, away: null, lastMsg: null, hours: new Array(24).fill(0) };
+    for (const { name } of sp) P[name] = { name, chars: 0, laugh: 0, turns: 0, lex: { N: 0, S: 0, F: 0, T: 0, J: 0, P: 0 }, days: new Set(), count: 0, text: 0, kk: 0, short: new Map(), shortTotal: 0, phrases: new Map(), questions: 0, unanswered: 0, unansweredQ: null, late: 0, lateQuote: null, emoticon: 0, photo: 0, inits: 0, kills: 0, killQuote: null, repliesGot: 0, mono: null, away: null, lastMsg: null, hours: new Array(24).fill(0) };
     const pairs = new Map();
     const days = new Set(), allHours = new Array(24).fill(0);
     let run = null;
     for (let i = 0; i < msgs.length; i++) {
       const m = msgs[i], p = P[m.name], prev = msgs[i - 1], next = msgs[i + 1];
       const d = new Date(m.t), h = d.getHours();
-      days.add(dayKey(m.t)); allHours[h]++; p.hours[h]++;
+      days.add(dayKey(m.t)); allHours[h]++; p.hours[h]++; p.days.add(dayKey(m.t));
+      if (!prev || prev.name !== m.name || m.t - prev.t >= SESSION_GAP) p.turns++;
       p.count++;
       if (m.kind === "emoticon") p.emoticon++;
       if (m.kind === "photo") p.photo++;
       if (h >= 2 && h < 5) { p.late++; if (m.kind === "text" && (!p.lateQuote || m.text.length > p.lateQuote.text.length)) p.lateQuote = m; }
       if (m.kind === "text") {
         const t = m.text.trim(), norm = t.replace(/\s+/g, " ");
-        p.text++;
+        p.text++; p.chars += t.length;
+        if (W.laugh.test(t)) p.laugh++;
+        for (const k of ["N", "S", "F", "T", "J", "P"]) p.lex[k] += count(t, W[k]);
         p.kk += (t.match(/ㅋ/g) || []).length;
         if (SHORT.has(norm)) { p.short.set(norm, (p.short.get(norm) || 0) + 1); p.shortTotal++; }
         else if (norm.length >= 2 && norm.length <= 20 && !/^[ㅋㅎㅠㅜ\s.!?~]+$/.test(norm)) p.phrases.set(norm, (p.phrases.get(norm) || 0) + 1);
@@ -433,9 +436,16 @@
     const spanDays = total ? Math.max(1, Math.round((dayKey(msgs[total - 1].t) - dayKey(msgs[0].t)) / 864e5) + 1) : 0;
     const months = Math.max(1, spanDays / 30.4);
     const top = (map) => { let best = null; for (const [w, c] of map) if (!best || c > best.c) best = { w, c }; return best; };
+    const sessions = Object.values(P).reduce((s2, p) => s2 + p.inits, 0) || 1;
     const members = sp.map(({ name }) => {
       const p = P[name];
+      // 1:1과 같은 기준으로 말투 유형을 추정한다. 단톡방은 선톡이 n명에게 나뉘니 2인 기준으로 맞춘다.
+      const type = p.count >= 30 ? estimateType({
+        initShare: Math.min(1, (p.inits / sessions) * sp.length / 2), perDay: p.count / Math.max(1, p.days.size), perTurn: p.turns ? p.count / p.turns : 1,
+        lex: p.lex, avgLen: p.text ? p.chars / p.text : 0, laughRate: p.text ? p.laugh / p.text : 0, emoticon: p.emoticon, count: p.count, hours: p.hours,
+      }) : null;
       return {
+        type,
         name, count: p.count, share: p.count / total, perMonth: p.count / months, text: p.text, kk: p.kk,
         kkRate: p.text ? p.kk / p.text : 0, short: top(p.short), shortTotal: p.shortTotal, phrase: top(p.phrases),
         questions: p.questions, unanswered: p.unanswered, unansweredQ: p.unansweredQ, late: p.late, lateQuote: p.lateQuote,
@@ -447,6 +457,30 @@
     });
     const pairList = [...pairs.entries()].map(([k, c]) => ({ names: k.split("\u0000"), c })).sort((x, y) => y.c - x.c);
     return { members, pairs: pairList, total, spanDays, activeDays: days.size, peakHour: allHours.indexOf(Math.max(...allHours)), allHours, from: msgs[0] && msgs[0].t, to: msgs[total - 1] && msgs[total - 1].t };
+  }
+
+  // ---------- MBTI 궁합 (흔히 알려진 궁합표 + 글자별 규칙, 재미용) ----------
+  const MBTI_TYPES = ["INTJ", "INTP", "ENTJ", "ENTP", "INFJ", "INFP", "ENFJ", "ENFP", "ISTJ", "ISFJ", "ESTJ", "ESFJ", "ISTP", "ISFP", "ESTP", "ESFP"];
+  const MBTI_BEST = { INFP: ["ENFJ", "ENTJ"], ENFP: ["INFJ", "INTJ"], INFJ: ["ENFP", "ENTP"], ENFJ: ["INFP", "ISFP"], INTJ: ["ENFP", "ENTP"], ENTJ: ["INFP", "INTP"], INTP: ["ENTJ", "ESTJ"], ENTP: ["INFJ", "INTJ"], ISFP: ["ENFJ", "ESFJ", "ESTJ"], ESFP: ["ISFJ", "ISTJ"], ISTP: ["ESFJ", "ESTJ"], ESTP: ["ISFJ", "ISTJ"], ISFJ: ["ESFP", "ESTP"], ESFJ: ["ISFP", "ISTP"], ISTJ: ["ESFP", "ESTP"], ESTJ: ["INTP", "ISFP", "ISTP"] };
+  function mbtiScore(x, y) {
+    if (!x || !y) return null;
+    if ((MBTI_BEST[x] || []).includes(y) || (MBTI_BEST[y] || []).includes(x)) return 96;
+    let s = 62;
+    s += x[1] === y[1] ? 12 : -10;          // N/S: 대화 주제가 통하는지
+    s += x[0] !== y[0] ? 5 : 2;             // E/I: 서로 다르면 균형
+    s += x[2] === y[2] ? 4 : -2;            // T/F: 말투 온도
+    s += x[3] !== y[3] ? 3 : 1;             // J/P
+    if (x === y) s = 74;                    // 같은 유형: 편하지만 새로움은 적다
+    return Math.max(35, Math.min(92, s));
+  }
+  // 방 전체 유형: 글자마다 다수결, 동점이면 X
+  function roomType(types) {
+    const ts = types.filter(Boolean);
+    if (!ts.length) return null;
+    return [["E", "I"], ["N", "S"], ["T", "F"], ["J", "P"]].map(([a, b], i) => {
+      const na = ts.filter((t) => t[i] === a).length, nb = ts.length - na;
+      return na > nb ? a : nb > na ? b : "X";
+    }).join("");
   }
 
   // ---------- 예시 단톡방 (가상의 다섯 친구) ----------
@@ -558,5 +592,5 @@
     return lines.join("\n");
   }
 
-  return { parse, analyze, moments, funStats, groupStats, makeGroupSample, speakers, estimateType, compat, makeSample, kindOf };
+  return { parse, analyze, moments, funStats, groupStats, makeGroupSample, MBTI_TYPES, mbtiScore, roomType, speakers, estimateType, compat, makeSample, kindOf };
 });

@@ -196,19 +196,6 @@ details.paste textarea { width: 100%; min-height: 120px; margin-top: 8px; border
 .award .quote { font-size: 13.5px; border-left: 3px solid var(--line); padding: 2px 0 2px 10px; display: grid; gap: 3px; overflow-wrap: anywhere; color: var(--ink); }
 .award .quote .gap { color: var(--muted); font-size: 12.5px; }
 
-/* 판결문 */
-.court { background: var(--surface); border: 1px solid var(--line); padding: 26px 22px; display: grid; gap: 14px; font-family: "Noto Serif KR", "Nanum Myeongjo", serif; max-width: 760px; width: 100%; justify-self: center; box-shadow: 0 1px 0 var(--line), 0 6px 0 -3px var(--surface), 0 7px 0 -3px var(--line); }
-.court .no { font-size: 13px; color: var(--muted); font-family: var(--f-num); }
-.court h2 { font-family: "Noto Serif KR", serif; font-weight: 600; font-size: 30px; text-align: center; letter-spacing: .3em; padding-left: .3em; }
-.court dl { display: grid; grid-template-columns: 72px 1fr; gap: 4px 12px; margin: 0; font-size: 15px; }
-.court dt { color: var(--muted); }
-.court dd { margin: 0; font-weight: 600; }
-.court h3 { font-family: "Noto Serif KR", serif; font-weight: 600; font-size: 18px; text-align: center; letter-spacing: .4em; padding-left: .4em; }
-.court ol { margin: 0; padding-left: 22px; display: grid; gap: 6px; font-size: 15.5px; line-height: 1.7; }
-.court .order li { font-weight: 600; }
-.court .sign { text-align: right; font-size: 14px; line-height: 1.8; }
-.court .seal { display: inline-grid; place-items: center; width: 54px; height: 54px; border: 3px solid var(--b); color: var(--b); border-radius: 6px; font-weight: 600; font-size: 13px; line-height: 1.15; transform: rotate(-8deg); margin-left: 8px; vertical-align: middle; text-align: center; }
-
 /* 단톡방 */
 .gshare { display: grid; gap: 8px; }
 .gshare .r { display: grid; grid-template-columns: minmax(70px, 120px) 1fr 92px; gap: 10px; align-items: center; font-size: 14px; }
@@ -223,6 +210,33 @@ details.paste textarea { width: 100%; min-height: 120px; margin-top: 8px; border
 .pairs li { display: grid; gap: 2px; font-size: 14px; }
 .pairs .names { display: flex; gap: 6px; align-items: center; font-weight: 800; font-size: 15px; flex-wrap: wrap; }
 .mode { display: inline-flex; gap: 6px; }
+.mbti-in { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 10px; }
+.mbti-in label { display: grid; gap: 4px; font-size: 13.5px; font-weight: 600; min-width: 0; }
+.mbti-in label > span { display: flex; gap: 6px; align-items: center; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+.mbti-in select { border: 1px solid var(--line); border-radius: 8px; padding: 6px 8px; background: var(--bg); font-family: var(--f-num); font-size: 14px; }
+.roomtype { display: grid; grid-template-columns: 1fr auto; gap: 4px 16px; align-items: end; border: 3px solid var(--ink); padding: 14px 16px; }
+.roomtype .code { font-family: var(--f-num); font-size: 48px; font-weight: 600; line-height: 1; letter-spacing: .04em; }
+.roomtype .name { font-family: var(--f-display); font-size: 28px; }
+.roomtype .desc { grid-column: 1 / -1; font-size: 14px; }
+.roomtype .avg { text-align: right; font-size: 13px; color: var(--muted); }
+.roomtype .avg b { display: block; font-family: var(--f-num); font-size: 34px; color: var(--ink); line-height: 1.1; }
+.axisbars { display: grid; gap: 6px; }
+.axisbars .ab { display: grid; grid-template-columns: 52px 1fr 52px; gap: 8px; align-items: center; font-family: var(--f-num); font-size: 13px; }
+.axisbars .ab span:last-child { text-align: right; }
+.axisbars .track { display: flex; height: 12px; border: 1.5px solid var(--ink); }
+.axisbars .track i { display: block; height: 100%; }
+.mpairs { display: grid; gap: 12px; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); }
+.mpair { border: 1px solid var(--line); border-radius: 12px; padding: 12px 14px; display: grid; gap: 4px; align-content: start; }
+.mpair .k { font-size: 12px; font-weight: 800; letter-spacing: .04em; color: var(--muted); }
+.mpair .who { font-weight: 800; flex-wrap: wrap; }
+.mpair .sc { font-family: var(--f-num); font-size: 26px; font-weight: 600; }
+.mpair .twist { font-size: 14px; }
+.disguise { display: grid; gap: 0; }
+.disguise .r { display: grid; grid-template-columns: minmax(70px, 120px) 64px 64px 1fr; gap: 10px; padding: 8px 0; border-bottom: 1px solid var(--line); align-items: baseline; font-size: 14px; }
+.disguise .r:last-child { border-bottom: 0; }
+.disguise .r .c { font-family: var(--f-num); font-weight: 600; }
+.disguise .head { font-size: 12px; color: var(--muted); }
+@media (max-width: 520px) { .disguise .r { grid-template-columns: 1fr 56px 56px; } .disguise .r .v { grid-column: 1 / -1; } }
 
 /* 사주 */
 .saju-in { display: flex; flex-wrap: wrap; gap: 12px 20px; }
@@ -340,15 +354,20 @@ footer { font-size: 12.5px; color: var(--muted); display: grid; gap: 4px; border
           </div>
         </div>
       </div>
+      <div class="panel" id="gMbtiPanel" style="gap:16px">
+        <div class="ecg-head">
+          <h2 style="font-size:28px">단톡방 MBTI 궁합</h2>
+          <p>멤버 MBTI를 넣으면 실제 대화와 비교해 드려요. 3명 이상 넣으면 결과가 나와요.</p>
+        </div>
+        <div class="mbti-in" id="gMbtiIn"></div>
+        <div id="gMbtiOut" style="display:grid;gap:16px"></div>
+      </div>
       <div style="display:grid;gap:12px">
         <div class="ecg-head">
           <h2 style="font-size:28px">단톡방 시상식</h2>
           <p>전원이 후보입니다. 수상 거부는 받지 않습니다.</p>
         </div>
         <div class="awards" id="gAwards"></div>
-      </div>
-      <div style="display:grid;gap:12px" id="gCourtWrap">
-        <div class="court" id="gCourt"></div>
       </div>
     </div>
 
@@ -382,10 +401,6 @@ footer { font-size: 12.5px; color: var(--muted); display: grid; gap: 4px; border
         <p>실제 대화에서 찾은 기록으로 시상합니다. 이의 신청은 받지 않습니다.</p>
       </div>
       <div class="awards" id="awards"></div>
-    </div>
-
-    <div style="display:grid;gap:12px" id="courtWrap">
-      <div class="court" id="court"></div>
     </div>
 
     <div class="panel" style="gap:14px" id="ecgPanel">
@@ -924,30 +939,6 @@ footer { font-size: 12.5px; color: var(--muted); display: grid; gap: 4px; border
     return { f, list: list.slice(0, 8) };
   }
 
-  function buildVerdict() {
-    const an = state.analysis, mo = state.moments, fs = state.fun.f;
-    const [A, B] = an.people;
-    if (A.replyMedian == null || B.replyMedian == null) return null;
-    const [plain, def] = A.replyMedian <= B.replyMedian ? [A, B] : [B, A];
-    const ratio = def.replyMedian / Math.max(plain.replyMedian, 0.5);
-    const waited = mo ? mo.waited[plain.name] : 0;
-    const F = fs.people[def.name];
-    const caseNo = `2026가단${10000 + (an.total * 37) % 90000}`;
-    const guilty = ratio >= 1.3;
-    let portions = Math.max(1, Math.min(30, Math.round(waited / 3600e3 / 3)));
-    const mercy = Math.min(portions - 1, Math.floor((def.affection || 0) / 10) + (F.sorry >= 3 ? 1 : 0));
-    const reasons = [];
-    reasons.push(`피고의 답장 시간은 보통 ${mins(def.replyMedian)}으로, 원고(${mins(plain.replyMedian)})의 ${ratio.toFixed(1)}배에 이른다.`);
-    if (waited) reasons.push(`원고가 피고의 답장을 기다린 시간은 모두 ${span(waited)}이다. 영화 ${(waited / 7200e3).toFixed(1)}편을 볼 수 있는 시간이다.`);
-    if (F.ignored && F.ignored.ms >= 30 * 60e3) reasons.push(`특히 원고의 “${esc(clip(F.ignored.q.text, 30))}”라는 질문에 피고는 ${span(F.ignored.ms)} 만에 답하였다.`);
-    if (F.short) reasons.push(`피고는 '${esc(F.short.w)}' 같은 단답을 ${F.shortTotal}번 사용하여 성의 부족이 인정된다.`);
-    const mitig = [];
-    if (F.sorry) mitig.push(`'미안'이라고 ${F.sorry}번 말한 점`);
-    if (def.affection) mitig.push(`애정 표현을 ${def.affection}번 한 점`);
-    if (mitig.length) reasons.push(`다만 피고가 ${mitig.join(", ")}을 참작하여 ${mercy ? `${mercy}인분을 감한다` : "형을 정한다"}.`);
-    return { caseNo, plain, def, guilty, portions: portions - mercy, reasons, ratio };
-  }
-
   function renderFun() {
     state.fun = buildAwards();
     const L = state.fun.list;
@@ -959,21 +950,6 @@ footer { font-size: 12.5px; color: var(--muted); display: grid; gap: 4px; border
         <span class="note">${esc(a.note)}</span>
         ${a.quote ? `<div class="quote">${a.quote}</div>` : ""}</article>`).join("");
 
-    const v = state.verdict = buildVerdict();
-    $("courtWrap").hidden = !v;
-    if (!v) return;
-    const d = new Date();
-    $("court").innerHTML = `
-      <span class="no">사건 ${v.caseNo} 답장 지연 청구</span>
-      <h2>판 결</h2>
-      <dl><dt>원고</dt><dd>${esc(nm(v.plain.name))}</dd><dt>피고</dt><dd>${esc(nm(v.def.name))}</dd></dl>
-      <h3>주 문</h3>
-      <ol class="order">${v.guilty
-        ? `<li>피고는 원고에게 떡볶이 ${v.portions}인분을 제공하라.</li><li>피고는 앞으로 답장을 지금보다 빨리 하라.</li><li>소송비용(음료 포함)은 피고가 부담한다.</li>`
-        : `<li>피고는 무죄.</li><li>두 사람 모두 답장이 빨라 이 사건은 성립하지 않는다.</li><li>소송비용은 둘이 반반 낸다.</li>`}</ol>
-      <h3>이 유</h3>
-      <ol>${v.reasons.map((r) => `<li>${r}</li>`).join("")}</ol>
-      <p class="sign">${d.getFullYear()}. ${d.getMonth() + 1}. ${d.getDate()}.<br>우리 대화 성분표 지방법원 재미부<br>판사 성분표 <span class="seal">재미<br>전용</span></p>`;
   }
 
 
@@ -1024,37 +1000,13 @@ footer { font-size: 12.5px; color: var(--muted); display: grid; gap: 4px; border
     return out;
   }
 
-  function buildGroupVerdict(g) {
-    const M = g.members; if (M.length < 3) return null;
-    const ghost = M.reduce((x, y) => (y.count < x.count ? y : x));
-    const killer = M.reduce((x, y) => (y.kills > x.kills ? y : x));
-    const room = state.room || "단톡방", rest = M.length - 1;
-    const caseNo = `2026가단${10000 + (g.total * 53) % 90000}`;
-    const rank = M.indexOf(ghost) + 1;
-    if (ghost.share < 0.05) {
-      const reasons = [`피고의 메시지는 전체의 ${(ghost.share * 100).toFixed(1)}%로 ${M.length}명 중 ${rank}위다.`, `한 달 평균 ${ghost.perMonth.toFixed(1)}마디로, 출석은 했으나 발언이 없는 상태가 지속되었다.`];
-      if (ghost.away && ghost.away.ms >= 3 * 864e5) reasons.push(`피고는 ${span(ghost.away.ms)} 동안 잠수했다가 “${esc(clip(said1(ghost.away.back), 30))}”라며 아무 일 없다는 듯 복귀하였다.`);
-      if (ghost.photo + ghost.emoticon) reasons.push(`다만 사진·이모티콘으로 ${ghost.photo + ghost.emoticon}번 생존 신고를 한 점을 참작한다.`);
-      return { kind: "ghost", caseNo, title: "단톡방 무단 잠수 사건", plaintiff: `${room} 나머지 ${rest}명`, def: ghost,
-        orders: [`피고는 다음 모임에서 원고 전원(${rest}명)에게 커피를 사라.`, "피고는 하루 한 마디 이상 단톡방에 출석하라.", "소송비용은 피고가 부담한다."], reasons,
-        facts: [["피고 메시지 지분", `${(ghost.share * 100).toFixed(1)}%`], ["한 달 평균", `${ghost.perMonth.toFixed(1)}마디`], ["최장 잠수", ghost.away ? span(ghost.away.ms) : "–"]] };
-    }
-    if (killer.kills < 3) return null;
-    const reasons = [`피고가 말한 뒤 3시간 넘게 방이 조용해진 일이 ${killer.kills}번 있었다.`];
-    if (killer.killQuote) reasons.push(`특히 피고의 “${esc(clip(said1(killer.killQuote.m), 30))}” 이후 ${span(killer.killQuote.ms)} 동안 아무도 입을 열지 못했다.`);
-    if (killer.shortTotal >= 5 && killer.short) reasons.push(`피고는 '${esc(killer.short.w)}' 같은 단답을 ${killer.shortTotal}번 사용하여 분위기 냉각에 기여하였다.`);
-    return { kind: "killer", caseNo, title: "단톡방 분위기 냉각 사건", plaintiff: `${room} 나머지 ${rest}명`, def: killer,
-      orders: ["피고는 다음 모임에서 분위기를 살리는 건배사를 하라.", "피고는 무거운 주제를 꺼내기 전에 'ㅋㅋ'를 붙여라.", "소송비용은 피고가 부담한다."], reasons,
-      facts: [["정적을 만든 횟수", `${killer.kills}번`], ["가장 긴 정적", killer.killQuote ? span(killer.killQuote.ms) : "–"]] };
-  }
-
   function renderGroup() {
     const g = ChatLab.groupStats(state.parsed.messages);
     state.gIndex = new Map(g.members.map((m, i) => [m.name, i]));
     const avgReply = g.members.reduce((s, m) => s + m.replyRate * m.share, 0);
     const vitality = Math.max(30, Math.min(99, Math.round(35 + 35 * (g.activeDays / g.spanDays) + 29 * avgReply)));
-    const awards = buildGroupAwards(g), verdict = buildGroupVerdict(g);
-    state.g = { stats: g, vitality, awards, verdict };
+    const awards = buildGroupAwards(g);
+    state.g = { stats: g, vitality, awards, mbti: null };
     const M = g.members, top = M[0];
 
     $("gLabel").innerHTML = `
@@ -1090,19 +1042,101 @@ footer { font-size: 12.5px; color: var(--muted); display: grid; gap: 4px; border
         <span class="winner"><span class="lab">수상</span>${mdot(a.who.name)}${esc(nm(a.who.name))}</span>
         <span class="t">${a.title}</span><span class="stat">${esc(a.stat)}</span><span class="note">${esc(a.note)}</span>
         ${a.quote ? `<div class="quote">${a.quote}</div>` : ""}</article>`).join("");
-
-    $("gCourtWrap").hidden = !verdict;
-    if (verdict) {
-      const d = new Date();
-      $("gCourt").innerHTML = `
-        <span class="no">사건 ${verdict.caseNo} ${verdict.title}</span>
-        <h2>판 결</h2>
-        <dl><dt>원고</dt><dd>${esc(verdict.plaintiff)}</dd><dt>피고</dt><dd>${esc(nm(verdict.def.name))}</dd></dl>
-        <h3>주 문</h3><ol class="order">${verdict.orders.map((o) => `<li>${o}</li>`).join("")}</ol>
-        <h3>이 유</h3><ol>${verdict.reasons.map((r) => `<li>${r}</li>`).join("")}</ol>
-        <p class="sign">${d.getFullYear()}. ${d.getMonth() + 1}. ${d.getDate()}.<br>우리 대화 성분표 지방법원 단톡방부<br>판사 성분표 <span class="seal">재미<br>전용</span></p>`;
-    }
+    renderGroupMbti();
   }
+
+
+  // ---------- 단톡방 MBTI 궁합 ----------
+  state.mbti = {};
+  const SAMPLE_MBTI = { 민수: "ENFP", 지은: "ESFJ", 현우: "INTJ", 소라: "ESTJ", 태오: "INFP" };
+  const ROOMS = {
+    "E-NT": ["토론 동아리", "말이 시작되면 결론까지 가야 끝나는 방. 반박은 애정 표현이에요."],
+    "I-NT": ["조용한 연구실", "평소엔 조용하다가 관심 주제가 나오면 논문급 답장이 달려요."],
+    "E-NF": ["감성 파티", "리액션이 큰 방. 'ㅠㅠ'와 'ㅋㅋ'가 번갈아 터져요."],
+    "I-NF": ["새벽 일기장", "낮엔 잠잠하고 밤에 속 얘기가 나오는 방."],
+    "E-SJ": ["총무 회의", "날짜, 장소, 회비가 제일 빨리 정해지는 방."],
+    "I-SJ": ["조용한 사무실", "필요한 말만 오가지만 약속은 칼같이 지켜져요."],
+    "E-SP": ["번개 모임", "'지금 나올 사람?'이 통하는 방. 계획은 없고 실행은 빨라요."],
+    "I-SP": ["각자 노는 방", "각자 할 일 하다가 웃긴 거 하나씩 던지고 사라지는 방."],
+  };
+  function roomName(code) {
+    const e = code[0] === "X" ? null : code[0];
+    const t = code[1] === "N" ? (code[2] === "X" ? null : "N" + code[2]) : code[1] === "S" ? (code[3] === "X" ? null : "S" + code[3]) : null;
+    if (!t) return ["뭐든 되는 잡탕방", "성향이 골고루 섞인 방. 누가 말을 꺼내느냐에 따라 분위기가 확 바뀌어요."];
+    return ROOMS[(e || "E") + "-" + t];
+  }
+
+  function buildGroupMbti(g) {
+    const M = g.members.filter((m) => state.mbti[m.name]);
+    if (M.length < 3) return null;
+    const types = M.map((m) => state.mbti[m.name]);
+    const code = ChatLab.roomType(types), [rname, rdesc] = roomName(code);
+    const actual = new Map(g.pairs.map((p, i) => [p.names.slice().sort().join("\u0000"), { c: p.c, rank: i + 1 }]));
+    const pairs = [];
+    for (let i = 0; i < M.length; i++) for (let j = i + 1; j < M.length; j++) {
+      const x = M[i], y = M[j], key = [x.name, y.name].sort().join("\u0000");
+      pairs.push({ x, y, score: ChatLab.mbtiScore(state.mbti[x.name], state.mbti[y.name]), act: actual.get(key) || { c: 0, rank: null } });
+    }
+    const avg = Math.round(pairs.reduce((s, p) => s + p.score, 0) / pairs.length);
+    const best = pairs.reduce((a, b) => (b.score > a.score || (b.score === a.score && b.act.c > a.act.c) ? b : a));
+    const worst = pairs.reduce((a, b) => (b.score < a.score || (b.score === a.score && b.act.c > a.act.c) ? b : a));
+    const realTop = g.pairs[0] ? pairs.find((p) => [p.x.name, p.y.name].sort().join("\u0000") === g.pairs[0].names.slice().sort().join("\u0000")) : null;
+    const axes = [["E", "I"], ["N", "S"], ["T", "F"], ["J", "P"]].map(([a, b], i) => ({ a, b, na: types.filter((t) => t[i] === a).length, nb: types.filter((t) => t[i] === b).length }));
+    const disguise = g.members.map((m) => {
+      const d = state.mbti[m.name], e = m.type && m.type.letters;
+      const same = d && e ? [...d].filter((ch, i) => ch === e[i]).length : null;
+      return { m, d, e, same };
+    }).filter((r) => r.d);
+    const most = disguise.filter((r) => r.same != null).sort((a, b) => a.same - b.same)[0];
+    // 짝이 많은 방에선 상위 1/3까지를 '실제로 친한 사이'로 본다
+    const hi = Math.max(2, Math.ceil(g.pairs.length / 3));
+    return { code, rname, rdesc, avg, best, worst, realTop, axes, disguise, most, hi, n: M.length, total: g.members.length };
+  }
+
+  const twist = (p, kind, hi) => {
+    const n = p.act.rank;
+    if (kind === "worst") return n && n <= hi ? `MBTI로는 상극인데 실제론 이 방 ${n}위 콤비예요. 서로 받아 준 횟수 ${p.act.c}번.` : `실제로도 대화가 적은 편이에요${n ? `(${n}위)` : ""}. 궁합표가 맞았네요.`;
+    return n && n <= hi ? `실제로도 서로 받아 준 횟수 ${p.act.c}번으로 ${n}위. 궁합표대로예요.` : n ? `그런데 실제로 서로 받아 준 건 ${p.act.c}번(${n}위). 궁합만 좋고 대화는 아직이에요.` : "그런데 실제 대화에선 거의 안 마주쳐요. 궁합만 좋은 사이.";
+  };
+
+  function renderGroupMbti() {
+    const g = state.g.stats, M = g.members.slice(0, 12);
+    if (state.sample) M.forEach((m) => { if (state.mbti[m.name] == null && SAMPLE_MBTI[m.name]) state.mbti[m.name] = SAMPLE_MBTI[m.name]; });
+    const opts = (v) => `<option value="">모름</option>` + ChatLab.MBTI_TYPES.map((t) => `<option${t === v ? " selected" : ""}>${t}</option>`).join("");
+    $("gMbtiIn").innerHTML = M.map((m, i) => `<label for="mb${i}"><span>${mdot(m.name)}${esc(nm(m.name))}</span><select id="mb${i}" data-name="${esc(m.name)}">${opts(state.mbti[m.name] || "")}</select></label>`).join("");
+    const R = state.g.mbti = buildGroupMbti(g);
+    const out = $("gMbtiOut");
+    if (!R) { out.innerHTML = `<p class="muted" style="font-size:14px">아직 MBTI가 ${M.filter((m) => state.mbti[m.name]).length}명만 들어 있어요. 3명 이상 넣으면 방 유형, 짝 궁합, 말투로 본 MBTI가 나와요.</p>`; return; }
+    const who = (m) => `${mdot(m.name)}${esc(nm(m.name))}<span class="muted" style="font-weight:400;font-family:var(--f-num);font-size:13px">${state.mbti[m.name]}</span>`;
+    const pairCard = (label, p, kind) => `<div class="mpair"><span class="k">${label}</span><span class="who">${who(p.x)} ↔ ${who(p.y)}</span><span class="sc">${p.score}점</span><span class="twist">${twist(p, kind, R.hi)}</span></div>`;
+    const top = R.realTop;
+    out.innerHTML = `
+      <div class="roomtype">
+        <div style="display:grid;gap:2px"><span class="code">${R.code}</span><span class="name">${R.rname}</span></div>
+        <div class="avg">평균 MBTI 궁합<b>${R.avg}점</b>실제 활력 ${state.g.vitality}점</div>
+        <p class="desc">${R.rdesc}${R.code.includes("X") ? " (X는 반반이라 정해지지 않은 글자예요)" : ""}</p>
+      </div>
+      <div class="axisbars">${R.axes.map((x) => `<div class="ab"><span>${x.a} ${x.na}</span><span class="track"><i style="flex:${x.na || 0.001};background:var(--m1)"></i><i style="flex:${x.nb || 0.001};background:var(--m2)"></i></span><span>${x.nb} ${x.b}</span></div>`).join("")}</div>
+      <div class="mpairs">
+        ${pairCard("MBTI 천생연분", R.best, "best")}
+        ${pairCard("MBTI 상극", R.worst, "worst")}
+        ${top && top !== R.best && top !== R.worst ? `<div class="mpair"><span class="k">실제 공식 짝꿍</span><span class="who">${who(top.x)} ↔ ${who(top.y)}</span><span class="sc">${top.score}점</span><span class="twist">MBTI 궁합은 ${top.score}점인데 실제로는 서로 ${top.act.c}번 받아 준 이 방 1위 콤비예요.</span></div>` : ""}
+      </div>
+      <div style="display:grid;gap:6px">
+        <h3 style="font-size:22px">말투로 본 MBTI</h3>
+        <div class="disguise">
+          <div class="r head"><span>멤버</span><span>입력</span><span>말투</span><span class="v">판정</span></div>
+          ${R.disguise.map((r) => `<div class="r"><span class="who">${mdot(r.m.name)}${esc(nm(r.m.name))}</span><span class="c">${r.d}</span><span class="c">${r.e || "–"}</span><span class="v">${r.same == null ? "대화가 적어 판정 보류" : r.same === 4 ? "MBTI 그대로 말하는 사람" : r.same === 3 ? "거의 맞아요" : `자칭 ${r.d}, 말투는 ${r.e}`}</span></div>`).join("")}
+        </div>
+      </div>
+      <p class="muted" style="font-size:12.5px">MBTI 궁합은 흔히 알려진 궁합표를 바탕으로 한 재미용 점수예요. '말투'는 선톡, 메시지 양, 단어, 웃음, 활동 시간으로 추정했어요.</p>`;
+  }
+  $("gMbtiIn").addEventListener("change", (e) => {
+    const sel = e.target.closest("select"); if (!sel) return;
+    state.mbti[sel.dataset.name] = sel.value;
+    renderGroupMbti(); drawCard();
+    if (!state.sample && state.g.mbti) track("group-mbti", String(state.g.mbti.n));
+  });
 
   // ---------- 사주 궁합 ----------
   state.birth = {};
@@ -1193,17 +1227,16 @@ footer { font-size: 12.5px; color: var(--muted); display: grid; gap: 4px; border
     { id: "firsts", name: "처음 순간들", file: "처음순간들" },
     { id: "saju", name: "사주 vs 카톡", file: "사주vs카톡궁합" },
     { id: "awards", name: "시상식", file: "우리대화시상식" },
-    { id: "verdict", name: "판결문", file: "답장지연판결문" },
     { id: "g-label", group: true, name: "단톡방 성분표", file: "단톡방성분표" },
     { id: "g-awards", group: true, name: "단톡방 시상식", file: "단톡방시상식" },
-    { id: "g-verdict", group: true, name: "단톡방 판결문", file: "단톡방판결문" },
+    { id: "g-mbti", group: true, name: "단톡방 MBTI 궁합", file: "단톡방MBTI궁합" },
   ];
   state.cardKind = "label";
 
   function availableKinds() {
-    if (state.mode === "group") return KINDS.filter((k) => k.group && (k.id !== "g-awards" || (state.g && state.g.awards.length)) && (k.id !== "g-verdict" || (state.g && state.g.verdict)));
+    if (state.mode === "group") return KINDS.filter((k) => k.group && (k.id !== "g-awards" || (state.g && state.g.awards.length)) && (k.id !== "g-mbti" || (state.g && state.g.mbti)));
     const mo = state.moments;
-    return KINDS.filter((k) => k.id === "label" || (k.id === "saju" && state.saju) || (k.id === "awards" && state.fun && state.fun.list.length) || (k.id === "verdict" && state.verdict) || (mo && (k.id === "ecg" || k.id === "wait" ||
+    return KINDS.filter((k) => k.id === "label" || (k.id === "saju" && state.saju) || (k.id === "awards" && state.fun && state.fun.list.length) || (mo && (k.id === "ecg" || k.id === "wait" ||
       (k.id === "cold" && mo.cold.length) || (k.id === "rally" && mo.rally) || (k.id === "firsts" && mo.firsts.length))));
   }
   function renderKinds() {
@@ -1444,26 +1477,36 @@ footer { font-size: 12.5px; color: var(--muted); display: grid; gap: 4px; border
       });
       return k.c;
     },
-    "g-verdict"() {
-      const v = state.g.verdict, k = frame("단톡방 판결문"), { g: ctx, L, R } = k, Y = 110;
-      const serif = '"Noto Serif KR", serif';
-      k.text(`사건 ${v.caseNo} ${v.title}`, L, Y + 222, `26px ${FONT.mono}`, CARD.muted);
-      k.text(k.fit(`원고  ${v.plaintiff}`, `600 36px ${serif}`, R - L), L, Y + 280, `600 36px ${serif}`);
-      k.text(k.fit(`피고  ${nm(v.def.name)}`, `600 36px ${serif}`, R - L), L, Y + 332, `600 36px ${serif}`);
-      k.rule(Y + 370, 4);
-      k.text("주    문", (L + R) / 2, Y + 438, `600 42px ${serif}`, CARD.ink, "center");
-      const n = k.wrap(v.orders[0], L, Y + 515, R - L, 60, 3, `600 44px ${serif}`);
-      let y = Y + 515 + n * 60 + 30;
-      k.hair(y - 20);
-      v.facts.forEach(([a, b]) => { k.row(y + 26, a, b); y += 60; });
-      ctx.save(); ctx.translate(R - 52, Y + 978); ctx.rotate(-0.14);
-      ctx.strokeStyle = CARD.b; ctx.lineWidth = 5; ctx.strokeRect(-46, -46, 92, 92);
-      k.text("재미", 0, -4, `600 28px ${serif}`, CARD.b, "center"); k.text("전용", 0, 30, `600 28px ${serif}`, CARD.b, "center");
-      ctx.restore();
-      k.text("우리 대화 성분표 지방법원 단톡방부", L, Y + 980, `30px ${serif}`, CARD.muted);
+    "g-mbti"() {
+      const R = state.g.mbti, k = frame("단톡방 MBTI 궁합"), { g: ctx, L, R: Rt } = k, Y = 110;
+      k.text(R.code, L, Y + 320, `600 130px ${FONT.mono}`);
+      k.text(R.rname, L, Y + 395, `56px ${FONT.disp}`);
+      k.text("평균 궁합", Rt, Y + 230, `32px ${FONT.disp}`, CARD.muted, "right");
+      k.text(`${R.avg}`, Rt, Y + 320, `600 96px ${FONT.mono}`, CARD.ink, "right");
+      k.rule(Y + 430, 6);
+      const ci = (m) => state.gIndex.get(m.name);
+      const row = (y, label, p, line) => {
+        k.text(label, L, y, `36px ${FONT.disp}`, CARD.muted);
+        k.text(`${p.score}점`, Rt, y, `600 36px ${FONT.mono}`, CARD.ink, "right");
+        let x = L;
+        [p.x, p.y].forEach((m, j) => {
+          const i = ci(m); ctx.fillStyle = i < 8 ? CARD_M[i] : CARD.muted; ctx.beginPath(); ctx.arc(x + 12, y + 50, 12, 0, Math.PI * 2); ctx.fill();
+          const t = `${nm(m.name)} ${state.mbti[m.name]}`; k.text(t, x + 32, y + 62, `800 34px ${FONT.body}`);
+          ctx.font = `800 34px ${FONT.body}`; x += 32 + ctx.measureText(t).width + 20;
+          if (!j) { k.text("↔", x, y + 62, `34px ${FONT.body}`, CARD.muted); x += 56; }
+        });
+        k.text(k.fit(line, `30px ${FONT.body}`, Rt - L), L, y + 110, `30px ${FONT.body}`, CARD.muted);
+      };
+      const short = (p, kind) => { const n = p.act.rank; return kind === "worst" ? (n && n <= R.hi ? `그런데 실제론 이 방 ${n}위 콤비` : "궁합표대로 말을 잘 안 섞음") : (n && n <= R.hi ? `실제로도 ${n}위 짝꿍` : "궁합만 좋고 대화는 아직"); };
+      row(Y + 500, "MBTI 천생연분", R.best, short(R.best, "best"));
+      k.hair(Y + 640);
+      row(Y + 700, "MBTI 상극", R.worst, short(R.worst, "worst"));
+      if (R.most && R.most.same <= 2) {
+        k.hair(Y + 840);
+        k.text(k.fit(`${nm(R.most.m.name)}: 자칭 ${R.most.d}, 말투는 ${R.most.e}`, `40px ${FONT.disp}`, Rt - L), L, Y + 910, `40px ${FONT.disp}`);
+      }
       return k.c;
     },
-
     awards() {
       const k = frame("우리 대화 시상식"), { g, L, R } = k, Y = 110;
       const list = state.fun.list.slice(0, 4);
@@ -1479,34 +1522,6 @@ footer { font-size: 12.5px; color: var(--muted); display: grid; gap: 4px; border
         if (sub) k.text(k.fit(sub, `30px ${FONT.body}`, R - L), L, y + 120, `30px ${FONT.body}`, CARD.muted);
         if (i < list.length - 1) k.hair(y + 155);
       });
-      return k.c;
-    },
-
-    verdict() {
-      const v = state.verdict, k = frame("답장 지연 판결문"), { g, L, R } = k, Y = 110;
-      const serif = '"Noto Serif KR", serif';
-      k.text(`사건 ${v.caseNo}`, L, Y + 222, `26px ${FONT.mono}`, CARD.muted);
-      k.text(`원고  ${nm(v.plain.name)}`, L, Y + 280, `600 38px ${serif}`);
-      k.text(`피고  ${nm(v.def.name)}`, L, Y + 334, `600 38px ${serif}`);
-      k.rule(Y + 372, 4);
-      k.text("주    문", (L + R) / 2, Y + 440, `600 42px ${serif}`, CARD.ink, "center");
-      const order = v.guilty ? `피고는 원고에게 떡볶이 ${v.portions}인분을 제공하라.` : "피고는 무죄. 둘 다 답장이 빠르다.";
-      const n = k.wrap(order, L, Y + 520, R - L, 66, 3, `600 52px ${serif}`);
-      let y = Y + 520 + n * 66 + 40;
-      k.hair(y - 30);
-      const facts = [
-        [`피고 답장 보통`, mins(v.def.replyMedian)],
-        [`원고 답장 보통`, mins(v.plain.replyMedian)],
-        [`원고가 기다린 시간`, state.moments ? span(state.moments.waited[v.plain.name]) : "–"],
-      ];
-      const ig = state.fun.f.people[v.def.name].ignored;
-      if (ig && ig.ms >= 30 * 60e3) facts.push([`가장 늦은 답장`, span(ig.ms)]);
-      facts.forEach(([a, b]) => { k.row(y + 20, a, b); y += 60; });
-      g.save(); g.translate(R - 52, Y + 978); g.rotate(-0.14);
-      g.strokeStyle = CARD.b; g.lineWidth = 5; g.strokeRect(-46, -46, 92, 92);
-      k.text("재미", 0, -4, `600 28px ${serif}`, CARD.b, "center"); k.text("전용", 0, 30, `600 28px ${serif}`, CARD.b, "center");
-      g.restore();
-      k.text("우리 대화 성분표 지방법원 재미부", L, Y + 980, `30px ${serif}`, CARD.muted);
       return k.c;
     },
 

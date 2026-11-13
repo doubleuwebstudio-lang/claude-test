@@ -101,3 +101,16 @@ test("단톡방: 전원 통계", () => {
   assert.ok(Math.abs(g.members.reduce((s, m) => s + m.share, 0) - 1) < 1e-9);
   console.log(g.total, g.members.map((m) => `${m.name}:${m.count}/k${m.kills}/r${m.replyRate.toFixed(2)}/u${m.unanswered}`).join(" "), g.pairs.slice(0, 2));
 });
+
+test("MBTI 궁합과 단톡방 말투 추정", () => {
+  assert.equal(L.mbtiScore("INFP", "ENFJ"), 96);
+  assert.equal(L.mbtiScore("ENFJ", "INFP"), 96);
+  assert.ok(L.mbtiScore("INTJ", "ESFP") < 60);
+  assert.equal(L.roomType(["ENFP", "ESFJ", "INTJ", "ESTJ", "INFP"]), "ENFJ");
+  assert.equal(L.roomType(["ENFP", "ISTJ"]), "XXXX");
+  const g = L.groupStats(L.parse(L.makeGroupSample()).messages);
+  const by = Object.fromEntries(g.members.map((m) => [m.name, m]));
+  assert.match(by["민수"].type.letters, /^[EI][NS][FT][JP]$/);
+  assert.equal(by["태오"].type, null, "메시지가 적으면 추정하지 않는다");
+  console.log(g.members.map((m) => m.name + ":" + (m.type ? m.type.letters : "-")).join(" "));
+});
