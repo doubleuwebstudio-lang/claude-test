@@ -377,6 +377,126 @@
     return { a, b, people: out, foodShare: textAll ? foodAll / textAll : 0 };
   }
 
+
+  // ---------- 단톡방 모드: 전원 대상 통계 ----------
+  const REPLY_GAP = 10 * 60e3;      // 10분 안에 다른 사람이 말하면 '받아 준' 것으로 본다
+  const KILL_GAP = 3 * 3600e3;      // 이 사람 말 뒤로 3시간 넘게 조용하면 '대화 종결'
+  function groupStats(all) {
+    const msgs = all;
+    const sp = speakers(msgs);
+    const P = {};
+    for (const { name } of sp) P[name] = { name, count: 0, text: 0, kk: 0, short: new Map(), shortTotal: 0, phrases: new Map(), questions: 0, unanswered: 0, unansweredQ: null, late: 0, lateQuote: null, emoticon: 0, photo: 0, inits: 0, kills: 0, killQuote: null, repliesGot: 0, mono: null, away: null, lastMsg: null, hours: new Array(24).fill(0) };
+    const pairs = new Map();
+    const days = new Set(), allHours = new Array(24).fill(0);
+    let run = null;
+    for (let i = 0; i < msgs.length; i++) {
+      const m = msgs[i], p = P[m.name], prev = msgs[i - 1], next = msgs[i + 1];
+      const d = new Date(m.t), h = d.getHours();
+      days.add(dayKey(m.t)); allHours[h]++; p.hours[h]++;
+      p.count++;
+      if (m.kind === "emoticon") p.emoticon++;
+      if (m.kind === "photo") p.photo++;
+      if (h >= 2 && h < 5) { p.late++; if (m.kind === "text" && (!p.lateQuote || m.text.length > p.lateQuote.text.length)) p.lateQuote = m; }
+      if (m.kind === "text") {
+        const t = m.text.trim(), norm = t.replace(/\s+/g, " ");
+        p.text++;
+        p.kk += (t.match(/ㅋ/g) || []).length;
+        if (SHORT.has(norm)) { p.short.set(norm, (p.short.get(norm) || 0) + 1); p.shortTotal++; }
+        else if (norm.length >= 2 && norm.length <= 20 && !/^[ㅋㅎㅠㅜ\s.!?~]+$/.test(norm)) p.phrases.set(norm, (p.phrases.get(norm) || 0) + 1);
+        if (/\?/.test(t)) {
+          p.questions++;
+          let answered = false;
+          for (let j = i + 1; j < msgs.length && msgs[j].t - m.t <= 3600e3; j++) if (msgs[j].name !== m.name) { answered = true; break; }
+          if (!answered) { p.unanswered++; if (!p.unansweredQ || t.length > p.unansweredQ.text.length) p.unansweredQ = m; }
+        }
+      }
+      if (!prev || m.t - prev.t >= SESSION_GAP) p.inits++;
+      if (next && next.t - m.t >= KILL_GAP && h >= 9 && h <= 22 && m.kind === "text" && !NIGHT.test(m.text)) {
+        p.kills++;
+        if (!p.killQuote || (next.t - m.t) > p.killQuote.ms) p.killQuote = { m, ms: next.t - m.t };
+      }
+      if (prev && prev.name !== m.name && m.t - prev.t <= REPLY_GAP) {
+        P[prev.name].repliesGot++;
+        const key = [prev.name, m.name].sort().join("\u0000");
+        pairs.set(key, (pairs.get(key) || 0) + 1);
+      }
+      if (run && run.name === m.name && m.t - prev.t < 864e5) { run.n++; run.to = i; }
+      else run = { name: m.name, n: 1, from: i, to: i };
+      if (!p.mono || run.n > p.mono.n) p.mono = { ...run };
+      if (p.lastMsg) {
+        const gap = m.t - p.lastMsg.t;
+        if (!p.away || gap > p.away.ms) p.away = { ms: gap, before: p.lastMsg, back: m };
+      }
+      p.lastMsg = m;
+    }
+    const total = msgs.length;
+    const spanDays = total ? Math.max(1, Math.round((dayKey(msgs[total - 1].t) - dayKey(msgs[0].t)) / 864e5) + 1) : 0;
+    const months = Math.max(1, spanDays / 30.4);
+    const top = (map) => { let best = null; for (const [w, c] of map) if (!best || c > best.c) best = { w, c }; return best; };
+    const members = sp.map(({ name }) => {
+      const p = P[name];
+      return {
+        name, count: p.count, share: p.count / total, perMonth: p.count / months, text: p.text, kk: p.kk,
+        kkRate: p.text ? p.kk / p.text : 0, short: top(p.short), shortTotal: p.shortTotal, phrase: top(p.phrases),
+        questions: p.questions, unanswered: p.unanswered, unansweredQ: p.unansweredQ, late: p.late, lateQuote: p.lateQuote,
+        emoticon: p.emoticon, photo: p.photo, inits: p.inits, kills: p.kills, killQuote: p.killQuote,
+        replyRate: p.count ? p.repliesGot / p.count : 0, hours: p.hours,
+        mono: p.mono && { n: p.mono.n, msgs: msgs.slice(p.mono.from, p.mono.to + 1) },
+        away: p.away,
+      };
+    });
+    const pairList = [...pairs.entries()].map(([k, c]) => ({ names: k.split("\u0000"), c })).sort((x, y) => y.c - x.c);
+    return { members, pairs: pairList, total, spanDays, activeDays: days.size, peakHour: allHours.indexOf(Math.max(...allHours)), allHours, from: msgs[0] && msgs[0].t, to: msgs[total - 1] && msgs[total - 1].t };
+  }
+
+  // ---------- 예시 단톡방 (가상의 다섯 친구) ----------
+  function makeGroupSample() {
+    let seed = 11;
+    const rnd = () => ((seed = (seed * 16807) % 2147483647) / 2147483647);
+    const pick = (a) => a[Math.floor(rnd() * a.length)];
+    const W = { 민수: 0.42, 지은: 0.2, 현우: 0.18, 소라: 0.18, 태오: 0.02 };
+    const say = {
+      민수: ["ㅋㅋㅋㅋㅋㅋㅋㅋㅋ 미쳤다", "아 개웃기네 ㅋㅋㅋㅋ", "이거 봐봐 ㅋㅋㅋㅋㅋㅋ", "사진", "ㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋ", "나 오늘 진짜 레전드 있었음", "이모티콘", "아니 근데 ㅋㅋㅋㅋ"],
+      지은: ["ㅋㅋㅋㅋ 민수 또 시작", "헐 진짜?", "아 그거 나도 봤어 ㅋㅋ", "사진", "이모티콘", "맞아 맞아", "그래서 어떻게 됐는데"],
+      현우: ["ㅇㅇ", "ㅇㅇ", "ㅇㅋ", "웅", "근데 다들 노후 준비는 하고 있어?", "요즘 금리 생각하면 좀 무섭더라", "ㅇㅇ 그래"],
+      소라: ["이번 주말 시간 되는 사람?", "다들 몇 시에 끝나?", "어디서 볼까?", "그 집 예약 돼?", "누가 회비 정리 좀 해줄 수 있어?", "이모티콘", "좋아 그럼 7시?"],
+      태오: ["ㅋㅋ"],
+    };
+    const names = Object.keys(W);
+    const who = () => { let r = rnd(), acc = 0; for (const n of names) { acc += W[n]; if (r < acc) return n; } return "민수"; };
+    const lines = ["대학 동기방 5 님과 카카오톡 대화", "저장한 날짜 : 2026-11-12 23:10:44", ""];
+    const fmt = (d) => { const h = d.getHours(); return `${d.getFullYear()}년 ${d.getMonth() + 1}월 ${d.getDate()}일 ${h < 12 ? "오전" : "오후"} ${h % 12 || 12}:${String(d.getMinutes()).padStart(2, "0")}`; };
+    const push = (d, n, t) => lines.push(`${fmt(d)}, ${n} : ${t}`);
+    for (let day = 0; day < 40; day++) {
+      if (rnd() < 0.15) continue;
+      const base = new Date(2026, 9, 3 + day);
+      const sessions = 1 + Math.floor(rnd() * 2);
+      let t = new Date(base.getTime() + (11 + rnd() * 4) * 3600e3);
+      for (let s = 0; s < sessions; s++) {
+        const n = 8 + Math.floor(rnd() * 25);
+        let last = null;
+        for (let i = 0; i < n; i++) {
+          let w = who(); if (w === "태오") w = "민수";
+          if (last === "민수" && rnd() < 0.4) w = "지은"; // 민수 말엔 지은이 바로 받는다
+          push(t, w, pick(say[w]));
+          t = new Date(t.getTime() + (0.3 + rnd() * 4) * 60e3); last = w;
+        }
+        if (rnd() < 0.35) { push(t, "현우", "근데 다들 노후 준비는 하고 있어?"); t = new Date(t.getTime() + (4 + rnd() * 2) * 3600e3); }
+        else t = new Date(t.getTime() + (6.5 + rnd() * 2) * 3600e3);
+        if (t.getDate() !== base.getDate()) break;
+      }
+      if (rnd() < 0.25) push(new Date(base.getTime() + (26 + rnd() * 2) * 3600e3), "현우", "자니… 나만 안 자나");
+      if (day === 2) push(new Date(base.getTime() + 21 * 3600e3), "태오", "ㅋㅋㅋ 나도 갈래");
+      if (day === 6) { const q = new Date(base.getTime() + 16 * 3600e3); push(q, "소라", "회비 3만 원씩 보낸 사람 손?"); }
+      if (day === 33) push(new Date(base.getTime() + 20.5 * 3600e3), "태오", "헐 다들 잘 지냄? 나 폰 바꿨어");
+      if (day === 18) {
+        let mt = new Date(base.getTime() + 22.5 * 3600e3);
+        ["아니", "얘들아", "나 방금", "편의점에서", "전 여친 만남", "근데", "걔가 먼저 인사함", "ㅋㅋㅋㅋㅋㅋㅋ", "나 어떡해"].forEach((x) => { push(mt, "민수", x); mt = new Date(mt.getTime() + 25e3); });
+      }
+    }
+    return lines.join("\n");
+  }
+
   // ---------- 예시 대화 (가상의 두 사람) ----------
   function makeSample() {
     let seed = 7;
@@ -438,5 +558,5 @@
     return lines.join("\n");
   }
 
-  return { parse, analyze, moments, funStats, speakers, estimateType, compat, makeSample, kindOf };
+  return { parse, analyze, moments, funStats, groupStats, makeGroupSample, speakers, estimateType, compat, makeSample, kindOf };
 });

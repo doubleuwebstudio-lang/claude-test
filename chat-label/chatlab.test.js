@@ -85,3 +85,19 @@ test("웃음 포인트: 독백, 읽씹, 단답", () => {
   assert.ok(f.foodShare > 0);
   console.log(ji.mono.n, Math.round(dy.ignored.ms / 6e4), ji.short, dy.phrase, ji.late, f.foodShare.toFixed(2));
 });
+
+test("단톡방: 전원 통계", () => {
+  const r = L.parse(L.makeGroupSample());
+  assert.equal(r.title, "대학 동기방 5");
+  const g = L.groupStats(r.messages);
+  const by = Object.fromEntries(g.members.map((m) => [m.name, m]));
+  assert.equal(g.members.length, 5);
+  assert.equal(g.members[0].name, "민수");
+  assert.ok(by["태오"].count <= 4, "태오는 유령 회원");
+  assert.ok(by["태오"].away.ms > 20 * 864e5, "태오의 긴 잠수");
+  assert.ok(by["현우"].kills >= 3, "현우가 대화를 끊는다");
+  assert.ok(by["민수"].mono.n >= 9);
+  assert.deepEqual(g.pairs[0].names.sort(), ["민수", "지은"]);
+  assert.ok(Math.abs(g.members.reduce((s, m) => s + m.share, 0) - 1) < 1e-9);
+  console.log(g.total, g.members.map((m) => `${m.name}:${m.count}/k${m.kills}/r${m.replyRate.toFixed(2)}/u${m.unanswered}`).join(" "), g.pairs.slice(0, 2));
+});

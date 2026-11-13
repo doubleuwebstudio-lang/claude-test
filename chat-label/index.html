@@ -17,6 +17,7 @@
   --b: #e2405f;
   --a-soft: #2d58e61f;
   --b-soft: #e2405f1f;
+  --m1: #2d58e6; --m2: #e2405f; --m3: #1f9d6b; --m4: #d98200; --m5: #7a4fd6; --m6: #0f8fa8; --m7: #c2410c; --m8: #5b6472;
   --f-display: "Do Hyeon", "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
   --f-body: "Gothic A1", "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
   --f-num: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
@@ -25,13 +26,16 @@
   :root:not([data-theme="light"]) {
     --bg: #0f1115; --surface: #181b21; --ink: #eceef3; --muted: #9aa0ad; --line: #2c3039;
     --a: #7290ff; --b: #ff7590; --a-soft: #7290ff26; --b-soft: #ff759026; color-scheme: dark;
+    --m1: #7290ff; --m2: #ff7590; --m3: #46c995; --m4: #ffb23e; --m5: #a888ff; --m6: #3cc3db; --m7: #f07a45; --m8: #9aa3b2;
   }
 }
 :root[data-theme="dark"] {
   --bg: #0f1115; --surface: #181b21; --ink: #eceef3; --muted: #9aa0ad; --line: #2c3039;
   --a: #7290ff; --b: #ff7590; --a-soft: #7290ff26; --b-soft: #ff759026; color-scheme: dark;
+    --m1: #7290ff; --m2: #ff7590; --m3: #46c995; --m4: #ffb23e; --m5: #a888ff; --m6: #3cc3db; --m7: #f07a45; --m8: #9aa3b2;
 }
 * { box-sizing: border-box; }
+[hidden] { display: none !important; }
 body {
   background: var(--bg); color: var(--ink); font-family: var(--f-body); font-size: 15px; line-height: 1.6;
   padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px));
@@ -205,6 +209,21 @@ details.paste textarea { width: 100%; min-height: 120px; margin-top: 8px; border
 .court .sign { text-align: right; font-size: 14px; line-height: 1.8; }
 .court .seal { display: inline-grid; place-items: center; width: 54px; height: 54px; border: 3px solid var(--b); color: var(--b); border-radius: 6px; font-weight: 600; font-size: 13px; line-height: 1.15; transform: rotate(-8deg); margin-left: 8px; vertical-align: middle; text-align: center; }
 
+/* 단톡방 */
+.gshare { display: grid; gap: 8px; }
+.gshare .r { display: grid; grid-template-columns: minmax(70px, 120px) 1fr 92px; gap: 10px; align-items: center; font-size: 14px; }
+.gshare .r .nm { display: flex; gap: 6px; align-items: center; min-width: 0; font-weight: 600; }
+.gshare .r .nm span:last-child { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.gshare .r .bar { height: 12px; background: var(--line); border-radius: 3px; overflow: hidden; }
+.gshare .r .bar i { display: block; height: 100%; }
+.gshare .r .v { font-family: var(--f-num); font-size: 13px; text-align: right; font-variant-numeric: tabular-nums; }
+.stack { display: flex; height: 22px; border: 2px solid var(--ink); overflow: hidden; }
+.stack i { display: block; height: 100%; }
+.pairs { display: grid; gap: 10px; margin: 0; padding: 0; list-style: none; }
+.pairs li { display: grid; gap: 2px; font-size: 14px; }
+.pairs .names { display: flex; gap: 6px; align-items: center; font-weight: 800; font-size: 15px; flex-wrap: wrap; }
+.mode { display: inline-flex; gap: 6px; }
+
 /* 사주 */
 .saju-in { display: flex; flex-wrap: wrap; gap: 12px 20px; }
 .saju-in label { display: grid; gap: 4px; font-size: 14px; font-weight: 600; }
@@ -256,7 +275,8 @@ footer { font-size: 12.5px; color: var(--muted); display: grid; gap: 4px; border
       <div class="row">
         <label class="btn" for="file">대화 파일 고르기</label>
         <input id="file" type="file" accept=".txt,.csv,.zip,text/plain,text/csv,application/zip" hidden>
-        <button class="btn ghost" id="sampleBtn" type="button">예시 다시 보기</button>
+        <button class="btn ghost" id="sampleBtn" type="button">1:1 예시</button>
+        <button class="btn ghost" id="groupSampleBtn" type="button">단톡방 예시</button>
       </div>
       <p class="muted" style="font-size:14px">.txt, .csv, .zip 파일을 여기로 끌어다 놓아도 됩니다.</p>
       <p class="lock"><svg width="14" height="14" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 2a5 5 0 0 0-5 5v3H5v12h14V10h-2V7a5 5 0 0 0-5-5Zm-3 8V7a3 3 0 1 1 6 0v3H9Z"/></svg>
@@ -297,10 +317,42 @@ footer { font-size: 12.5px; color: var(--muted); display: grid; gap: 4px; border
   <section id="out" aria-live="polite" style="display:grid;gap:20px">
     <div class="controls">
       <span class="sample-flag" id="sampleFlag">예시 대화 · 가상의 두 사람</span>
+      <span class="mode chips" id="modeChips" role="group" aria-label="보기 방식" hidden>
+        <button type="button" class="chip" data-mode="group" aria-pressed="true">단톡방 전체</button>
+        <button type="button" class="chip" data-mode="pair" aria-pressed="false">두 사람 비교</button>
+      </span>
       <label id="pickWrap">비교할 두 사람 <select id="pickA" aria-label="첫 번째 사람"></select> <select id="pickB" aria-label="두 번째 사람"></select></label>
       <label><input type="checkbox" id="mask"> 이름 가리기</label>
     </div>
 
+    <div id="groupView" style="display:grid;gap:20px" hidden>
+      <div class="result">
+        <div class="label" id="gLabel"></div>
+        <div style="display:grid;gap:20px;min-width:0">
+          <div class="panel">
+            <h2>수다 지분</h2>
+            <div class="stack" id="gStack" aria-hidden="true"></div>
+            <div class="gshare" id="gShare"></div>
+          </div>
+          <div class="panel">
+            <h2>누가 누구 말을 받아 주나</h2>
+            <ul class="pairs" id="gPairs"></ul>
+          </div>
+        </div>
+      </div>
+      <div style="display:grid;gap:12px">
+        <div class="ecg-head">
+          <h2 style="font-size:28px">단톡방 시상식</h2>
+          <p>전원이 후보입니다. 수상 거부는 받지 않습니다.</p>
+        </div>
+        <div class="awards" id="gAwards"></div>
+      </div>
+      <div style="display:grid;gap:12px" id="gCourtWrap">
+        <div class="court" id="gCourt"></div>
+      </div>
+    </div>
+
+    <div id="pairView" style="display:grid;gap:20px">
     <div class="result">
       <div class="label" id="label"></div>
       <div style="display:grid;gap:20px;min-width:0">
@@ -372,6 +424,8 @@ footer { font-size: 12.5px; color: var(--muted); display: grid; gap: 4px; border
         <label for="bdB"><span id="bdBLabel">두 번째 사람 생일</span><input type="date" id="bdB" min="1900-01-01" max="2026-12-31"></label>
       </div>
       <div id="sajuOut" style="display:grid;gap:16px"></div>
+    </div>
+
     </div>
 
     <div class="panel" style="gap:14px">
@@ -458,7 +512,7 @@ footer { font-size: 12.5px; color: var(--muted); display: grid; gap: 4px; border
     if (c < 0xac00 || c > 0xd7a3) return w + withB + "(" + noB + ")";
     return w + ((c - 0xac00) % 28 ? withB : noB);
   };
-  const pct = (x) => Math.round(x * 100) + "%";
+  const pct = (x) => (x > 0 && x < 0.01 ? (x * 100).toFixed(1) : Math.round(x * 100)) + "%";
   const mins = (m) => m == null ? "–" : m < 1 ? "1분 안" : m < 60 ? Math.round(m) + "분" : (m / 60).toFixed(1) + "시간";
   const dstr = (t) => { const d = new Date(t); return `${d.getFullYear()}.${String(d.getMonth() + 1).padStart(2, "0")}.${String(d.getDate()).padStart(2, "0")}`; };
   const hourName = (h) => (h < 12 ? "오전 " : "오후 ") + (h % 12 || 12) + "시";
@@ -491,8 +545,11 @@ footer { font-size: 12.5px; color: var(--muted); display: grid; gap: 4px; border
     if (sp.length < 2) { setStatus("두 사람 이상이 나눈 대화여야 비교할 수 있어요.", true); return; }
     state.parsed = parsed; state.sample = isSample; state.sp = sp;
     state.a = sp[0].name; state.b = sp[1].name;
+    state.mode = sp.length >= 3 ? "group" : "pair";
+    state.room = (parsed.title || "").replace(/\s+\d+$/, "");
     fillPickers();
     $("sampleFlag").hidden = !isSample;
+    $("sampleFlag").textContent = sp.length >= 3 ? "예시 단톡방 · 가상의 다섯 친구" : "예시 대화 · 가상의 두 사람";
     if (!isSample) { setStatus(`메시지 ${parsed.messages.length.toLocaleString()}개를 읽었어요.`); track("upload", `${via ? via + "-" : ""}${parsed.format}-${sizeBucket(parsed.messages.length)}${sp.length > 2 ? "-단체방" : ""}`); }
     render();
     if (!isSample) $("out").scrollIntoView({ behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth" });
@@ -502,10 +559,15 @@ footer { font-size: 12.5px; color: var(--muted); display: grid; gap: 4px; border
     const opts = state.sp.map((s) => `<option value="${esc(s.name)}">${esc(nm(s.name))} (${s.n})</option>`).join("");
     $("pickA").innerHTML = opts; $("pickB").innerHTML = opts;
     $("pickA").value = state.a; $("pickB").value = state.b;
-    $("pickWrap").hidden = state.sp.length <= 2;
+    $("pickWrap").hidden = state.sp.length <= 2 || state.mode === "group";
+    $("modeChips").hidden = state.sp.length <= 2;
+    document.querySelectorAll("#modeChips .chip").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.mode === state.mode)));
   }
 
   function render() {
+    $("groupView").hidden = state.mode !== "group";
+    $("pairView").hidden = state.mode === "group";
+    if (state.mode === "group") { renderGroup(); drawCard(); return; }
     const an = ChatLab.analyze(state.parsed.messages, state.a, state.b);
     state.analysis = an;
     const [A, B] = an.people;
@@ -914,6 +976,134 @@ footer { font-size: 12.5px; color: var(--muted); display: grid; gap: 4px; border
       <p class="sign">${d.getFullYear()}. ${d.getMonth() + 1}. ${d.getDate()}.<br>우리 대화 성분표 지방법원 재미부<br>판사 성분표 <span class="seal">재미<br>전용</span></p>`;
   }
 
+
+  // ---------- 단톡방 모드 ----------
+  const mcolor = (name) => { const i = state.gIndex ? state.gIndex.get(name) : 0; return i < 8 ? `var(--m${i + 1})` : "var(--muted)"; };
+  const mdot = (name) => `<span class="dot" style="background:${mcolor(name)}"></span>`;
+
+  function buildGroupAwards(g) {
+    const M = g.members, out = [], wins = new Map();
+    const max = (fn, pool = M) => pool.reduce((x, y) => (fn(y) > fn(x) ? y : x), pool[0]);
+    const min = (fn, pool = M) => pool.reduce((x, y) => (fn(y) < fn(x) ? y : x), pool[0]);
+    const add = (who, o) => { if ((wins.get(who.name) || 0) >= 3 || out.length >= 10) return; wins.set(who.name, (wins.get(who.name) || 0) + 1); out.push({ who, ...o }); };
+    const talkers = M.filter((m) => m.text >= 20);
+
+    let w = max((m) => m.share);
+    add(w, { title: "수다왕", stat: `지분 ${pct(w.share)}`, note: `이 방 메시지의 ${pct(w.share)}가 이 사람 목소리. 한 달에 ${Math.round(w.perMonth)}마디.`, card: `한 달에 ${Math.round(w.perMonth)}마디` });
+    if (M.length >= 3) {
+      w = min((m) => m.count);
+      add(w, { title: "유령 회원상", stat: `${w.count}마디`, note: w.perMonth < 1 ? `한 달에 한 마디도 안 하는 수준. 그래도 방은 안 나갔어요.` : `한 달 평균 ${w.perMonth.toFixed(1)}마디. 읽고는 있는 걸로 믿겠습니다.`, card: `한 달 평균 ${w.perMonth.toFixed(1)}마디` });
+    }
+    w = max((m) => m.kills);
+    if (w.kills >= 3) add(w, { title: "대화 종결자상", stat: `${w.kills}번`, note: "이 사람이 말한 뒤 3시간 넘게 방이 조용해진 횟수.", quote: w.killQuote ? `<div>${q1(w.killQuote.m, 60)}</div><div class="gap">… 그 뒤 ${span(w.killQuote.ms)} 동안 아무도 말이 없었다 …</div>` : "", card: w.killQuote ? `“${clip(said1(w.killQuote.m), 18)}” 뒤 ${span(w.killQuote.ms)} 정적` : "", plain: "말하면 방이 3시간 넘게 조용해짐" });
+    if (talkers.length >= 2) {
+      w = max((m) => m.kkRate, talkers);
+      if (w.kk >= 30) add(w, { title: "분위기 메이커상", stat: `ㅋ ${w.kk.toLocaleString()}개`, note: `메시지 하나에 ㅋ가 평균 ${w.kkRate.toFixed(1)}개. 이 방 웃음의 원천.`, card: `메시지당 ㅋ ${w.kkRate.toFixed(1)}개` });
+      w = min((m) => m.replyRate, talkers);
+      add(w, { title: "메아리상", stat: `답 올 확률 ${pct(w.replyRate)}`, note: "말하면 10분 안에 누가 받아 줄 확률. 메아리만 돌아오는 날이 많았어요.", quote: w.unansweredQ ? `<div>${q1(w.unansweredQ, 60)}</div><div class="gap">… 한 시간 동안 아무도 답하지 않음 …</div>` : "", card: w.unansweredQ ? `“${clip(w.unansweredQ.text, 20)}” 답 없음` : "", plain: "말하면 메아리만 돌아옴" });
+    }
+    w = max((m) => m.inits);
+    if (w.inits >= 3) add(w, { title: "단톡방 알람 시계", stat: `${w.inits}번`, note: "조용하던 방을 먼저 깨운 횟수. 이 사람 없으면 방이 멈춥니다.", card: "조용한 방을 깨운 횟수" });
+    w = max((m) => (m.away ? m.away.ms : 0));
+    if (w.away && w.away.ms >= 7 * 864e5) add(w, { title: "잠수왕", stat: `${span(w.away.ms)} 잠수`, note: "가장 오래 말이 없다가 돌아온 기록.", quote: `<div class="gap">잠수 전 마지막 말</div><div>${q1(w.away.before, 40)}</div><div class="gap">돌아와서 한 말</div><div>${q1(w.away.back, 50)}</div>`, card: `돌아와서 “${clip(said1(w.away.back), 18)}”`, plain: "아무 일 없다는 듯 복귀" });
+    w = max((m) => m.late);
+    if (w.late >= 3) add(w, { title: "새벽 지킴이", stat: `새벽 ${w.late}개`, note: "새벽 2~5시에 보낸 메시지. 다들 자는 동안 방을 지켰습니다.", quote: w.lateQuote ? `<div>${q1(w.lateQuote, 60)}</div>` : "", card: "새벽 2~5시 메시지" });
+    w = max((m) => m.shortTotal);
+    if (w.shortTotal >= 10 && w.short) add(w, { title: "단답 장인상", stat: `'${w.short.w}' ${w.short.c}번`, note: `단답만 모두 ${w.shortTotal}번. 대답은 하는데 대화는 안 됩니다.`, card: `단답 총 ${w.shortTotal}번` });
+    w = max((m) => (m.mono ? m.mono.n : 0));
+    if (w.mono && w.mono.n >= 6) {
+      const tx = w.mono.msgs.filter((m) => m.kind === "text"), pool = tx.length >= 2 ? tx : w.mono.msgs;
+      add(w, { title: "독백 연기대상", stat: `${w.mono.n}개 연속`, note: "아무도 끼어들지 않은 최장 혼잣말.", quote: [pool[0], pool[1], pool[pool.length - 1]].map((m, k) => (k === 2 && pool.length > 3 ? `<div class="gap">… ${pool.length - 3}개 더 …</div>` : "") + `<div>${q1(m, 40)}</div>`).join(""), card: `“${clip(said1(pool[0]), 10)}” … “${clip(said1(pool[pool.length - 1]), 10)}”`, plain: "아무도 안 끼어든 혼잣말" });
+    }
+    w = max((m) => m.photo);
+    if (w.photo >= 10) add(w, { title: "단톡방 사진 기자", stat: `사진 ${w.photo}장`, note: "이 방의 기록은 이 사람 앨범에 다 있어요.", card: "이 방의 기록 담당" });
+    w = max((m) => m.questions);
+    if (w.questions >= 20) add(w, { title: "질문 폭격기상", stat: `물음표 ${w.questions}개`, note: "약속 잡고, 묻고, 또 묻는 총무 체질.", card: "총무 체질" });
+    w = max((m) => m.emoticon);
+    if (w.emoticon >= 10) add(w, { title: "이모티콘 수집가상", stat: `이모티콘 ${w.emoticon}개`, note: "말보다 그림이 빠른 사람.", card: "말보다 그림" });
+    return out;
+  }
+
+  function buildGroupVerdict(g) {
+    const M = g.members; if (M.length < 3) return null;
+    const ghost = M.reduce((x, y) => (y.count < x.count ? y : x));
+    const killer = M.reduce((x, y) => (y.kills > x.kills ? y : x));
+    const room = state.room || "단톡방", rest = M.length - 1;
+    const caseNo = `2026가단${10000 + (g.total * 53) % 90000}`;
+    const rank = M.indexOf(ghost) + 1;
+    if (ghost.share < 0.05) {
+      const reasons = [`피고의 메시지는 전체의 ${(ghost.share * 100).toFixed(1)}%로 ${M.length}명 중 ${rank}위다.`, `한 달 평균 ${ghost.perMonth.toFixed(1)}마디로, 출석은 했으나 발언이 없는 상태가 지속되었다.`];
+      if (ghost.away && ghost.away.ms >= 3 * 864e5) reasons.push(`피고는 ${span(ghost.away.ms)} 동안 잠수했다가 “${esc(clip(said1(ghost.away.back), 30))}”라며 아무 일 없다는 듯 복귀하였다.`);
+      if (ghost.photo + ghost.emoticon) reasons.push(`다만 사진·이모티콘으로 ${ghost.photo + ghost.emoticon}번 생존 신고를 한 점을 참작한다.`);
+      return { kind: "ghost", caseNo, title: "단톡방 무단 잠수 사건", plaintiff: `${room} 나머지 ${rest}명`, def: ghost,
+        orders: [`피고는 다음 모임에서 원고 전원(${rest}명)에게 커피를 사라.`, "피고는 하루 한 마디 이상 단톡방에 출석하라.", "소송비용은 피고가 부담한다."], reasons,
+        facts: [["피고 메시지 지분", `${(ghost.share * 100).toFixed(1)}%`], ["한 달 평균", `${ghost.perMonth.toFixed(1)}마디`], ["최장 잠수", ghost.away ? span(ghost.away.ms) : "–"]] };
+    }
+    if (killer.kills < 3) return null;
+    const reasons = [`피고가 말한 뒤 3시간 넘게 방이 조용해진 일이 ${killer.kills}번 있었다.`];
+    if (killer.killQuote) reasons.push(`특히 피고의 “${esc(clip(said1(killer.killQuote.m), 30))}” 이후 ${span(killer.killQuote.ms)} 동안 아무도 입을 열지 못했다.`);
+    if (killer.shortTotal >= 5 && killer.short) reasons.push(`피고는 '${esc(killer.short.w)}' 같은 단답을 ${killer.shortTotal}번 사용하여 분위기 냉각에 기여하였다.`);
+    return { kind: "killer", caseNo, title: "단톡방 분위기 냉각 사건", plaintiff: `${room} 나머지 ${rest}명`, def: killer,
+      orders: ["피고는 다음 모임에서 분위기를 살리는 건배사를 하라.", "피고는 무거운 주제를 꺼내기 전에 'ㅋㅋ'를 붙여라.", "소송비용은 피고가 부담한다."], reasons,
+      facts: [["정적을 만든 횟수", `${killer.kills}번`], ["가장 긴 정적", killer.killQuote ? span(killer.killQuote.ms) : "–"]] };
+  }
+
+  function renderGroup() {
+    const g = ChatLab.groupStats(state.parsed.messages);
+    state.gIndex = new Map(g.members.map((m, i) => [m.name, i]));
+    const avgReply = g.members.reduce((s, m) => s + m.replyRate * m.share, 0);
+    const vitality = Math.max(30, Math.min(99, Math.round(35 + 35 * (g.activeDays / g.spanDays) + 29 * avgReply)));
+    const awards = buildGroupAwards(g), verdict = buildGroupVerdict(g);
+    state.g = { stats: g, vitality, awards, verdict };
+    const M = g.members, top = M[0];
+
+    $("gLabel").innerHTML = `
+      <div class="title">단톡방 성분표</div>
+      <div class="meta">
+        ${state.room ? `<div><span>방 이름</span><span>${esc(state.room)}</span></div>` : ""}
+        <div><span>분석 기간</span><span class="num">${dstr(g.from)}–${dstr(g.to)}</span></div>
+        <div><span>대화한 날 / 전체</span><span class="num">${g.activeDays}일 / ${g.spanDays}일</span></div>
+      </div>
+      <div class="score"><b>단톡방 활력</b><span class="big">${vitality}<small>/100</small></span></div>
+      <div class="lines">
+        <div><span>멤버</span><span class="num">${M.length}명</span></div>
+        <div><span>총 메시지</span><span class="num">${g.total.toLocaleString()}개</span></div>
+        <div><span>하루 평균</span><span class="num">${(g.total / g.activeDays).toFixed(1)}개</span></div>
+        <div><span>제일 활발한 시간</span><span>${hourName(g.peakHour)}</span></div>
+        <div><span>제일 말 많은 사람</span><span>${esc(nm(top.name))}</span></div>
+        <div><span>서로 받아 준 비율</span><span class="num">${pct(avgReply)}</span></div>
+      </div>
+      <p class="foot">활력은 대화한 날의 비율과 서로 받아 준 비율로 계산한 재미용 값입니다.</p>`;
+
+    const shown = M.slice(0, 8), restN = M.length - shown.length, restShare = M.slice(8).reduce((s, m) => s + m.share, 0);
+    $("gStack").innerHTML = shown.map((m) => `<i style="width:${(m.share * 100).toFixed(2)}%;background:${mcolor(m.name)}" title="${esc(nm(m.name))}"></i>`).join("") + (restN ? `<i style="width:${(restShare * 100).toFixed(2)}%;background:var(--line)"></i>` : "");
+    const maxShare = top.share;
+    $("gShare").innerHTML = shown.map((m) => `<div class="r"><span class="nm">${mdot(m.name)}<span>${esc(nm(m.name))}</span></span><span class="bar"><i style="width:${(m.share / maxShare * 100).toFixed(1)}%;background:${mcolor(m.name)}"></i></span><span class="v">${pct(m.share)} · ${m.count.toLocaleString()}</span></div>`).join("") +
+      (restN ? `<p class="muted" style="font-size:13px">그 외 ${restN}명 · ${pct(restShare)}</p>` : "");
+
+    const pairs = g.pairs.slice(0, 3);
+    const echo = M.filter((m) => m.text >= 20).reduce((x, y) => (!x || y.replyRate < x.replyRate ? y : x), null);
+    $("gPairs").innerHTML = pairs.map((pr, i) => `<li><span class="names">${i === 0 ? '<span class="tag" style="font-size:11px;border:1.5px solid var(--ink);border-radius:999px;padding:0 8px">공식 짝꿍</span>' : ""}${mdot(pr.names[0])}${esc(nm(pr.names[0]))} ↔ ${mdot(pr.names[1])}${esc(nm(pr.names[1]))}</span><span class="muted">10분 안에 서로 받아 준 횟수 ${pr.c}번</span></li>`).join("") +
+      (echo ? `<li><span class="names">${mdot(echo.name)}${esc(nm(echo.name))}의 말에 답이 올 확률</span><span class="muted">${pct(echo.replyRate)} · 이 방에서 제일 낮아요</span></li>` : "");
+
+    $("gAwards").innerHTML = awards.map((a) => `<article class="award">
+        <span class="winner"><span class="lab">수상</span>${mdot(a.who.name)}${esc(nm(a.who.name))}</span>
+        <span class="t">${a.title}</span><span class="stat">${esc(a.stat)}</span><span class="note">${esc(a.note)}</span>
+        ${a.quote ? `<div class="quote">${a.quote}</div>` : ""}</article>`).join("");
+
+    $("gCourtWrap").hidden = !verdict;
+    if (verdict) {
+      const d = new Date();
+      $("gCourt").innerHTML = `
+        <span class="no">사건 ${verdict.caseNo} ${verdict.title}</span>
+        <h2>판 결</h2>
+        <dl><dt>원고</dt><dd>${esc(verdict.plaintiff)}</dd><dt>피고</dt><dd>${esc(nm(verdict.def.name))}</dd></dl>
+        <h3>주 문</h3><ol class="order">${verdict.orders.map((o) => `<li>${o}</li>`).join("")}</ol>
+        <h3>이 유</h3><ol>${verdict.reasons.map((r) => `<li>${r}</li>`).join("")}</ol>
+        <p class="sign">${d.getFullYear()}. ${d.getMonth() + 1}. ${d.getDate()}.<br>우리 대화 성분표 지방법원 단톡방부<br>판사 성분표 <span class="seal">재미<br>전용</span></p>`;
+    }
+  }
+
   // ---------- 사주 궁합 ----------
   state.birth = {};
   const SAMPLE_BIRTH = { "지민": "1998-05-12", "도윤": "1997-11-06" };
@@ -992,6 +1182,7 @@ footer { font-size: 12.5px; color: var(--muted); display: grid; gap: 4px; border
 
   // ---------- 공유 카드 ----------
   const CARD = { bg: "#eef0f4", paper: "#ffffff", ink: "#14161b", muted: "#646a78", line: "#d9dce4", a: "#2d58e6", b: "#e2405f", aSoft: "#dfe6fc" };
+  const CARD_M = ["#2d58e6", "#e2405f", "#1f9d6b", "#d98200", "#7a4fd6", "#0f8fa8", "#c2410c", "#5b6472"];
   const FONT = { disp: '"Do Hyeon", "Apple SD Gothic Neo", sans-serif', body: '"Gothic A1", "Apple SD Gothic Neo", sans-serif', mono: '"IBM Plex Mono", monospace' };
   const KINDS = [
     { id: "label", name: "성분표", file: "대화성분표" },
@@ -1003,17 +1194,21 @@ footer { font-size: 12.5px; color: var(--muted); display: grid; gap: 4px; border
     { id: "saju", name: "사주 vs 카톡", file: "사주vs카톡궁합" },
     { id: "awards", name: "시상식", file: "우리대화시상식" },
     { id: "verdict", name: "판결문", file: "답장지연판결문" },
+    { id: "g-label", group: true, name: "단톡방 성분표", file: "단톡방성분표" },
+    { id: "g-awards", group: true, name: "단톡방 시상식", file: "단톡방시상식" },
+    { id: "g-verdict", group: true, name: "단톡방 판결문", file: "단톡방판결문" },
   ];
   state.cardKind = "label";
 
   function availableKinds() {
+    if (state.mode === "group") return KINDS.filter((k) => k.group && (k.id !== "g-awards" || (state.g && state.g.awards.length)) && (k.id !== "g-verdict" || (state.g && state.g.verdict)));
     const mo = state.moments;
     return KINDS.filter((k) => k.id === "label" || (k.id === "saju" && state.saju) || (k.id === "awards" && state.fun && state.fun.list.length) || (k.id === "verdict" && state.verdict) || (mo && (k.id === "ecg" || k.id === "wait" ||
       (k.id === "cold" && mo.cold.length) || (k.id === "rally" && mo.rally) || (k.id === "firsts" && mo.firsts.length))));
   }
   function renderKinds() {
     const ks = availableKinds();
-    if (!ks.some((k) => k.id === state.cardKind)) state.cardKind = "label";
+    if (!ks.some((k) => k.id === state.cardKind)) state.cardKind = ks[0].id;
     $("cardKinds").innerHTML = ks.map((k) => `<button type="button" class="chip" data-kind="${k.id}" aria-pressed="${k.id === state.cardKind}">${k.name}</button>`).join("");
   }
   $("cardKinds").addEventListener("click", (e) => {
@@ -1210,6 +1405,65 @@ footer { font-size: 12.5px; color: var(--muted); display: grid; gap: 4px; border
       return k.c;
     },
 
+    "g-label"() {
+      const G = state.g, g = G.stats, k = frame("단톡방 성분표"), { g: ctx, L, R } = k, Y = 110;
+      if (state.room) k.text(k.fit(state.room, `600 34px ${FONT.body}`, R - L - 300), L, Y + 222, `600 34px ${FONT.body}`, CARD.muted);
+      k.text("활력", R - 190, Y + 222, `36px ${FONT.disp}`, CARD.muted, "right");
+      k.text(String(G.vitality), R, Y + 232, `600 80px ${FONT.mono}`, CARD.ink, "right");
+      k.rule(Y + 262, 6);
+      k.text("수다 지분", L, Y + 330, `44px ${FONT.disp}`);
+      const shown = g.members.slice(0, 6), max = shown[0].share;
+      // 띠 그래프
+      let x = L; const bw = R - L;
+      g.members.slice(0, 8).forEach((m, i) => { ctx.fillStyle = CARD_M[i]; ctx.fillRect(x, Y + 355, bw * m.share, 30); x += bw * m.share; });
+      if (x < R) { ctx.fillStyle = CARD.line; ctx.fillRect(x, Y + 355, R - x, 30); }
+      ctx.strokeStyle = CARD.ink; ctx.lineWidth = 3; ctx.strokeRect(L, Y + 355, bw, 30);
+      shown.forEach((m, i) => {
+        const y = Y + 450 + i * 82;
+        ctx.fillStyle = CARD_M[i]; ctx.beginPath(); ctx.arc(L + 12, y - 12, 12, 0, Math.PI * 2); ctx.fill();
+        k.text(k.fit(nm(m.name), `800 34px ${FONT.body}`, 220), L + 36, y, `800 34px ${FONT.body}`);
+        ctx.fillStyle = CARD.line; ctx.fillRect(L + 280, y - 26, 400, 22);
+        ctx.fillStyle = CARD_M[i]; ctx.fillRect(L + 280, y - 26, 400 * m.share / max, 22);
+        k.text(pct(m.share), R, y, `600 34px ${FONT.mono}`, CARD.ink, "right");
+      });
+      k.text(`총 ${g.total.toLocaleString()}개 · ${g.members.length}명 · ${g.activeDays}일`, L, Y + 990, `30px ${FONT.body}`, CARD.muted);
+      return k.c;
+    },
+    "g-awards"() {
+      const k = frame("단톡방 시상식"), { g: ctx, L, R } = k, Y = 110;
+      const list = state.g.awards.slice(0, 4), rowH = 205;
+      list.forEach((a, i) => {
+        const y = Y + 240 + i * rowH, ci = state.gIndex.get(a.who.name);
+        k.text(a.title, L, y, `46px ${FONT.disp}`);
+        ctx.fillStyle = ci < 8 ? CARD_M[ci] : CARD.muted; ctx.beginPath(); ctx.arc(R - 12, y - 12, 12, 0, Math.PI * 2); ctx.fill();
+        k.text(k.fit(nm(a.who.name), `800 34px ${FONT.body}`, 260), R - 36, y, `800 34px ${FONT.body}`, CARD.ink, "right");
+        k.text(k.fit(a.stat, `600 50px ${FONT.mono}`, R - L), L, y + 68, `600 50px ${FONT.mono}`);
+        const sub = quoteOK() ? a.card || a.plain : (a.card && !a.card.includes("“") ? a.card : a.plain || "");
+        if (sub) k.text(k.fit(sub, `30px ${FONT.body}`, R - L), L, y + 112, `30px ${FONT.body}`, CARD.muted);
+        if (i < list.length - 1) k.hair(y + 150);
+      });
+      return k.c;
+    },
+    "g-verdict"() {
+      const v = state.g.verdict, k = frame("단톡방 판결문"), { g: ctx, L, R } = k, Y = 110;
+      const serif = '"Noto Serif KR", serif';
+      k.text(`사건 ${v.caseNo} ${v.title}`, L, Y + 222, `26px ${FONT.mono}`, CARD.muted);
+      k.text(k.fit(`원고  ${v.plaintiff}`, `600 36px ${serif}`, R - L), L, Y + 280, `600 36px ${serif}`);
+      k.text(k.fit(`피고  ${nm(v.def.name)}`, `600 36px ${serif}`, R - L), L, Y + 332, `600 36px ${serif}`);
+      k.rule(Y + 370, 4);
+      k.text("주    문", (L + R) / 2, Y + 438, `600 42px ${serif}`, CARD.ink, "center");
+      const n = k.wrap(v.orders[0], L, Y + 515, R - L, 60, 3, `600 44px ${serif}`);
+      let y = Y + 515 + n * 60 + 30;
+      k.hair(y - 20);
+      v.facts.forEach(([a, b]) => { k.row(y + 26, a, b); y += 60; });
+      ctx.save(); ctx.translate(R - 52, Y + 978); ctx.rotate(-0.14);
+      ctx.strokeStyle = CARD.b; ctx.lineWidth = 5; ctx.strokeRect(-46, -46, 92, 92);
+      k.text("재미", 0, -4, `600 28px ${serif}`, CARD.b, "center"); k.text("전용", 0, 30, `600 28px ${serif}`, CARD.b, "center");
+      ctx.restore();
+      k.text("우리 대화 성분표 지방법원 단톡방부", L, Y + 980, `30px ${serif}`, CARD.muted);
+      return k.c;
+    },
+
     awards() {
       const k = frame("우리 대화 시상식"), { g, L, R } = k, Y = 110;
       const list = state.fun.list.slice(0, 4);
@@ -1300,7 +1554,7 @@ footer { font-size: 12.5px; color: var(--muted); display: grid; gap: 4px; border
   };
 
   async function drawCard() {
-    const an = state.analysis; if (!an) return;
+    const an = state.analysis; if (state.mode !== "group" && !an) return;
     try { await document.fonts.ready; } catch (e) {}
     renderKinds();
     const kind = state.cardKind;
@@ -1396,6 +1650,11 @@ footer { font-size: 12.5px; color: var(--muted); display: grid; gap: 4px; border
   $("pasteBtn").addEventListener("click", () => load($("pasteBox").value, false));
   $("sampleBtn").addEventListener("click", () => { setStatus(""); load(ChatLab.makeSample(), true); track("sample"); });
   $("mask").addEventListener("change", () => { fillPickers(); render(); });
+  $("modeChips").addEventListener("click", (e) => {
+    const b = e.target.closest(".chip"); if (!b || b.dataset.mode === state.mode) return;
+    state.mode = b.dataset.mode; fillPickers(); render(); track("mode", state.mode);
+  });
+  $("groupSampleBtn").addEventListener("click", () => { setStatus(""); load(ChatLab.makeGroupSample(), true); track("sample", "group"); });
   const pick = () => {
     const a = $("pickA").value, b = $("pickB").value;
     if (a === b) { setStatus("서로 다른 두 사람을 골라 주세요.", true); return; }
