@@ -17,6 +17,7 @@ const FILL = {
     cells: { 1: "해돋이 보기", 9: "지은 생일", 13: "기타 첫 레슨", 16: "러닝 시작", 23: "독서모임", 30: "본가 가기" },
     box: ["책 2권 끝내기", "기타 학원 등록", "방 정리 (진짜로)"],
     memo: "1월엔 하나만 시작하기!\n→ 러닝부터",
+    feel: ["해돋이 본 날", "지은", "2월엔 기타 1곡 완성!"],
   },
   week: {
     id: "w2",
@@ -31,7 +32,9 @@ const FILL = {
       ["푹 쉬기", "다음 주 3개 정하기"],
     ],
     mood: [0, 0, 2, 0, 1, 0, 0],
-    extra: ["동네 카페 리뷰 블로그?", "보드게임 모임 만들기", "→ 주차장으로"],
+    thanks: ["지은이가 생일 선물 미리 챙겨 줌", "기타 선생님이 첫날부터 칭찬", "토요일 날씨 최고"],
+    word: "설렘",
+    who: ["팀장님", "기타 선생님", "", "지은", "", "러닝 크루", "엄마"],
   },
   ideas: {
     id: "i1",
@@ -79,7 +82,8 @@ const FILL = {
     const M = document.getElementById(F.month.id);
     M.querySelectorAll(".cell").forEach((c) => { const n = c.querySelector(".n"); if (n && F.month.cells[n.textContent]) c.append(hw(F.month.cells[n.textContent], "sm")); });
     M.querySelectorAll(".mfoot .box")[0].querySelectorAll(".ln").forEach((ln, i) => ln.append(hw(F.month.box[i])));
-    const memo = M.querySelectorAll(".mfoot .box")[1].querySelector(".dots"); memo.style.padding = "10px 12px"; memo.append(hw(F.month.memo, "red"));
+    const memo = M.querySelectorAll(".mfoot .box")[2].querySelector(".dots"); memo.style.padding = "10px 12px"; memo.append(hw(F.month.memo, "red"));
+    M.querySelectorAll(".mfoot .box")[1].querySelectorAll(".ln").forEach((ln, i) => { const s = hw(F.month.feel[i]); s.style.marginLeft = "auto"; ln.append(s); });
 
     // 주간
     const Wk = document.getElementById(F.week.id);
@@ -92,8 +96,10 @@ const FILL = {
       F.week.days[i].forEach((t, k) => { const s = hw(t, k === 1 && t.startsWith("→") ? "red" : ""); s.style.display = "block"; s.style.marginTop = k ? "4px" : "8px"; day.append(s); });
       const dots = day.querySelectorAll(".mood u"); const m = F.week.mood[i]; dots[m].classList.add("filled"); dots[m].style.color = MOOD[m];
     });
-    const ex = Wk.querySelector(".day.extra"); const hint = ex.querySelector(".hint"); hint.style.display = "none";
-    F.week.extra.forEach((t, k) => { const s = hw(t, k === 2 ? "red" : ""); s.style.display = "block"; s.style.marginTop = "6px"; ex.insertBefore(s, ex.querySelector(".jump")); });
+    const ex = Wk.querySelector(".day.extra"), exl = ex.querySelectorAll(".ln");
+    F.week.thanks.forEach((t, k) => exl[k].append(hw(t)));
+    const wd = hw(F.week.word, "red"); wd.style.marginLeft = "auto"; exl[3].append(wd);
+    Wk.querySelectorAll(".day:not(.extra) .who").forEach((w, i) => { if (F.week.who[i]) { const s = hw(F.week.who[i], "sm"); s.style.marginLeft = "8px"; w.append(s); } });
 
     // 아이디어 주차장
     const I = document.getElementById(F.ideas.id);
